@@ -1,0 +1,7 @@
+{
+  "name": "diegesis",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}

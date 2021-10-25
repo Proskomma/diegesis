@@ -16,6 +16,7 @@ const StorageSettings = () => {
                 <IonCol className="ion-text-center">
                     <IonButton
                         color="secondary"
+                        size="small"
                         onClick={() => setShowRemoteModal(true)}
                     >
                         <IonIcon icon={download}/>&nbsp;
@@ -25,6 +26,7 @@ const StorageSettings = () => {
                 <IonCol className="ion-text-center">
                     <IonButton
                         color="secondary"
+                        size="small"
                         onClick={() => setShowLocalModal(true)}>
                         <IonIcon icon={folder}/>&nbsp;
                         <IonLabel>Add from Local Storage</IonLabel>
@@ -33,6 +35,7 @@ const StorageSettings = () => {
                 <IonCol className="ion-text-center">
                     <IonButton
                         color="secondary"
+                        size="small"
                         disabled={true}>
                         <IonIcon icon={trash}/>&nbsp;
                         <IonLabel>Remove Selected</IonLabel>

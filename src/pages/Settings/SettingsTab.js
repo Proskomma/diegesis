@@ -32,7 +32,8 @@ const SettingsTab = () => {
                     <IonRow>
                         <IonCol className="ion-text-center">
                             <IonButton
-                                fill={selectedSection === 'network' ? "solid" : "outline"}
+                                fill="clear"
+                                strong={selectedSection === 'network'}
                                 onClick={() => setSelectedSection('network')}
                             >
                                 <IonIcon icon={globe}/>&nbsp;
@@ -41,7 +42,8 @@ const SettingsTab = () => {
                         </IonCol>
                         <IonCol className="ion-text-center">
                             <IonButton
-                                fill={selectedSection === 'storage' ? "solid" : "outline"}
+                                fill="clear"
+                                strong = {selectedSection === 'storage'}
                                 onClick={() => setSelectedSection('storage')}
                             >
                                 <IonIcon icon={albums}/>&nbsp;
@@ -50,7 +52,8 @@ const SettingsTab = () => {
                         </IonCol>
                         <IonCol className="ion-text-center">
                             <IonButton
-                                fill={selectedSection === 'appearance' ? "solid" : "outline"}
+                                fill="clear"
+                                strong={selectedSection === 'appearance'}
                                 onClick={() => setSelectedSection('appearance')}
                             >
                                 <IonIcon icon={brush}/>&nbsp;

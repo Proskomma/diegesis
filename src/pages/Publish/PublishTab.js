@@ -1,11 +1,12 @@
 import React, {useContext, useEffect} from 'react';
 import {IonContent, IonHeader, IonPage, IonTitle, IonToolbar} from '@ionic/react';
-import ExploreContainer from '../components/ExploreContainer';
-import './BrowseTab.css';
+import ExploreContainer from '../../components/ExploreContainer';
+import './PublishTab.css';
 
-import PkContext from '../PkContext';
+import PkContext from '../../PkContext';
+import PageToolBar from "../../components/PageToolBar";
 
-const BrowseTab = () => {
+const PublishTab = () => {
     const pk = useContext(PkContext);
     const [result, setResult] = React.useState({});
     useEffect(() => {
@@ -19,21 +20,14 @@ const BrowseTab = () => {
     return (
         <IonPage>
             <IonHeader>
-                <IonToolbar>
-                    <IonTitle>Browse</IonTitle>
-                </IonToolbar>
+                <PageToolBar pageTitle="Publish"/>
             </IonHeader>
             <IonContent fullscreen>
-                <IonHeader collapse="condense">
-                    <IonToolbar>
-                        <IonTitle size="large">Browse</IonTitle>
-                    </IonToolbar>
-                </IonHeader>
                 <h1>{JSON.stringify(result)}</h1>
-                <ExploreContainer name="Browse Content"/>
+                <ExploreContainer name="Publish Content"/>
             </IonContent>
         </IonPage>
     );
 };
 
-export default BrowseTab;
+export default PublishTab;

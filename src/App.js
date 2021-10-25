@@ -2,12 +2,12 @@ import React, {useContext} from 'react';
 import {Redirect, Route} from 'react-router-dom';
 import {IonApp, IonIcon, IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs,} from '@ionic/react';
 import {IonReactRouter} from '@ionic/react-router';
-import {book, cog, construct, create, print} from 'ionicons/icons';
-import BrowseTab from './pages/BrowseTab';
-import EditTab from './pages/EditTab';
-import PublishTab from './pages/PublishTab';
-import SettingsTab from './pages/SettingsTab';
-import ContributeTab from './pages/ContributeTab';
+import {book, create, print} from 'ionicons/icons';
+import BrowseTab from './pages/Browse/BrowseTab';
+import EditTab from './pages/Edit/EditTab';
+import PublishTab from './pages/Publish/PublishTab';
+import ContributeTab from './pages/Contribute/ContributeTab';
+import SettingsTab from './pages/Settings/SettingsTab';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -47,11 +47,11 @@ const App = () => {
                         <Route exact path="/publish">
                             <PublishTab/>
                         </Route>
-                        <Route exact path="/settings">
-                            <SettingsTab/>
-                        </Route>
                         <Route exact path="/contribute">
                             <ContributeTab/>
+                        </Route>
+                        <Route exact path="/settings">
+                            <SettingsTab/>
                         </Route>
                         <Route render={() => <Redirect to="/browse"/>}/>
                     </IonRouterOutlet>
@@ -67,14 +67,6 @@ const App = () => {
                         <IonTabButton tab="publish" href="/publish">
                             <IonIcon icon={print}/>
                             <IonLabel>Publish</IonLabel>
-                        </IonTabButton>
-                        <IonTabButton tab="contribute" href="/contribute">
-                            <IonIcon icon={construct}/>
-                            <IonLabel>Contribute</IonLabel>
-                        </IonTabButton>
-                        <IonTabButton tab="settings" href="/settings">
-                            <IonIcon icon={cog}/>
-                            <IonLabel>Settings</IonLabel>
                         </IonTabButton>
                     </IonTabBar>
                 </IonTabs>

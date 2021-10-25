@@ -1,11 +1,14 @@
 import React, {useContext, useEffect} from 'react';
 import {IonContent, IonHeader, IonPage, IonTitle, IonToolbar} from '@ionic/react';
-import ExploreContainer from '../components/ExploreContainer';
-import './EditTab.css';
+import {IonButtons, IonButton, IonIcon} from '@ionic/react';
+import {book, cog, construct, create, print} from 'ionicons/icons';
+import ExploreContainer from '../../components/ExploreContainer';
+import './BrowseTab.css';
+import PageToolBar from '../../components/PageToolBar';
 
-import PkContext from '../PkContext';
+import PkContext from '../../PkContext';
 
-const EditTab = () => {
+const BrowseTab = () => {
     const pk = useContext(PkContext);
     const [result, setResult] = React.useState({});
     useEffect(() => {
@@ -19,21 +22,14 @@ const EditTab = () => {
     return (
         <IonPage>
             <IonHeader>
-                <IonToolbar>
-                    <IonTitle>Edit</IonTitle>
-                </IonToolbar>
+                <PageToolBar pageTitle="Browse"/>
             </IonHeader>
             <IonContent fullscreen>
-                <IonHeader collapse="condense">
-                    <IonToolbar>
-                        <IonTitle size="large">Edit</IonTitle>
-                    </IonToolbar>
-                </IonHeader>
-                <h1>{JSON.stringify(result)}</h1>
-                <ExploreContainer name="Edit Content"/>
+                 <h1>{JSON.stringify(result)}</h1>
+                <ExploreContainer name="Browse Content"/>
             </IonContent>
         </IonPage>
     );
 };
 
-export default EditTab;
+export default BrowseTab;

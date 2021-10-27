@@ -13,7 +13,7 @@ const BrowseTab = () => {
     const [result, setResult] = React.useState({});
     useEffect(() => {
         const doQuery = async () => {
-                 const res = await pk.gqlQuery('{ id packageVersion processor }');
+                 const res = await pk.gqlQuery('{ id packageVersion processor nDocSets nDocuments}');
                 setResult(res);
         };
         doQuery();

@@ -16,11 +16,11 @@ const SettingsTab = () => {
     const [selectedSection, setSelectedSection] = React.useState('network');
     useEffect(() => {
         const doQuery = async () => {
-            const res = await pk.gqlQuery('{ id packageVersion processor }');
+            const res = await pk.gqlQuery('{ nDocSets nDocuments }');
             setResult(res);
         };
         doQuery();
-    }, []);
+    }, [selectedSection]);
 
     return (
         <IonPage>
@@ -60,6 +60,9 @@ const SettingsTab = () => {
                                 <IonLabel>Appearance</IonLabel>
                             </IonButton>
                         </IonCol>
+                    </IonRow>
+                    <IonRow>
+                        <IonCol>{JSON.stringify(result)}</IonCol>
                     </IonRow>
                     <IonRow>
                         <IonCol>

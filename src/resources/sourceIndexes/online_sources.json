@@ -4,7 +4,7 @@
       "source": "ebible",
       "lang": "eng",
       "abbr": "asv",
-      "revision":  "3"
+      "isDraft": 0
     },
     "description": "American Standard Version",
     "transport": "https",
@@ -30,6 +30,67 @@
         ],
         "format": "usfmZip",
         "source": "eng-asv_usfm.zip"
+      }
+    ]
+  },
+  {
+    "selectors": {
+      "source": "ebible",
+      "lang": "eng",
+      "abbr": "emtv",
+      "isDraft": 0
+    },
+    "description": "The New Testament, English Majority Text Version",
+    "transport": "https",
+    "sourcePrefix": "https://ebible.org/Scriptures/",
+    "documents": [
+      {
+        "bookCodes": [
+          "MAT",
+          "MRK",
+          "LUK",
+          "JHN",
+          "ACT"
+        ],
+        "docTypes": [
+          "text"
+        ],
+        "format": "usfmZip",
+        "source": "engemtv_usfm.zip"
+      }
+    ]
+  },
+  {
+    "selectors": {
+      "source": "ebible",
+      "lang": "eng",
+      "abbr": "webbe",
+      "isDraft": 0
+    },
+    "description": "World English Bible British Edition",
+    "transport": "https",
+    "sourcePrefix": "https://ebible.org/Scriptures/",
+    "documents": [
+      {
+        "bookCodes": [
+          "GEN",
+          "EXO",
+          "LEV",
+          "NUM",
+          "DEU",
+          "PSA",
+          "PRO",
+          "MAT",
+          "MRK",
+          "LUK",
+          "JHN",
+          "ACT"
+        ],
+        "docTypes": [
+          "text"
+        ],
+        "format": "usfmZip",
+        "source": "eng-webbe_usfm.zip"
       }
     ]
   }

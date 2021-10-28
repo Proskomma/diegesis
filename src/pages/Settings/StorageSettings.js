@@ -1,45 +1,61 @@
-import React, { useState } from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {IonButton, IonCol, IonGrid, IonIcon, IonLabel, IonRow} from '@ionic/react';
 import {download, folder, trash} from "ionicons/icons";
 
-import AddLocalModal from "./AddLocalModal";
-import AddRemoteModal from "./AddRemoteModal";
+import AddRemote from "./AddRemote";
+import RemoveLocal from "./RemoveLocal";
+import PkContext from "../../PkContext";
 
 const StorageSettings = () => {
-    const [showRemoteModal, setShowRemoteModal] = useState(false);
-    const [showLocalModal, setShowLocalModal] = useState(false);
+    const [selectedSection, setSelectedSection] = React.useState('remote');
+    const [loadCount, setLoadCount] = React.useState(0);
+    const [loadedDocSets, setLoadedDocSets] = React.useState([]);
+
+    const pk = useContext(PkContext);
+
+    useEffect(() => {
+        const doQuery = async () => {
+            const res = await pk.gqlQuery('{ docSets { selectors { key value } } }');
+            const selectors = res.data.docSets.map(ds => ds.selectors.map(s => s.value));
+            setLoadedDocSets(selectors);
+        };
+        doQuery();
+    }, [loadCount]);
+
     return <>
-        <AddRemoteModal showModal={showRemoteModal} setShowModal={setShowRemoteModal}/>
-        <AddLocalModal showModal={showLocalModal} setShowModal={setShowLocalModal}/>
         <IonGrid>
             <IonRow>
                 <IonCol className="ion-text-center">
                     <IonButton
-                        color="secondary"
-                        size="small"
-                        onClick={() => setShowRemoteModal(true)}
+                        fill={selectedSection === 'remote' ? "solid" : "clear"}
+                        expand="full"
+                        onClick={() => setSelectedSection('remote')}
                     >
                         <IonIcon icon={download}/>&nbsp;
                         <IonLabel>Add from Server</IonLabel>
                     </IonButton>
                 </IonCol>
-                <IonCol className="ion-text-center">
+                 <IonCol className="ion-text-center">
                     <IonButton
-                        color="secondary"
-                        size="small"
-                        onClick={() => setShowLocalModal(true)}>
-                        <IonIcon icon={folder}/>&nbsp;
-                        <IonLabel>Add from Local Storage</IonLabel>
+                        fill={selectedSection === 'local' ? "solid" : "clear"}
+                        expand="full"
+                        onClick={() => setSelectedSection('local')}
+                        >
+                        <IonIcon icon={trash}/>&nbsp;
+                        <IonLabel>Remove from Local</IonLabel>
                     </IonButton>
                 </IonCol>
-                <IonCol className="ion-text-center">
-                    <IonButton
-                        color="secondary"
-                        size="small"
-                        disabled={true}>
-                        <IonIcon icon={trash}/>&nbsp;
-                        <IonLabel>Remove Selected</IonLabel>
-                    </IonButton>
+            </IonRow>
+            <IonRow>
+                <IonCol>
+                    {selectedSection === 'remote' &&
+                    <AddRemote
+                        loadCount={loadCount}
+                        setLoadCount={setLoadCount}
+                        loadedDocSets={loadedDocSets}
+                    />}
+                    {selectedSection === 'local' &&
+                    <RemoveLocal loadedDocSets={loadedDocSets}/>}
                 </IonCol>
             </IonRow>
         </IonGrid>

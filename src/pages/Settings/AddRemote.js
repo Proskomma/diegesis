@@ -1,23 +1,29 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {IonButton, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonModal, IonRow, IonTitle} from '@ionic/react';
+import {IonButton, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonPage, IonRow, IonTitle} from '@ionic/react';
 import onlineSources from '../../resources/sourceIndexes/online_sources';
 import {download} from "ionicons/icons";
 import Axios from 'axios';
 import JSZip from 'jszip';
 import PkContext from "../../PkContext";
 
-export const AddRemoteModal = ({showModal, setShowModal}) => {
-
-    const pk = useContext(PkContext);
+export const AddRemote = (props) => {
     const [toDownload, setToDownload] = useState([]);
     const [toImport, setToImport] = useState([]);
+
+    const pk = useContext(PkContext);
 
     useEffect(() => {
         const doDownload = async () => {
             const downloadRecord = toDownload[0];
             setToDownload(toDownload.slice(1));
             const newToImport = [...toImport];
-            await Axios.request(
+            const axiosInstance = Axios.create({});
+            axiosInstance.defaults.headers = {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache',
+                'Expires': '0',
+            };
+            await axiosInstance.request(
                 {
                     method: "get",
                     responseType: 'arraybuffer',
@@ -41,6 +47,7 @@ export const AddRemoteModal = ({showModal, setShowModal}) => {
                                 }
                             }));
                             setToImport(newToImport);
+                            props.setLoadCount(props.loadCount + 1);
                         } else {
                             console.log(`Unknown format ${downloadRecord.format}`);
                         }
@@ -54,7 +61,6 @@ export const AddRemoteModal = ({showModal, setShowModal}) => {
     useEffect(() => {
         if (toImport.length > 0) {
             const importRecord = toImport[0];
-            console.log(importRecord)
             setToImport(toImport.slice(1));
             pk.importDocument(
                 {
@@ -79,12 +85,7 @@ export const AddRemoteModal = ({showModal, setShowModal}) => {
     }
 
     return (
-        <IonModal isOpen={showModal} cssClass='my-custom-class' backdropDismiss={false}>
-            <IonHeader>
-                <IonTitle>Add Content from a Server</IonTitle>
-            </IonHeader>
-            <IonContent>
-                <IonGrid>
+                <IonGrid style={{border: "2px solid black"}}>
                     {(toDownload.length > 0 || toImport.length > 0) &&
                     <IonRow>
                         <IonCol size="6">
@@ -96,13 +97,16 @@ export const AddRemoteModal = ({showModal, setShowModal}) => {
                     </IonRow>
                     }
                     {
-                        [...onlineSources.entries()].map(([n, os]) =>
+                        [...onlineSources.entries()]
+                            .filter(([n, os]) => props.loadedDocSets.filter(lds => lds[0] === os.selectors.lang && lds[1] === os.selectors.abbr).length === 0)
+                            .map(([n, os]) =>
                             <IonRow key={n}>
                                 <IonCol size="8">{os.description}</IonCol>
                                 <IonCol size="3">{os.selectors.source}</IonCol>
                                 <IonCol size="1">
                                     <IonButton
                                         fill="clear"
+                                        disabled={toDownload.length > 0 || toImport.length > 0}
                                         onClick={() => doDownload(os)}>
                                         <IonIcon icon={download}/>
                                     </IonButton>
@@ -110,10 +114,7 @@ export const AddRemoteModal = ({showModal, setShowModal}) => {
                             </IonRow>)
                     }
                 </IonGrid>
-            </IonContent>
-            <IonButton onClick={() => setShowModal(false)}>Close</IonButton>
-        </IonModal>
     );
 };
 
-export default AddRemoteModal;
+export default AddRemote;

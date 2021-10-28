@@ -62,9 +62,6 @@ const SettingsTab = () => {
                         </IonCol>
                     </IonRow>
                     <IonRow>
-                        <IonCol>{JSON.stringify(result)}</IonCol>
-                    </IonRow>
-                    <IonRow>
                         <IonCol>
                             {selectedSection === 'network' && <NetworkSettings/>}
                             {selectedSection === 'storage' && <StorageSettings/>}

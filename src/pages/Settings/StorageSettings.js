@@ -1,6 +1,6 @@
-import React, {useContext, useEffect, useState} from "react";
+import React, {useContext, useEffect} from "react";
 import {IonButton, IonCol, IonGrid, IonIcon, IonLabel, IonRow} from '@ionic/react';
-import {download, folder, trash} from "ionicons/icons";
+import {download, trash} from "ionicons/icons";
 
 import AddRemote from "./AddRemote";
 import RemoveLocal from "./RemoveLocal";
@@ -35,12 +35,12 @@ const StorageSettings = () => {
                         <IonLabel>Add from Server</IonLabel>
                     </IonButton>
                 </IonCol>
-                 <IonCol className="ion-text-center">
+                <IonCol className="ion-text-center">
                     <IonButton
                         fill={selectedSection === 'local' ? "solid" : "clear"}
                         expand="full"
                         onClick={() => setSelectedSection('local')}
-                        >
+                    >
                         <IonIcon icon={trash}/>&nbsp;
                         <IonLabel>Remove from Local</IonLabel>
                     </IonButton>
@@ -48,14 +48,20 @@ const StorageSettings = () => {
             </IonRow>
             <IonRow>
                 <IonCol>
-                    {selectedSection === 'remote' &&
-                    <AddRemote
-                        loadCount={loadCount}
-                        setLoadCount={setLoadCount}
-                        loadedDocSets={loadedDocSets}
-                    />}
-                    {selectedSection === 'local' &&
-                    <RemoveLocal loadedDocSets={loadedDocSets}/>}
+                    {
+                        selectedSection === 'remote' &&
+                        <AddRemote
+                            loadCount={loadCount}
+                            setLoadCount={setLoadCount}
+                            loadedDocSets={loadedDocSets}/>
+                    }
+                    {
+                        selectedSection === 'local' &&
+                        <RemoveLocal
+                            loadCount={loadCount}
+                            setLoadCount={setLoadCount}
+                            loadedDocSets={loadedDocSets}/>
+                    }
                 </IonCol>
             </IonRow>
         </IonGrid>

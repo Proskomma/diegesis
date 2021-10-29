@@ -22,7 +22,7 @@
     "axios": "^0.24.0",
     "ionicons": "^5.4.0",
     "jszip": "^3.7.1",
-    "proskomma": "^0.4.79",
+    "proskomma": "^0.4.81",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-router": "^5.2.0",

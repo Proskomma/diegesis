@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {IonButton, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonPage, IonRow, IonTitle} from '@ionic/react';
+import {IonButton, IonCol, IonGrid, IonIcon, IonRow, IonSpinner} from '@ionic/react';
 import onlineSources from '../../resources/sourceIndexes/online_sources';
 import {download} from "ionicons/icons";
 import Axios from 'axios';
@@ -9,6 +9,7 @@ import PkContext from "../../PkContext";
 export const AddRemote = (props) => {
     const [toDownload, setToDownload] = useState([]);
     const [toImport, setToImport] = useState([]);
+    const [showAdds, setShowAdds] = useState(false);
 
     const pk = useContext(PkContext);
 
@@ -73,6 +74,12 @@ export const AddRemote = (props) => {
         }
     }, [toImport]);
 
+    useEffect(() => {
+        const newValue = toImport.length > 0 || toDownload.length > 0;
+        console.log(newValue);
+        setShowAdds(newValue);
+    }, [toImport, toDownload]);
+
     const doDownload = os => {
         os.documents.forEach(doc => setToDownload([
             ...toDownload,
@@ -86,16 +93,6 @@ export const AddRemote = (props) => {
 
     return (
                 <IonGrid style={{border: "2px solid black"}}>
-                    {(toDownload.length > 0 || toImport.length > 0) &&
-                    <IonRow>
-                        <IonCol size="6">
-                            downloading {toDownload.length}
-                        </IonCol>
-                        <IonCol size="6">
-                            importing {toImport.length}
-                        </IonCol>
-                    </IonRow>
-                    }
                     {
                         [...onlineSources.entries()]
                             .filter(([n, os]) => props.loadedDocSets.filter(lds => lds[0] === os.selectors.lang && lds[1] === os.selectors.abbr).length === 0)
@@ -104,12 +101,13 @@ export const AddRemote = (props) => {
                                 <IonCol size="8">{os.description}</IonCol>
                                 <IonCol size="3">{os.selectors.source}</IonCol>
                                 <IonCol size="1">
+                                    {!showAdds &&
                                     <IonButton
                                         fill="clear"
-                                        disabled={toDownload.length > 0 || toImport.length > 0}
                                         onClick={() => doDownload(os)}>
                                         <IonIcon icon={download}/>
-                                    </IonButton>
+                                    </IonButton>}
+                                    {showAdds && <IonSpinner name={"dots"}/>}
                                 </IonCol>
                             </IonRow>)
                     }

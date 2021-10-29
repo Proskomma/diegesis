@@ -1,10 +1,11 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {IonButton, IonCol, IonGrid, IonIcon, IonRow, IonSpinner} from '@ionic/react';
+import {IonButton, IonCol, IonGrid, IonIcon, IonRow, IonSpinner, IonText} from '@ionic/react';
 import onlineSources from '../../resources/sourceIndexes/online_sources';
 import {download} from "ionicons/icons";
 import Axios from 'axios';
 import JSZip from 'jszip';
 import PkContext from "../../PkContext";
+import "./SettingsTab.css";
 
 export const AddRemote = (props) => {
     const [toDownload, setToDownload] = useState([]);
@@ -76,7 +77,6 @@ export const AddRemote = (props) => {
 
     useEffect(() => {
         const newValue = toImport.length > 0 || toDownload.length > 0;
-        console.log(newValue);
         setShowAdds(newValue);
     }, [toImport, toDownload]);
 
@@ -90,28 +90,32 @@ export const AddRemote = (props) => {
             }
         ]));
     }
-
+    const sourceEntries = [...onlineSources.entries()]
+        .filter(([n, os]) => props.loadedDocSets.filter(lds => lds[0] === os.selectors.lang && lds[1] === os.selectors.abbr).length === 0);
     return (
-                <IonGrid style={{border: "2px solid black"}}>
-                    {
-                        [...onlineSources.entries()]
-                            .filter(([n, os]) => props.loadedDocSets.filter(lds => lds[0] === os.selectors.lang && lds[1] === os.selectors.abbr).length === 0)
-                            .map(([n, os]) =>
-                            <IonRow key={n}>
-                                <IonCol size="8">{os.description}</IonCol>
-                                <IonCol size="3">{os.selectors.source}</IonCol>
-                                <IonCol size="1">
-                                    {!showAdds &&
-                                    <IonButton
-                                        fill="clear"
-                                        onClick={() => doDownload(os)}>
-                                        <IonIcon icon={download}/>
-                                    </IonButton>}
-                                    {showAdds && <IonSpinner name={"dots"}/>}
-                                </IonCol>
-                            </IonRow>)
-                    }
-                </IonGrid>
+        <IonGrid class="storage_content">
+            {
+                sourceEntries.length > 0 ?
+                    sourceEntries.map(([n, os]) =>
+                        <IonRow key={n}>
+                            <IonCol size="8">{os.description}</IonCol>
+                            <IonCol size="3">{os.selectors.source}</IonCol>
+                            <IonCol size="1">
+                                {!showAdds &&
+                                <IonButton
+                                    fill="clear"
+                                    onClick={() => doDownload(os)}>
+                                    <IonIcon icon={download}/>
+                                </IonButton>}
+                                {showAdds && <IonSpinner name={"dots"}/>}
+                            </IonCol>
+                        </IonRow>
+                    ) : <p className="no_content">
+                        <IonText color="primary">No Content Stored Locally</IonText>
+                        {showAdds && <IonSpinner name={"dots"}/>}
+                </p>
+            }
+        </IonGrid>
     );
 };
 

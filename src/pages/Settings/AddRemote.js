@@ -5,6 +5,7 @@ import {download} from "ionicons/icons";
 import Axios from 'axios';
 import JSZip from 'jszip';
 import PkContext from "../../PkContext";
+import SettingsContext from "../../SettingsContext";
 import "./SettingsTab.css";
 
 export const AddRemote = (props) => {
@@ -13,6 +14,7 @@ export const AddRemote = (props) => {
     const [showAdds, setShowAdds] = useState(false);
 
     const pk = useContext(PkContext);
+    const settings = useContext(SettingsContext);
 
     useEffect(() => {
         const doDownload = async () => {
@@ -92,6 +94,7 @@ export const AddRemote = (props) => {
     }
     const sourceEntries = [...onlineSources.entries()]
         .filter(([n, os]) => props.loadedDocSets.filter(lds => lds[0] === os.selectors.lang && lds[1] === os.selectors.abbr).length === 0);
+    if (settings.enableNetworkAccess[0]) {
     return (
         <IonGrid class="storage_content">
             {
@@ -111,12 +114,23 @@ export const AddRemote = (props) => {
                             </IonCol>
                         </IonRow>
                     ) : <p className="no_content">
-                        <IonText color="primary">No Content Stored Locally</IonText>
+                        <IonText color="primary">No Content to Download</IonText>
                         {showAdds && <IonSpinner name={"dots"}/>}
                 </p>
             }
         </IonGrid>
     );
+} else {
+        return <IonGrid class="storage_content">
+            <IonRow>
+                <IonCol>
+                    <p className="no_content">
+                        <IonText color="danger">Network Access Disabled in App - Click Globe to Enable</IonText>
+                    </p>
+                </IonCol>
+            </IonRow>
+        </IonGrid>
+    }
 };
 
 export default AddRemote;

@@ -1,4 +1,4 @@
-import React, {useContext} from 'react';
+import React, {useContext, useState} from 'react';
 import {Redirect, Route} from 'react-router-dom';
 import {IonApp, IonIcon, IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs,} from '@ionic/react';
 import {IonReactRouter} from '@ionic/react-router';
@@ -6,7 +6,6 @@ import {book, create, print} from 'ionicons/icons';
 import BrowseTab from './pages/Browse/BrowseTab';
 import EditTab from './pages/Edit/EditTab';
 import PublishTab from './pages/Publish/PublishTab';
-import ContributeTab from './pages/Contribute/ContributeTab';
 import SettingsTab from './pages/Settings/SettingsTab';
 
 /* Core CSS required for Ionic components to work properly */
@@ -30,47 +29,50 @@ import './theme/variables.css';
 
 /* Non-ionic imports */
 import PkContext, {PkProvider} from './PkContext'
+import {SettingsProvider} from './SettingsContext'
 
 const App = () => {
     const pk = useContext(PkContext);
+    const settings = {
+        enableNetworkAccess: useState(false)
+    };
     return <IonApp>
         <PkProvider value={pk}>
-            <IonReactRouter>
-                <IonTabs>
-                    <IonRouterOutlet>
-                        <Route exact path="/browse">
-                            <BrowseTab/>
-                        </Route>
-                        <Route exact path="/edit">
-                            <EditTab/>
-                        </Route>
-                        <Route exact path="/publish">
-                            <PublishTab/>
-                        </Route>
-                        <Route exact path="/contribute">
-                            <ContributeTab/>
-                        </Route>
-                        <Route exact path="/settings">
-                            <SettingsTab/>
-                        </Route>
-                        <Route render={() => <Redirect to="/browse"/>}/>
-                    </IonRouterOutlet>
-                    <IonTabBar slot="bottom">
-                        <IonTabButton tab="browse" href="/browse">
-                            <IonIcon icon={book}/>
-                            <IonLabel>Browse</IonLabel>
-                        </IonTabButton>
-                        <IonTabButton tab="edit" href="/edit">
-                            <IonIcon icon={create}/>
-                            <IonLabel>Edit</IonLabel>
-                        </IonTabButton>
-                        <IonTabButton tab="publish" href="/publish">
-                            <IonIcon icon={print}/>
-                            <IonLabel>Publish</IonLabel>
-                        </IonTabButton>
-                    </IonTabBar>
-                </IonTabs>
-            </IonReactRouter>
+            <SettingsProvider value={settings}>
+                <IonReactRouter>
+                    <IonTabs>
+                        <IonRouterOutlet>
+                            <Route exact path="/browse">
+                                <BrowseTab/>
+                            </Route>
+                            <Route exact path="/edit">
+                                <EditTab/>
+                            </Route>
+                            <Route exact path="/publish">
+                                <PublishTab/>
+                            </Route>
+                            <Route exact path="/settings">
+                                <SettingsTab/>
+                            </Route>
+                            <Route render={() => <Redirect to="/browse"/>}/>
+                        </IonRouterOutlet>
+                        <IonTabBar slot="bottom">
+                            <IonTabButton tab="browse" href="/browse">
+                                <IonIcon icon={book}/>
+                                <IonLabel>Browse</IonLabel>
+                            </IonTabButton>
+                            <IonTabButton tab="edit" href="/edit">
+                                <IonIcon icon={create}/>
+                                <IonLabel>Edit</IonLabel>
+                            </IonTabButton>
+                            <IonTabButton tab="publish" href="/publish">
+                                <IonIcon icon={print}/>
+                                <IonLabel>Publish</IonLabel>
+                            </IonTabButton>
+                        </IonTabBar>
+                    </IonTabs>
+                </IonReactRouter>
+            </SettingsProvider>
         </PkProvider>
     </IonApp>
 };

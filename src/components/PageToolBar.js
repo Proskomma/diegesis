@@ -1,7 +1,7 @@
 import {IonButton, IonButtons, IonIcon, IonTitle, IonToolbar} from "@ionic/react";
 import {cog, globe} from "ionicons/icons";
 import React, {useContext} from "react";
-import SettingsContext from "../SettingsContext";
+import SettingsContext from "../contexts/SettingsContext";
 
 const PageToolBar = ({pageTitle}) => {
     const settings = useContext(SettingsContext);

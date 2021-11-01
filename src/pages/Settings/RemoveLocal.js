@@ -2,10 +2,12 @@ import React, {useContext, useState} from 'react';
 import {IonButton, IonCol, IonGrid, IonIcon, IonRow, IonText} from '@ionic/react';
 import onlineSources from '../../resources/sourceIndexes/online_sources';
 import {trash} from "ionicons/icons";
-import PkContext from "../../PkContext";
+import PkContext from "../../contexts/PkContext";
 import "./SettingsTab.css";
+import btoa from "btoa";
+const uuid = require("uuid");
 
-export const RemoveLocal = (props) => {
+export const RemoveLocal = ({setLoadUuid, loadedDocSets, currentDocSet, setCurrentDocSet, setCurrentBookCode}) => {
 
     const pk = useContext(PkContext);
 
@@ -13,12 +15,16 @@ export const RemoveLocal = (props) => {
         const docSetId = `${selectors.lang}_${selectors.abbr}`;
         const query = `mutation { deleteDocSet(docSetId: "${docSetId}") }`;
         const result = await pk.gqlQuery(query);
-        props.setLoadCount(props.loadCount + 1);
+        if (currentDocSet === docSetId) {
+            setCurrentDocSet("");
+            setCurrentBookCode("");
+        }
+        setLoadUuid(btoa(uuid.v4()).substring(0, 12));
     }
 
     const [buttonsDisabled, setButtonsDisabled] = useState(false);
     const sourceEntries = [...onlineSources.entries()]
-        .filter(([n, os]) => props.loadedDocSets.filter(lds => lds[0] === os.selectors.lang && lds[1] === os.selectors.abbr).length === 1);
+        .filter(([n, os]) => loadedDocSets.filter(lds => lds[0] === os.selectors.lang && lds[1] === os.selectors.abbr).length === 1);
     return (
         <IonGrid class="storage_content">
             {

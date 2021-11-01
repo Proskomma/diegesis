@@ -4,14 +4,14 @@ import onlineSources from '../../resources/sourceIndexes/online_sources';
 import {download} from "ionicons/icons";
 import Axios from 'axios';
 import JSZip from 'jszip';
-import PkContext from "../../PkContext";
-import SettingsContext from "../../SettingsContext";
+import PkContext from "../../contexts/PkContext";
+import SettingsContext from "../../contexts/SettingsContext";
 import "./SettingsTab.css";
+const uuid = require('uuid');
+const btoa = require('btoa');
 
-export const AddRemote = (props) => {
+export const AddRemote = ({toImport, setToImport, loadUuid, setLoadUuid, loadedDocSets}) => {
     const [toDownload, setToDownload] = useState([]);
-    const [toImport, setToImport] = useState([]);
-    const [showAdds, setShowAdds] = useState(false);
 
     const pk = useContext(PkContext);
     const settings = useContext(SettingsContext);
@@ -19,7 +19,6 @@ export const AddRemote = (props) => {
     useEffect(() => {
         const doDownload = async () => {
             const downloadRecord = toDownload[0];
-            setToDownload(toDownload.slice(1));
             const newToImport = [...toImport];
             const axiosInstance = Axios.create({});
             axiosInstance.defaults.headers = {
@@ -51,36 +50,18 @@ export const AddRemote = (props) => {
                                 }
                             }));
                             setToImport(newToImport);
-                            props.setLoadCount(props.loadCount + 1);
+                            const newUuid = btoa(uuid.v4()).substring(0, 12);
+                            setLoadUuid(newUuid);
                         } else {
                             console.log(`Unknown format ${downloadRecord.format}`);
                         }
                     });
+            setToDownload(toDownload.slice(1));
         };
         if (toDownload.length > 0) {
             doDownload().then();
         }
     }, [toDownload]);
-
-    useEffect(() => {
-        if (toImport.length > 0) {
-            const importRecord = toImport[0];
-            setToImport(toImport.slice(1));
-            pk.importDocument(
-                {
-                    lang: importRecord.selectors.lang,
-                    abbr: importRecord.selectors.abbr
-                },
-                importRecord.contentType,
-                importRecord.content
-            );
-        }
-    }, [toImport]);
-
-    useEffect(() => {
-        const newValue = toImport.length > 0 || toDownload.length > 0;
-        setShowAdds(newValue);
-    }, [toImport, toDownload]);
 
     const doDownload = os => {
         os.documents.forEach(doc => setToDownload([
@@ -93,7 +74,7 @@ export const AddRemote = (props) => {
         ]));
     }
     const sourceEntries = [...onlineSources.entries()]
-        .filter(([n, os]) => props.loadedDocSets.filter(lds => lds[0] === os.selectors.lang && lds[1] === os.selectors.abbr).length === 0);
+        .filter(([n, os]) => loadedDocSets.filter(lds => lds[0] === os.selectors.lang && lds[1] === os.selectors.abbr).length === 0);
     if (settings.enableNetworkAccess[0]) {
     return (
         <IonGrid class="storage_content">
@@ -104,18 +85,18 @@ export const AddRemote = (props) => {
                             <IonCol size="8">{os.description}</IonCol>
                             <IonCol size="3">{os.selectors.source}</IonCol>
                             <IonCol size="1">
-                                {!showAdds &&
+                                {(toImport.length === 0 && toDownload.length === 0) &&
                                 <IonButton
                                     fill="clear"
                                     onClick={() => doDownload(os)}>
                                     <IonIcon icon={download}/>
                                 </IonButton>}
-                                {showAdds && <IonSpinner name={"dots"}/>}
+                                {(toImport.length > 0 || toDownload.length > 0) && <IonSpinner name={"dots"}/>}
                             </IonCol>
                         </IonRow>
                     ) : <p className="no_content">
                         <IonText color="primary">No Content to Download</IonText>
-                        {showAdds && <IonSpinner name={"dots"}/>}
+                        {(toImport.length > 0 || toDownload.length > 0) && <IonSpinner name={"dots"}/>}
                 </p>
             }
         </IonGrid>

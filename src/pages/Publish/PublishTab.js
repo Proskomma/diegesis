@@ -3,7 +3,7 @@ import {IonContent, IonHeader, IonPage, IonTitle, IonToolbar} from '@ionic/react
 import ExploreContainer from '../../components/ExploreContainer';
 import './PublishTab.css';
 
-import PkContext from '../../PkContext';
+import PkContext from '../../contexts/PkContext';
 import PageToolBar from "../../components/PageToolBar";
 
 const PublishTab = () => {

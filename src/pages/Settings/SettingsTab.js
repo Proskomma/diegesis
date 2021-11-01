@@ -1,26 +1,23 @@
 import React, {useContext, useEffect} from 'react';
-import {IonButton, IonButtons, IonContent, IonHeader, IonIcon, IonPage, IonTitle, IonToolbar, IonLabel} from '@ionic/react';
-import { IonGrid, IonRow, IonCol } from '@ionic/react';
+import {IonButton, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonLabel, IonPage, IonRow} from '@ionic/react';
 import './SettingsTab.css';
 import StorageSettings from './StorageSettings';
 import AppearanceSettings from './AppearanceSettings';
 
-import PkContext from '../../PkContext';
 import PageToolBar from "../../components/PageToolBar";
 import {albums, brush} from "ionicons/icons";
 
-const SettingsTab = () => {
-    const pk = useContext(PkContext);
-    const [result, setResult] = React.useState({});
+const SettingsTab = ({
+                         loadUuid,
+                         setLoadUuid,
+                         toImport,
+                         setToImport,
+                         currentDocSet,
+                         setCurrentDocSet,
+                         currentBookCode,
+                         setCurrentBookCode
+                     }) => {
     const [selectedSection, setSelectedSection] = React.useState('storage');
-    useEffect(() => {
-        const doQuery = async () => {
-            const res = await pk.gqlQuery('{ nDocSets nDocuments }');
-            setResult(res);
-        };
-        doQuery();
-    }, [selectedSection]);
-
     return (
         <IonPage>
             <IonHeader>
@@ -32,7 +29,7 @@ const SettingsTab = () => {
                         <IonCol className="ion-text-center">
                             <IonButton
                                 fill="clear"
-                                strong = {selectedSection === 'storage'}
+                                strong={selectedSection === 'storage'}
                                 onClick={() => setSelectedSection('storage')}
                             >
                                 <IonIcon icon={albums}/>&nbsp;
@@ -52,8 +49,23 @@ const SettingsTab = () => {
                     </IonRow>
                     <IonRow>
                         <IonCol>
-                            {selectedSection === 'storage' && <StorageSettings/>}
-                            {selectedSection === 'appearance' && <AppearanceSettings/>}
+                            {
+                                selectedSection === 'storage' &&
+                                <StorageSettings
+                                    loadUuid={loadUuid}
+                                    setLoadUuid={setLoadUuid}
+                                    toImport={toImport}
+                                    setToImport={setToImport}
+                                    currentDocSet={currentDocSet}
+                                    setCurrentDocSet={setCurrentDocSet}
+                                    currentBookCode={currentBookCode}
+                                    setCurrentBookCode={setCurrentBookCode}
+                                />
+                            }
+                            {
+                                selectedSection === 'appearance' &&
+                                <AppearanceSettings/>
+                            }
                         </IonCol>
                     </IonRow>
                 </IonGrid>

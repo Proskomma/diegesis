@@ -4,11 +4,10 @@ import {download, trash} from "ionicons/icons";
 
 import AddRemote from "./AddRemote";
 import RemoveLocal from "./RemoveLocal";
-import PkContext from "../../PkContext";
+import PkContext from "../../contexts/PkContext";
 
-const StorageSettings = () => {
+const StorageSettings = ({loadUuid, setLoadUuid, toImport, setToImport, currentDocSet, setCurrentDocSet, currentBookCode, setCurrentBookCode}) => {
     const [selectedSection, setSelectedSection] = React.useState('remote');
-    const [loadCount, setLoadCount] = React.useState(0);
     const [loadedDocSets, setLoadedDocSets] = React.useState([]);
 
     const pk = useContext(PkContext);
@@ -20,7 +19,7 @@ const StorageSettings = () => {
             setLoadedDocSets(selectors);
         };
         doQuery();
-    }, [loadCount]);
+    }, [loadUuid, toImport, loadUuid]);
 
     return <>
         <IonGrid>
@@ -51,16 +50,26 @@ const StorageSettings = () => {
                     {
                         selectedSection === 'remote' &&
                         <AddRemote
-                            loadCount={loadCount}
-                            setLoadCount={setLoadCount}
-                            loadedDocSets={loadedDocSets}/>
+                            loadUuid={loadUuid}
+                            setLoadUuid={setLoadUuid}
+                            toImport={toImport}
+                            setToImport={setToImport}
+                            loadedDocSets={loadedDocSets}
+                        />
                     }
                     {
                         selectedSection === 'local' &&
                         <RemoveLocal
-                            loadCount={loadCount}
-                            setLoadCount={setLoadCount}
-                            loadedDocSets={loadedDocSets}/>
+                            loadUuid={loadUuid}
+                            setLoadUuid={setLoadUuid}
+                            toImport={toImport}
+                            setToImport={setToImport}
+                            loadedDocSets={loadedDocSets}
+                            currentDocSet={currentDocSet}
+                            setCurrentDocSet={setCurrentDocSet}
+                            currentBookCode={currentBookCode}
+                            setCurrentBookCode={setCurrentBookCode}
+                        />
                     }
                 </IonCol>
             </IonRow>

@@ -5,19 +5,15 @@ import {
     IonGrid,
     IonHeader,
     IonItem,
-    IonList,
     IonPage,
     IonRow,
     IonSelect,
     IonSelectOption,
     IonText
 } from '@ionic/react';
-import {
-    ScriptureParaModel,
-    ScriptureDocSet,
-    ScriptureParaDocument,
-    ScriptureParaModelQuery,
-} from 'proskomma-render';
+import {ScriptureDocSet, ScriptureParaModel, ScriptureParaModelQuery,} from 'proskomma-render';
+import BrowseDocumentModel from './BrowseDocumentModel';
+import VerseDetails from "./VerseDetails";
 import './BrowseTab.css';
 import PageToolBar from '../../components/PageToolBar';
 
@@ -26,15 +22,29 @@ import DocSetsContext from '../../contexts/DocSetsContext';
 
 
 const BrowseTab = ({currentDocSet, setCurrentDocSet, currentBookCode, setCurrentBookCode, currentDocId}) => {
-    const [sequenceText, setSequenceText] = useState([]);
     const pk = useContext(PkContext);
     const docSets = useContext(DocSetsContext);
-    console.log(currentDocId)
+    const [renderedSequence, setRenderedSequence] = useState([]);
+    const [selectedChapter, setSelectedChapter] = useState(null);
+    const [selectedVerses, setSelectedVerses] = useState(null);
+
     useEffect(() => {
         const doQuery = async () => {
             const resData = await ScriptureParaModelQuery(pk, [currentDocSet], [currentDocId]);
             if (resData.docSets && resData.docSets[0]) {
-                setSequenceText(resData.docSets[0].documents[0].sequences.filter(s => s.type === 'main')[0].blocks.map(b => b.items.filter(i => i.type === 'token').map(i => i.payload).join('')));
+                const config = {
+                    rendered: [],
+                    versesCallback: ((chapter, verses) => {
+                        setSelectedChapter(chapter);
+                        setSelectedVerses(verses);
+                    }),
+                };
+                const model = new ScriptureParaModel(resData, config);
+                const docSetModel = new ScriptureDocSet(resData, model.context, config);
+                docSetModel.addDocumentModel("default", new BrowseDocumentModel(resData, model.context, config));
+                model.addDocSetModel('default', docSetModel);
+                model.render();
+                setRenderedSequence(config.rendered);
             }
         };
         if (currentDocSet && currentBookCode) {
@@ -49,9 +59,10 @@ const BrowseTab = ({currentDocSet, setCurrentDocSet, currentBookCode, setCurrent
                     currentDocSet !== "" &&
                     <IonGrid>
                         <IonRow>
-                             <IonCol size={6}>
+                            <IonCol size={6}>
                                 <IonSelect
                                     value={currentDocSet}
+                                    disabled={selectedChapter && selectedVerses}
                                     onIonChange={e => {
                                         setCurrentDocSet(e.detail.value);
                                         const docSet = docSets[e.detail.value];
@@ -73,6 +84,7 @@ const BrowseTab = ({currentDocSet, setCurrentDocSet, currentBookCode, setCurrent
                             <IonCol size={6}>
                                 <IonSelect
                                     value={currentBookCode}
+                                    disabled={selectedChapter && selectedVerses}
                                     onIonChange={e => setCurrentBookCode(e.detail.value)}>
                                     {
                                         [...Object.entries(docSets[currentDocSet].documents)]
@@ -92,7 +104,27 @@ const BrowseTab = ({currentDocSet, setCurrentDocSet, currentBookCode, setCurrent
                 {!currentDocSet &&
                 <IonItem><IonText color="primary">No content - download some in settings</IonText></IonItem>}
                 {currentDocSet &&
-                <IonContent><IonList>{sequenceText.map(bt => <IonItem>{bt}</IonItem>)}</IonList></IonContent>}
+                <IonGrid>
+                    {
+                        (!selectedChapter || !selectedVerses) &&
+                        <IonRow>
+                            <IonCol>
+                                <IonText>{renderedSequence}</IonText>
+                            </IonCol>
+                        </IonRow>
+                    }
+                    {
+                        (selectedChapter && selectedVerses) &&
+                        <VerseDetails
+                            currentDocSet={currentDocSet}
+                            currentBookCode={currentBookCode}
+                            selectedChapter={selectedChapter}
+                            selectedVerses={selectedVerses}
+                            setSelectedChapter={setSelectedChapter}
+                            setSelectedVerses={setSelectedVerses}
+                        />
+                    }
+                </IonGrid>}
             </IonContent>
         </IonPage>
     );

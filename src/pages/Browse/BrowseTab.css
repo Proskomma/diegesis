@@ -1,0 +1,19 @@
+.chapter_label {
+    font-size: xx-large;
+    font-weight: bold;
+    padding-right: 0.25em;
+    float: left;
+}
+.verses_label {
+    font-size: smaller;
+    font-weight: bold;
+    padding-right: 0.25em;
+}
+
+.usfm_p {}
+.usfm_q {
+    padding-left: 1em;
+}
+.usfm_q2 {
+    padding-left: 2em;
+}

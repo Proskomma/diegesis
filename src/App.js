@@ -98,6 +98,7 @@ const App = () => {
                                             currentDocSet={currentDocSet}
                                             setCurrentDocSet={setCurrentDocSet}
                                             currentBookCode={currentBookCode}
+                                            currentDocId ={docSets[currentDocSet] && docSets[currentDocSet].documents[currentBookCode] ? docSets[currentDocSet].documents[currentBookCode].id: ""}
                                             setCurrentBookCode={setCurrentBookCode}
                                         />
                                     </Route>

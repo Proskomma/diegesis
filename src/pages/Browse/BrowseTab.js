@@ -5,7 +5,6 @@ import {
     IonGrid,
     IonHeader,
     IonItem,
-    IonLabel,
     IonList,
     IonPage,
     IonRow,
@@ -13,6 +12,12 @@ import {
     IonSelectOption,
     IonText
 } from '@ionic/react';
+import {
+    ScriptureParaModel,
+    ScriptureDocSet,
+    ScriptureParaDocument,
+    ScriptureParaModelQuery,
+} from 'proskomma-render';
 import './BrowseTab.css';
 import PageToolBar from '../../components/PageToolBar';
 
@@ -20,15 +25,16 @@ import PkContext from '../../contexts/PkContext';
 import DocSetsContext from '../../contexts/DocSetsContext';
 
 
-const BrowseTab = ({currentDocSet, setCurrentDocSet, currentBookCode, setCurrentBookCode}) => {
+const BrowseTab = ({currentDocSet, setCurrentDocSet, currentBookCode, setCurrentBookCode, currentDocId}) => {
     const [sequenceText, setSequenceText] = useState([]);
     const pk = useContext(PkContext);
     const docSets = useContext(DocSetsContext);
+    console.log(currentDocId)
     useEffect(() => {
         const doQuery = async () => {
-            const res = await pk.gqlQuery(`{ docSet(id:"${currentDocSet}") { document(bookCode:"${currentBookCode}") { mainBlocksText } } }`);
-            if (res.data.docSet.document) {
-                setSequenceText(res.data.docSet.document.mainBlocksText);
+            const resData = await ScriptureParaModelQuery(pk, [currentDocSet], [currentDocId]);
+            if (resData.docSets && resData.docSets[0]) {
+                setSequenceText(resData.docSets[0].documents[0].sequences.filter(s => s.type === 'main')[0].blocks.map(b => b.items.filter(i => i.type === 'token').map(i => i.payload).join('')));
             }
         };
         if (currentDocSet && currentBookCode) {

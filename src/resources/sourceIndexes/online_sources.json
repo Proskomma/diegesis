@@ -93,5 +93,39 @@
         "source": "eng-webbe_usfm.zip"
       }
     ]
+  },
+  {
+    "selectors": {
+      "source": "door43",
+      "lang": "eng",
+      "abbr": "uwtn",
+      "isDraft": 0
+    },
+    "description": "Unfolding Word Translation Notes",
+    "transport": "https",
+    "sourcePrefix": "https://git.door43.org/unfoldingWord/",
+    "documents": [
+      {
+        "bookCodes": [
+          "GEN",
+          "EXO",
+          "LEV",
+          "NUM",
+          "DEU",
+          "PSA",
+          "PRO",
+          "MAT",
+          "MRK",
+          "LUK",
+          "JHN",
+          "ACT"
+        ],
+        "docTypes": [
+          "table"
+        ],
+        "format": "tsvZip",
+        "source": "en_tn/archive/v54.zip"
+      }
+    ]
   }
 ]

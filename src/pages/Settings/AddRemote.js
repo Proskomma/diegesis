@@ -7,6 +7,7 @@ import JSZip from 'jszip';
 import PkContext from "../../contexts/PkContext";
 import SettingsContext from "../../contexts/SettingsContext";
 import "./SettingsTab.css";
+
 const uuid = require('uuid');
 const btoa = require('btoa');
 
@@ -36,7 +37,7 @@ export const AddRemote = ({toImport, setToImport, loadUuid, setLoadUuid, loadedD
                 .then(
                     async response => {
                         const data = response.data;
-                        if (downloadRecord.format === 'usfmZip') {
+                        if (['usfmZip', 'tsvZip'].includes(downloadRecord.format)) {
                             const zip = new JSZip();
                             await zip.loadAsync(data);
                             await Promise.all(Object.keys(zip.files).map(async fn => {
@@ -44,7 +45,7 @@ export const AddRemote = ({toImport, setToImport, loadUuid, setLoadUuid, loadedD
                                     const response = await zip.file(fn).async('string');
                                     newToImport.push({
                                         selectors: downloadRecord.selectors,
-                                        contentType: "usfm",
+                                        contentType: downloadRecord.format === 'usfmZip' ? 'usfm' : 'tsv',
                                         content: response
                                     });
                                 }
@@ -76,32 +77,34 @@ export const AddRemote = ({toImport, setToImport, loadUuid, setLoadUuid, loadedD
     const sourceEntries = [...onlineSources.entries()]
         .filter(([n, os]) => loadedDocSets.filter(lds => lds[0] === os.selectors.lang && lds[1] === os.selectors.abbr).length === 0);
     if (settings.enableNetworkAccess[0]) {
-    return (
-        <IonGrid class="storage_content">
-            {
-                sourceEntries.length > 0 ?
-                    sourceEntries.map(([n, os]) =>
-                        <IonRow key={n}>
-                            <IonCol size="8">{os.description}</IonCol>
-                            <IonCol size="3">{os.selectors.source}</IonCol>
-                            <IonCol size="1">
-                                {(toImport.length === 0 && toDownload.length === 0) &&
-                                <IonButton
-                                    fill="clear"
-                                    onClick={() => doDownload(os)}>
-                                    <IonIcon icon={download}/>
-                                </IonButton>}
-                                {(toImport.length > 0 || toDownload.length > 0) && <IonSpinner name={"dots"}/>}
-                            </IonCol>
-                        </IonRow>
-                    ) : <p className="no_content">
-                        <IonText color="primary">No Content to Download</IonText>
-                        {(toImport.length > 0 || toDownload.length > 0) && <IonSpinner name={"dots"}/>}
-                </p>
-            }
-        </IonGrid>
-    );
-} else {
+        return (
+            <IonGrid class="storage_content">
+                {
+                    sourceEntries.length > 0 ?
+                        sourceEntries.map(([n, os]) =>
+                            <IonRow key={n}>
+                                <IonCol size="2">{os.selectors.source}</IonCol>
+                                <IonCol size="7">{os.description}</IonCol>
+                                <IonCol
+                                    size="2">{Array.from(new Set(os.documents.map(d => d.docTypes).reduce((a, b) => a.concat(b)))).join(', ')}</IonCol>
+                                <IonCol size="1">
+                                    {(toImport.length === 0 && toDownload.length === 0) &&
+                                    <IonButton
+                                        fill="clear"
+                                        onClick={() => doDownload(os)}>
+                                        <IonIcon icon={download}/>
+                                    </IonButton>}
+                                    {(toImport.length > 0 || toDownload.length > 0) && <IonSpinner name={"dots"}/>}
+                                </IonCol>
+                            </IonRow>
+                        ) : <p className="no_content">
+                            <IonText color="primary">No Content to Download</IonText>
+                            {(toImport.length > 0 || toDownload.length > 0) && <IonSpinner name={"dots"}/>}
+                        </p>
+                }
+            </IonGrid>
+        );
+    } else {
         return <IonGrid class="storage_content">
             <IonRow>
                 <IonCol>

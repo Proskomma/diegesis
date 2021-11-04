@@ -46,14 +46,18 @@ const App = () => {
         if (toImport.length > 0) {
             const importRecord = toImport[0];
             setToImport(toImport.slice(1));
-            pk.importDocument(
-                {
-                    lang: importRecord.selectors.lang,
-                    abbr: importRecord.selectors.abbr
-                },
-                importRecord.contentType,
-                importRecord.content
-            );
+            if (importRecord.contentType === 'usfm') {
+                pk.importDocument(
+                    {
+                        lang: importRecord.selectors.lang,
+                        abbr: importRecord.selectors.abbr
+                    },
+                    importRecord.contentType,
+                    importRecord.content
+                );
+            } else {
+                console.log(`Unknown import contentType '${importRecord.contentType}'`)
+            }
         }
     }, [loadUuid, toImport]);
 

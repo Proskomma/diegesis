@@ -83,10 +83,12 @@ export const AddRemote = ({toImport, setToImport, loadUuid, setLoadUuid, loadedD
                     sourceEntries.length > 0 ?
                         sourceEntries.map(([n, os]) =>
                             <IonRow key={n}>
-                                <IonCol size="2">{os.selectors.source}</IonCol>
-                                <IonCol size="7">{os.description}</IonCol>
+                                <IonCol size="1">{os.selectors.source}</IonCol>
+                                <IonCol size="1">{os.selectors.lang}</IonCol>
                                 <IonCol
-                                    size="2">{Array.from(new Set(os.documents.map(d => d.docTypes).reduce((a, b) => a.concat(b)))).join(', ')}</IonCol>
+                                    size="2">{Array.from(new Set(os.documents.map(d => d.docTypes).reduce((a, b) => a.concat(b)))).join(', ')}
+                                </IonCol>
+                                <IonCol size="7">{os.description}</IonCol>
                                 <IonCol size="1">
                                     {(toImport.length === 0 && toDownload.length === 0) &&
                                     <IonButton

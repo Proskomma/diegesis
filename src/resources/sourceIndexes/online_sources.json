@@ -12,18 +12,12 @@
     "documents": [
       {
         "bookCodes": [
-          "GEN",
-          "EXO",
-          "LEV",
-          "NUM",
-          "DEU",
-          "PSA",
-          "PRO",
           "MAT",
           "MRK",
           "LUK",
           "JHN",
-          "ACT"
+          "ACT",
+          "TIT"
         ],
         "docTypes": [
           "text"
@@ -50,7 +44,8 @@
           "MRK",
           "LUK",
           "JHN",
-          "ACT"
+          "ACT",
+          "TIT"
         ],
         "docTypes": [
           "text"
@@ -73,18 +68,12 @@
     "documents": [
       {
         "bookCodes": [
-          "GEN",
-          "EXO",
-          "LEV",
-          "NUM",
-          "DEU",
-          "PSA",
-          "PRO",
           "MAT",
           "MRK",
           "LUK",
           "JHN",
-          "ACT"
+          "ACT",
+          "TIT"
         ],
         "docTypes": [
           "text"
@@ -107,24 +96,41 @@
     "documents": [
       {
         "bookCodes": [
-          "GEN",
-          "EXO",
-          "LEV",
-          "NUM",
-          "DEU",
-          "PSA",
-          "PRO",
-          "MAT",
-          "MRK",
-          "LUK",
-          "JHN",
-          "ACT"
+          "TIT"
         ],
         "docTypes": [
           "table"
         ],
         "format": "tsvZip",
         "source": "en_tn/archive/v54.zip"
+      }
+    ]
+  },
+  {
+    "selectors": {
+      "source": "door43",
+      "lang": "grc",
+      "abbr": "ugnt",
+      "isDraft": 0
+    },
+    "description": "Unfolding Word Greek New Testament",
+    "transport": "https",
+    "sourcePrefix": "https://git.door43.org/unfoldingWord/",
+    "documents": [
+      {
+        "bookCodes": [
+          "MAT",
+          "MRK",
+          "LUK",
+          "JHN",
+          "ACT",
+          "TIT"
+        ],
+        "docTypes": [
+          "text"
+        ],
+        "format": "usfmZip",
+        "source": "el-x-koine_ugnt/archive/v0.22.zip"
       }
     ]
   }

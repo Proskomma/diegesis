@@ -28,9 +28,10 @@ import BrowseTab from './pages/Browse/BrowseTab';
 import EditTab from './pages/Edit/EditTab';
 import PublishTab from './pages/Publish/PublishTab';
 import SettingsTab from './pages/Settings/SettingsTab';
-import PkContext, {PkProvider} from './contexts/PkContext'
-import {SettingsProvider} from './contexts/SettingsContext'
-import {DocSetsProvider} from './contexts/DocSetsContext'
+import PkContext, {PkProvider} from './contexts/PkContext';
+import {blocksSpecUtils} from 'proskomma';
+import {SettingsProvider} from './contexts/SettingsContext';
+import {DocSetsProvider} from './contexts/DocSetsContext';
 
 const App = () => {
     const [loadUuid, setLoadUuid] = React.useState("");
@@ -55,6 +56,40 @@ const App = () => {
                     importRecord.contentType,
                     importRecord.content
                 );
+            } else if (importRecord.contentType === 'tsv') {
+                const addTsv = async () => {
+                    const tsvJson = blocksSpecUtils.tsvToInputBlock(importRecord.content, true);
+                    const tsvQueryContent = blocksSpecUtils.blocksSpec2Query(tsvJson);
+                    const bookCode = tsvJson[0].items[1].payload; // TERRIBLE KLUDGE!
+                    const stubUsfm = `\\id ${bookCode} TSV document\n\\toc1 ${bookCode}\n\\mt TSV Document for ${bookCode}`;
+                    let query = `mutation { addDocument(` +
+                        `selectors: [{key: "lang", value: "${importRecord.selectors.lang}"}, {key: "abbr", value: "${importRecord.selectors.abbr}"}], ` +
+                        `contentType: "usfm", ` +
+                        `content: """${stubUsfm}""") }`;
+                    let result = await pk.gqlQuery(query);
+                    if (!result.data || !result.data.addDocument) {
+                        console.log(`tsv doc creation for ${bookCode} failed: ${JSON.stringify(result)}`);
+                        return;
+                    }
+                    const docSetId = `${importRecord.selectors.lang}_${importRecord.selectors.abbr}`;
+                    query = `{ docSet(id:"${docSetId}") { id document(bookCode:"${bookCode}") { id } } }`;
+                    result = await pk.gqlQuery(query);
+                    if (!result.data || !result.data.docSet || !result.data.docSet.document) {
+                        console.log(`docSet query after tsv creation for ${bookCode} failed: ${JSON.stringify(result)}`);
+                        return;
+                    }
+                    const docId = result.data.docSet.document.id;
+                    query = `mutation { newSequence(` +
+                        ` documentId: "${docId}"` +
+                        ` type: "table"` +
+                        ` blocksSpec: ${tsvQueryContent}` +
+                        ` graftToMain: true) }`;
+                    result = await pk.gqlQuery(query);
+                    if (result.errors) {
+                        console.log(`tsv mutation for ${bookCode} failed: ${JSON.stringify(result)}`);
+                    }
+                }
+                addTsv().then();
             } else {
                 console.log(`Unknown import contentType '${importRecord.contentType}'`)
             }
@@ -83,8 +118,8 @@ const App = () => {
             }
             setDocSets(dss);
             if (res.data.docSets.length > 0 && !currentDocSet) {
-                    setCurrentDocSet(res.data.docSets[0].id);
-                    setCurrentBookCode(res.data.docSets[0].documents[0].bookCode);
+                setCurrentDocSet(res.data.docSets[0].id);
+                setCurrentBookCode(res.data.docSets[0].documents[0].bookCode);
             }
         };
         doQuery();
@@ -102,7 +137,7 @@ const App = () => {
                                             currentDocSet={currentDocSet}
                                             setCurrentDocSet={setCurrentDocSet}
                                             currentBookCode={currentBookCode}
-                                            currentDocId ={docSets[currentDocSet] && docSets[currentDocSet].documents[currentBookCode] ? docSets[currentDocSet].documents[currentBookCode].id: ""}
+                                            currentDocId={docSets[currentDocSet] && docSets[currentDocSet].documents[currentBookCode] ? docSets[currentDocSet].documents[currentBookCode].id : ""}
                                             setCurrentBookCode={setCurrentBookCode}
                                         />
                                     </Route>

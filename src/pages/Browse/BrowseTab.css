@@ -9,7 +9,9 @@
     font-weight: bold;
     padding-right: 0.25em;
 }
-
+.tableRow {
+    border-bottom: 1px #999 solid
+}
 .usfm_p {}
 .usfm_q {
     padding-left: 1em;

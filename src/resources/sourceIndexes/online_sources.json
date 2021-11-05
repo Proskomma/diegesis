@@ -86,6 +86,34 @@
   {
     "selectors": {
       "source": "door43",
+      "lang": "grc",
+      "abbr": "ugnt",
+      "isDraft": 0
+    },
+    "description": "Unfolding Word Greek New Testament",
+    "transport": "https",
+    "sourcePrefix": "https://git.door43.org/unfoldingWord/",
+    "documents": [
+      {
+        "bookCodes": [
+          "MAT",
+          "MRK",
+          "LUK",
+          "JHN",
+          "ACT",
+          "TIT"
+        ],
+        "docTypes": [
+          "text"
+        ],
+        "format": "usfmZip",
+        "source": "el-x-koine_ugnt/archive/v0.22.zip"
+      }
+    ]
+  },
+  {
+    "selectors": {
+      "source": "door43",
       "lang": "eng",
       "abbr": "uwtn",
       "isDraft": 0
@@ -109,28 +137,23 @@
   {
     "selectors": {
       "source": "door43",
-      "lang": "grc",
-      "abbr": "ugnt",
+      "lang": "eng",
+      "abbr": "uwsn",
       "isDraft": 0
     },
-    "description": "Unfolding Word Greek New Testament",
+    "description": "Unfolding Word Study Notes",
     "transport": "https",
     "sourcePrefix": "https://git.door43.org/unfoldingWord/",
     "documents": [
       {
         "bookCodes": [
-          "MAT",
-          "MRK",
-          "LUK",
-          "JHN",
-          "ACT",
           "TIT"
         ],
         "docTypes": [
-          "text"
+          "table"
         ],
-        "format": "usfmZip",
-        "source": "el-x-koine_ugnt/archive/v0.22.zip"
+        "format": "tsvZip",
+        "source": "en_sn/archive/master.zip"
       }
     ]
   }

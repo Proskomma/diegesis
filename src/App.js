@@ -60,7 +60,18 @@ const App = () => {
                 const addTsv = async () => {
                     const tsvJson = blocksSpecUtils.tsvToInputBlock(importRecord.content, true);
                     const tsvQueryContent = blocksSpecUtils.blocksSpec2Query(tsvJson);
-                    const bookCode = tsvJson[0].items[1].payload; // TERRIBLE KLUDGE!
+                    let bookCode = null;
+                    let rowN=0;
+                    while (!bookCode) { // TERRIBLE KLUDGE!
+                        const name = tsvJson[rowN].items[1].payload;
+                        console.log("-", name)
+                        if (name === name.toUpperCase()) {
+                            bookCode = name;
+                        } else {
+                            rowN++;
+                        }
+                    }
+                    console.log("bookCode", bookCode);
                     const stubUsfm = `\\id ${bookCode} TSV document\n\\toc1 ${bookCode}\n\\mt TSV Document for ${bookCode}`;
                     let query = `mutation { addDocument(` +
                         `selectors: [{key: "lang", value: "${importRecord.selectors.lang}"}, {key: "abbr", value: "${importRecord.selectors.abbr}"}], ` +

@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState, useRef} from 'react';
 import {
     IonCol,
     IonContent,
@@ -27,6 +27,21 @@ const BrowseTab = ({currentDocSet, setCurrentDocSet, currentBookCode, setCurrent
     const [renderedSequence, setRenderedSequence] = useState([]);
     const [selectedChapter, setSelectedChapter] = useState(null);
     const [selectedVerses, setSelectedVerses] = useState(null);
+    const [showDetails, setShowDetails] = useState(false);
+    const selectedVerseRef = useRef(null);
+    const topDocRef = useRef(null);
+    const scrollToSelectedVerse = () => {
+        if (selectedVerseRef.current) {
+            selectedVerseRef.current.scrollIntoView({block: "center"});
+        }
+        return true;
+    }
+    const scrollToTopDoc = () => {
+        if (topDocRef.current) {
+            topDocRef.current.scrollIntoView({block: "start"});
+        }
+        return true;
+    }
 
     useEffect(() => {
         const doQuery = async () => {
@@ -37,7 +52,12 @@ const BrowseTab = ({currentDocSet, setCurrentDocSet, currentBookCode, setCurrent
                     versesCallback: ((chapter, verses) => {
                         setSelectedChapter(chapter);
                         setSelectedVerses(verses);
+                        setShowDetails(true);
                     }),
+                    selectedChapter,
+                    selectedVerses,
+                    selectedVerseRef,
+                    topDocRef,
                 };
                 const model = new ScriptureParaModel(resData, config);
                 const docSetModel = new ScriptureDocSet(resData, model.context, config);
@@ -50,8 +70,15 @@ const BrowseTab = ({currentDocSet, setCurrentDocSet, currentBookCode, setCurrent
         if (currentDocSet && currentBookCode) {
             doQuery();
         }
-    }, [currentBookCode, currentDocSet, pk]);
-    return (
+    }, [currentBookCode, currentDocSet, selectedChapter, selectedVerses, pk]);
+    useEffect(() => {
+        if (selectedVerses && selectedVerseRef) {
+            scrollToSelectedVerse();
+        } else if (topDocRef) {
+            scrollToTopDoc();
+        }
+    }, [selectedVerses, selectedVerseRef, topDocRef, showDetails]);
+        return (
         <IonPage>
             <IonHeader>
                 <PageToolBar pageTitle="Browse"/>
@@ -62,13 +89,15 @@ const BrowseTab = ({currentDocSet, setCurrentDocSet, currentBookCode, setCurrent
                             <IonCol size={6}>
                                 <IonSelect
                                     value={currentDocSet}
-                                    disabled={selectedChapter && selectedVerses}
+                                    disabled={showDetails}
                                     onIonChange={e => {
                                         setCurrentDocSet(e.detail.value);
                                         const docSet = docSets[e.detail.value];
                                         if (docSet) {
                                             const firstBookCode = Object.keys(docSet.documents)[0];
                                             setCurrentBookCode(currentBookCode in docSet.documents ? currentBookCode : firstBookCode);
+                                            setSelectedChapter(null);
+                                            setSelectedVerses(null);
                                         }
                                     }}>
                                     {
@@ -84,7 +113,7 @@ const BrowseTab = ({currentDocSet, setCurrentDocSet, currentBookCode, setCurrent
                             <IonCol size={6}>
                                 <IonSelect
                                     value={currentBookCode}
-                                    disabled={selectedChapter && selectedVerses}
+                                    disabled={showDetails}
                                     onIonChange={e => setCurrentBookCode(e.detail.value)}>
                                     {
                                         [...Object.entries(docSets[currentDocSet].documents)]
@@ -106,7 +135,7 @@ const BrowseTab = ({currentDocSet, setCurrentDocSet, currentBookCode, setCurrent
                 {currentDocSet &&
                 <IonGrid>
                     {
-                        (!selectedChapter || !selectedVerses) &&
+                        !showDetails &&
                         <IonRow>
                             <IonCol>
                                 <IonText>{renderedSequence}</IonText>
@@ -114,14 +143,13 @@ const BrowseTab = ({currentDocSet, setCurrentDocSet, currentBookCode, setCurrent
                         </IonRow>
                     }
                     {
-                        (selectedChapter && selectedVerses) &&
+                        showDetails &&
                         <VerseDetails
                             currentDocSet={currentDocSet}
                             currentBookCode={currentBookCode}
                             selectedChapter={selectedChapter}
                             selectedVerses={selectedVerses}
-                            setSelectedChapter={setSelectedChapter}
-                            setSelectedVerses={setSelectedVerses}
+                            setShowDetails = {setShowDetails}
                         />
                     }
                 </IonGrid>}

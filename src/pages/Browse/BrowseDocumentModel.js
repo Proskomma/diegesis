@@ -43,11 +43,22 @@ const addActions = (dInstance) => {
             if (data.subType === 'start' && scopeName === 'verses') {
                 renderer.config.currentVerses = scopeValue;
                 const currentChapter = renderer.config.currentChapter;
+                let verseRef = null;
+                let className = "verses_label";
+                if (
+                    renderer.config.currentChapter === renderer.config.selectedChapter &&
+                    renderer.config.currentVerses === renderer.config.selectedVerses
+                ) {
+                    verseRef = renderer.config.selectedVerseRef;
+                    className = "selected_verses_label";
+                }
                 renderer.config.blockStack.push(
                     <span
+                        id={`v_${renderer.config.currentChapter}_${scopeValue}`}
                         onClick={() => renderer.config.versesCallback(currentChapter, scopeValue)}
+                        ref={verseRef}
                         key={renderer.config.nextKey++}
-                        className="verses_label">
+                        className={className}>
                         {scopeValue}
                     </span>);
             } else if (data.subType === 'end' && scopeName === 'verses') {
@@ -67,8 +78,12 @@ const addActions = (dInstance) => {
         'endBlock',
         () => true,
         (renderer, context) => {
-             renderer.config.rendered.push(
-                <p key={renderer.config.nextKey++}
+            const pRef = renderer.config.rendered.length === 0 ? renderer.config.topDocRef : null;
+            const key = renderer.config.nextKey++;
+            renderer.config.rendered.push(
+                <p key={key}
+                   id={key}
+                   ref={pRef}
                    className={'usfm_' + context.sequenceStack[0].block.blockScope.split('/')[1]}>
                     {renderer.config.blockStack}
                 </p>

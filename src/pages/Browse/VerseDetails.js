@@ -1,5 +1,4 @@
 import React, {useContext, useEffect} from 'react';
-import ReactDom from 'react-dom';
 import ReactMarkdown from 'react-markdown';
 import {IonButton, IonCol, IonRow, IonText, IonTitle} from '@ionic/react';
 import PkContext from "../../contexts/PkContext";
@@ -8,9 +7,8 @@ const VerseDetails = ({
                           currentDocSet,
                           currentBookCode,
                           selectedChapter,
-                          setSelectedChapter,
                           selectedVerses,
-                          setSelectedVerses
+                          setShowDetails,
                       }) => {
     const pk = useContext(PkContext);
     const [result, setResult] = React.useState({});
@@ -46,10 +44,10 @@ const VerseDetails = ({
             <IonCol size={4} className="ion-text-end">
                 <IonButton
                     size="small"
-                    onClick={() => {
-                        setSelectedChapter(null);
-                        setSelectedVerses(null);
-                    }
+                    onClick={
+                        () => {
+                            setShowDetails(false);
+                        }
                     }
                 >
                     Dismiss

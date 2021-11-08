@@ -40,11 +40,17 @@ export const AddRemote = ({toImport, setToImport, loadUuid, setLoadUuid, loadedD
                         if (['usfmZip', 'tsvZip'].includes(downloadRecord.format)) {
                             const zip = new JSZip();
                             await zip.loadAsync(data);
-                            await Promise.all(Object.keys(zip.files).map(async fn => {
-                                if (downloadRecord.bookCodes.filter(bc => fn.includes(bc)).length === 1) {
-                                    const response = await zip.file(fn).async('string');
+                            await Promise.all(downloadRecord.bookCodes.map(async bc => {
+                                const matchingFiles = Object.keys(zip.files).filter(zf => zf.includes(bc));
+                                if (matchingFiles.length > 1) {
+                                    console.log(`Multiple matches for bookCode '${bc}' in doDownload`);
+                                    return;
+                                }
+                                if (matchingFiles.length === 1) {
+                                    const response = await zip.file(matchingFiles[0]).async('string');
                                     newToImport.push({
                                         selectors: downloadRecord.selectors,
+                                        bookCode: bc,
                                         contentType: downloadRecord.format === 'usfmZip' ? 'usfm' : 'tsv',
                                         content: response
                                     });

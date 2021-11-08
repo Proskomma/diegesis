@@ -124,6 +124,7 @@
     "documents": [
       {
         "bookCodes": [
+          "LUK",
           "TIT"
         ],
         "docTypes": [

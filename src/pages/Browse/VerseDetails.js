@@ -28,6 +28,11 @@ const VerseDetails = ({
                  tableSequences { rows(equals:[{colN:1 values:["${selectedChapter}"]}, {colN:2 values:["${selectedVerses}"]}], columns:[5, 7, 8]) { text } }
                }
              }
+             studyNotes: docSet(id:"eng_uwsn") {
+               document(bookCode:"${currentBookCode}") {
+                 tableSequences { rows(equals:[{colN:0 values:["${selectedChapter}:${selectedVerses}"]}], columns:[4, 6]) { text } }
+               }
+             }
              }`);
             setResult(res);
         };
@@ -72,7 +77,7 @@ const VerseDetails = ({
             </IonRow>
         }
         {
-            result.data && result.data.translationNotes && result.data.translationNotes.document &&
+            result.data && result.data.translationNotes && result.data.translationNotes.document && result.data.translationNotes.document.tableSequences[0].rows.length > 0 &&
             <>
                 <IonRow>
                     <IonCol>
@@ -80,30 +85,55 @@ const VerseDetails = ({
                     </IonCol>
                 </IonRow>
                 {
-                result.data.translationNotes.document.tableSequences[0].rows.map(
-                    (r, n) => <IonRow key={n} className="tableRow">
-                        <IonCol size={4}>
-                            <IonRow>
-                                <IonCol>
-                                    <IonText color="primary">
-                                        {r[1].text}
-                                    </IonText>
-                                </IonCol>
-                            </IonRow>
-                            <IonRow>
-                                <IonCol>
-                                    <IonText color="secondary">
-                                        {r[0].text}
-                                    </IonText>
-                                </IonCol>
-                            </IonRow>
-                        </IonCol>
-                        <IonCol size={8}>
-                            <ReactMarkdown>{r[2].text.replace(/\(See: .+\)/g, "")}</ReactMarkdown>
-                        </IonCol>
-                    </IonRow>
-                )
-            }</>
+                    result.data.translationNotes.document.tableSequences[0].rows.map(
+                        (r, n) => <IonRow key={n} className="tableRow">
+                            <IonCol size={4}>
+                                <IonRow>
+                                    <IonCol>
+                                        <IonText color="primary">
+                                            {r[1].text}
+                                        </IonText>
+                                    </IonCol>
+                                </IonRow>
+                                <IonRow>
+                                    <IonCol>
+                                        <IonText color="secondary">
+                                            {r[0].text}
+                                        </IonText>
+                                    </IonCol>
+                                </IonRow>
+                            </IonCol>
+                            <IonCol size={8}>
+                                <ReactMarkdown>{r[2].text.replace(/\(See: .+\)/g, "")}</ReactMarkdown>
+                            </IonCol>
+                        </IonRow>
+                    )
+                }
+            </>
+        }
+        {
+            result.data && result.data.studyNotes && result.data.studyNotes.document && result.data.studyNotes.document.tableSequences[0].rows.length > 0 &&
+            <>
+                <IonRow>
+                    <IonCol>
+                        <IonTitle>unfoldingWord Study Notes</IonTitle>
+                    </IonCol>
+                </IonRow>
+                {
+                    result.data.studyNotes.document.tableSequences[0].rows.map(
+                        (r, n) => <IonRow key={n} className="tableRow">
+                            <IonCol size={4}>
+                                <IonText color="secondary">
+                                    {r[0].text}
+                                </IonText>
+                            </IonCol>
+                            <IonCol size={8}>
+                                <ReactMarkdown>{r[1].text}</ReactMarkdown>
+                            </IonCol>
+                        </IonRow>
+                    )
+                }
+            </>
         }
     </>
 }

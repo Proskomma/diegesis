@@ -60,33 +60,22 @@ const App = () => {
                 const addTsv = async () => {
                     const tsvJson = blocksSpecUtils.tsvToInputBlock(importRecord.content, true);
                     const tsvQueryContent = blocksSpecUtils.blocksSpec2Query(tsvJson);
-                    let bookCode = null;
-                    let rowN=0;
-                    while (!bookCode) { // TERRIBLE KLUDGE!
-                        const name = tsvJson[rowN].items[1].payload;
-                        console.log("-", name)
-                        if (name === name.toUpperCase()) {
-                            bookCode = name;
-                        } else {
-                            rowN++;
-                        }
-                    }
-                    console.log("bookCode", bookCode);
-                    const stubUsfm = `\\id ${bookCode} TSV document\n\\toc1 ${bookCode}\n\\mt TSV Document for ${bookCode}`;
+                    const stubUsfm =
+                        `\\id ${importRecord.bookCode} TSV document\n\\toc1 ${importRecord.bookCode}\n\\mt TSV Document for ${importRecord.bookCode}`;
                     let query = `mutation { addDocument(` +
                         `selectors: [{key: "lang", value: "${importRecord.selectors.lang}"}, {key: "abbr", value: "${importRecord.selectors.abbr}"}], ` +
                         `contentType: "usfm", ` +
                         `content: """${stubUsfm}""") }`;
                     let result = await pk.gqlQuery(query);
                     if (!result.data || !result.data.addDocument) {
-                        console.log(`tsv doc creation for ${bookCode} failed: ${JSON.stringify(result)}`);
+                        console.log(`tsv doc creation for ${importRecord.bookCode} failed: ${JSON.stringify(result)}`);
                         return;
                     }
                     const docSetId = `${importRecord.selectors.lang}_${importRecord.selectors.abbr}`;
-                    query = `{ docSet(id:"${docSetId}") { id document(bookCode:"${bookCode}") { id } } }`;
+                    query = `{ docSet(id:"${docSetId}") { id document(bookCode:"${importRecord.bookCode}") { id } } }`;
                     result = await pk.gqlQuery(query);
                     if (!result.data || !result.data.docSet || !result.data.docSet.document) {
-                        console.log(`docSet query after tsv creation for ${bookCode} failed: ${JSON.stringify(result)}`);
+                        console.log(`docSet query after tsv creation for ${importRecord.bookCode} failed: ${JSON.stringify(result)}`);
                         return;
                     }
                     const docId = result.data.docSet.document.id;
@@ -97,7 +86,7 @@ const App = () => {
                         ` graftToMain: true) }`;
                     result = await pk.gqlQuery(query);
                     if (result.errors) {
-                        console.log(`tsv mutation for ${bookCode} failed: ${JSON.stringify(result)}`);
+                        console.log(`tsv mutation for ${importRecord.bookCode} failed: ${JSON.stringify(result)}`);
                     }
                 }
                 addTsv().then();

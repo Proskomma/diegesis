@@ -157,5 +157,28 @@
         "source": "en_sn/archive/master.zip"
       }
     ]
+  },
+  {
+    "selectors": {
+      "source": "diegesis",
+      "lang": "eng",
+      "abbr": "cbst",
+      "isDraft": 0
+    },
+    "description": "Clear.Bible Syntax Trees",
+    "transport": "https",
+    "sourcePrefix": "https://diegesis/",
+    "documents": [
+      {
+        "bookCodes": [
+          "TIT"
+        ],
+        "docTypes": [
+          "tree"
+        ],
+        "format": "pkSerialized",
+        "source": "cbst_serialized.json"
+      }
+    ]
   }
 ]

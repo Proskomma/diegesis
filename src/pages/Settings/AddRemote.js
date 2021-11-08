@@ -31,12 +31,18 @@ export const AddRemote = ({toImport, setToImport, loadUuid, setLoadUuid, loadedD
                 {
                     method: "get",
                     responseType: 'arraybuffer',
-                    "url": `http://localhost:8099/${downloadRecord.source}`
+                    "url": `http://localhost:8099/${downloadRecord.source}`,
+                    "validateStatus": false,
                 }
             )
                 .then(
                     async response => {
                         const data = response.data;
+                        if (response.status !== 200) {
+                            console.log(`Request ${downloadRecord.source} returned status code ${response.status}`);
+                            console.log(String.fromCharCode.apply(null, new Uint8Array(data)));
+                            return;
+                        }
                         if (['usfmZip', 'tsvZip'].includes(downloadRecord.format)) {
                             const zip = new JSZip();
                             await zip.loadAsync(data);
@@ -59,6 +65,9 @@ export const AddRemote = ({toImport, setToImport, loadUuid, setLoadUuid, loadedD
                             setToImport(newToImport);
                             const newUuid = btoa(uuid.v4()).substring(0, 12);
                             setLoadUuid(newUuid);
+                        } else if (downloadRecord.format === 'pkSerialized') {
+                            console.log('Downloaded pkSerialized');
+                            console.log(String.fromCharCode.apply(null, new Uint8Array(data)));
                         } else {
                             console.log(`Unknown format ${downloadRecord.format}`);
                         }

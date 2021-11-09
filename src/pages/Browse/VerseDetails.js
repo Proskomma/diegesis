@@ -2,6 +2,7 @@ import React, {useContext, useEffect} from 'react';
 import ReactMarkdown from 'react-markdown';
 import {IonButton, IonCol, IonRow, IonText, IonTitle} from '@ionic/react';
 import PkContext from "../../contexts/PkContext";
+// const xre = require('xregexp');
 
 const VerseDetails = ({
                           currentDocSet,
@@ -33,6 +34,20 @@ const VerseDetails = ({
              }
              }`);
             setResult(res);
+            /*
+            const refs = new Set();
+            for (const [resourceName, resourceCol] of [['translationNotes', 2], ['studyNotes', 1]]) {
+                if (res.data && res.data[resourceName] && res.data[resourceName].document && res.data[resourceName].document.tableSequences) {
+                    for (const row of res.data[resourceName].document.tableSequences[0].rows) {
+                        for (const linkPhrase of xre.match(row[resourceCol].text, /\(See: \[\[(.*?)\]\]\)/g)) {
+                            const link = xre.exec(linkPhrase, /\[\[rc:\/\/(.*?)\]\]/)[1];
+                            refs.add(link);
+                        }
+                    }
+                }
+            }
+            console.log(Array.from(refs));
+            */
         };
         doQuery();
     }, []);

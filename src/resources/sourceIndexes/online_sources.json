@@ -180,5 +180,26 @@
         "source": "cbst_serialized.json"
       }
     ]
+  },
+  {
+    "selectors": {
+      "source": "diegesis",
+      "lang": "eng",
+      "abbr": "uwta",
+      "isDraft": 0
+    },
+    "description": "Unfolding Word Translation Academy",
+    "transport": "https",
+    "sourcePrefix": "https://diegesis/",
+    "documents": [
+      {
+        "bookCodes": [],
+        "docTypes": [
+          "entries"
+        ],
+        "format": "pkSerialized",
+        "source": "eng_uwta_serialized.json"
+      }
+    ]
   }
 ]

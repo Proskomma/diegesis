@@ -67,7 +67,14 @@ export const AddRemote = ({toImport, setToImport, loadUuid, setLoadUuid, loadedD
                             setLoadUuid(newUuid);
                         } else if (downloadRecord.format === 'pkSerialized') {
                             console.log('Downloaded pkSerialized');
-                            console.log(String.fromCharCode.apply(null, new Uint8Array(data)));
+                            const succinctJson = JSON.parse(new TextDecoder().decode(data));
+                            newToImport.push({
+                                selectors: downloadRecord.selectors,
+                                bookCode: '',
+                                contentType: "pkSerialized",
+                                content: succinctJson,
+                            });
+                            setToImport(newToImport);
                         } else {
                             console.log(`Unknown format ${downloadRecord.format}`);
                         }

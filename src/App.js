@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState} from 'react';
 import {Redirect, Route} from 'react-router-dom';
 import {IonApp, IonIcon, IonLabel, IonPage, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs} from '@ionic/react';
 import {IonReactRouter} from '@ionic/react-router';
-import {book, create, print} from 'ionicons/icons';
+import {book, search, create, print} from 'ionicons/icons';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -25,6 +25,7 @@ import './theme/variables.css';
 
 /* Non-ionic imports */
 import BrowseTab from './pages/Browse/BrowseTab';
+import SearchTab from './pages/Search/SearchTab';
 import EditTab from './pages/Edit/EditTab';
 import PublishTab from './pages/Publish/PublishTab';
 import SettingsTab from './pages/Settings/SettingsTab';
@@ -146,6 +147,9 @@ const App = () => {
                                             setCurrentBookCode={setCurrentBookCode}
                                         />
                                     </Route>
+                                    <Route exact path="/search">
+                                        <SearchTab/>
+                                    </Route>
                                     <Route exact path="/edit">
                                         <EditTab/>
                                     </Route>
@@ -170,6 +174,10 @@ const App = () => {
                                     <IonTabButton tab="browse" href="/browse">
                                         <IonIcon icon={book}/>
                                         <IonLabel>Browse</IonLabel>
+                                    </IonTabButton>
+                                    <IonTabButton tab="search" href="/search">
+                                        <IonIcon icon={search}/>
+                                        <IonLabel>Search</IonLabel>
                                     </IonTabButton>
                                     <IonTabButton tab="edit" href="/edit">
                                         <IonIcon icon={create}/>

@@ -2,7 +2,19 @@ import React, {useContext, useEffect} from 'react';
 import ReactMarkdown from 'react-markdown';
 import {IonButton, IonCol, IonRow, IonText, IonTitle} from '@ionic/react';
 import PkContext from "../../contexts/PkContext";
-// const xre = require('xregexp');
+const xre = require('xregexp');
+
+const renderSyntaxTree = tribos => {
+    return tribos.filter(n => n.content.elementType !== 'pc').map(
+        tree =>
+            tree.children && tree.children.length === 1 ?
+                renderSyntaxTree([tree.children[0]]) :
+        <li>
+            {tree.content.elementType === 'w' ? `${tree.content.text} - ${tree.content.gloss} (${tree.content.class})`: tree.content.class || JSON.stringify(tree.content)}
+            {tree.children && <ul>{renderSyntaxTree(tree.children)}</ul>}
+        </li>
+    )
+}
 
 const VerseDetails = ({
                           currentDocSet,
@@ -32,22 +44,30 @@ const VerseDetails = ({
                  tableSequences { rows(equals:[{colN:0 values:["${selectedChapter}:${selectedVerses}"]}], columns:[4, 6]) { text } }
                }
              }
+             syntaxTree: docSet(id:"eng_cblft") {
+               document(bookCode:"${currentBookCode}") {
+                 treeSequences {
+                   id
+                   verseTrees: tribos(query:"nodes[or(not(hasContent('chapter')), not(hasContent('verse')), not(==(content('chapter'),'${selectedChapter}')), not(==(content('verse'), '${selectedVerses}')))]/children[and(==(content('chapter'), '${selectedChapter}'), ==(content('verse'), '${selectedVerses}'))]/branch{children, @text, @gloss, @elementType, @role, @class}")
+                 }
+               }
+             }
              }`);
             setResult(res);
-            /*
             const refs = new Set();
             for (const [resourceName, resourceCol] of [['translationNotes', 2], ['studyNotes', 1]]) {
                 if (res.data && res.data[resourceName] && res.data[resourceName].document && res.data[resourceName].document.tableSequences) {
                     for (const row of res.data[resourceName].document.tableSequences[0].rows) {
                         for (const linkPhrase of xre.match(row[resourceCol].text, /\(See: \[\[(.*?)\]\]\)/g)) {
                             const link = xre.exec(linkPhrase, /\[\[rc:\/\/(.*?)\]\]/)[1];
-                            refs.add(link);
+                            if (link.startsWith('en/ta')) {
+                                refs.add(link);
+                            }
                         }
                     }
                 }
             }
-            console.log(Array.from(refs));
-            */
+            // console.log(Array.from(refs));
         };
         doQuery();
     }, []);
@@ -145,6 +165,19 @@ const VerseDetails = ({
                             </IonCol>
                         </IonRow>
                     )
+                }
+            </>
+        }
+        {
+            result.data && result.data.syntaxTree && result.data.syntaxTree.document && result.data.syntaxTree.document.treeSequences[0] && result.data.syntaxTree.document.treeSequences[0].verseTrees &&
+            <>
+                <IonRow>
+                    <IonCol>
+                        <IonTitle>Clear.Bible Syntax Trees</IonTitle>
+                    </IonCol>
+                </IonRow>
+                {
+                    <ul>{renderSyntaxTree(JSON.parse(result.data.syntaxTree.document.treeSequences[0].verseTrees).data)}</ul>
                 }
             </>
         }

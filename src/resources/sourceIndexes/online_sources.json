@@ -162,10 +162,10 @@
     "selectors": {
       "source": "diegesis",
       "lang": "eng",
-      "abbr": "cbst",
+      "abbr": "cblft",
       "isDraft": 0
     },
-    "description": "Clear.Bible Syntax Trees",
+    "description": "Clear.Bible 'Low Fat' Syntax Trees",
     "transport": "https",
     "sourcePrefix": "https://diegesis/",
     "documents": [
@@ -177,7 +177,7 @@
           "tree"
         ],
         "format": "pkSerialized",
-        "source": "cbst_serialized.json"
+        "source": "eng_cblft_serialized.json"
       }
     ]
   },

@@ -39,6 +39,7 @@ const App = () => {
     const [docSets, setDocSets] = React.useState({});
     const [currentDocSet, setCurrentDocSet] = React.useState("");
     const [currentBookCode, setCurrentBookCode] = React.useState("");
+    const [peripheralResources, setPeripheralResources] = React.useState({});
     const pk = useContext(PkContext);
     const settings = {
         enableNetworkAccess: useState(false)
@@ -92,8 +93,8 @@ const App = () => {
                 addTsv().then();
             } else if (importRecord.contentType === 'pkSerialized') {
                 pk.loadSuccinctDocSet(importRecord.content);
-                const query = '{docSet(id:"eng_uwta") { documents { kvSequences { id entries(keyMatches:"translate>>figs-exc") { key itemGroups { scopeLabels(startsWith:"kvField") text } } } } } }'
-                pk.gqlQuery(query).then(response => console.log(JSON.stringify(response.data.docSet.documents[0].kvSequences[0].entries, null, 2)));
+                // const query = '{docSet(id:"eng_uwta") { documents { kvSequences { id entries(keyMatches:"translate>>figs-exc") { key itemGroups { scopeLabels(startsWith:"kvField") text } } } } } }'
+                // pk.gqlQuery(query).then(response => console.log(JSON.stringify(response.data.docSet.documents[0].kvSequences[0].entries, null, 2)));
             } else {
                 console.log(`Unknown import contentType '${importRecord.contentType}'`)
             }

@@ -66,7 +66,6 @@ export const AddRemote = ({toImport, setToImport, loadUuid, setLoadUuid, loadedD
                             const newUuid = btoa(uuid.v4()).substring(0, 12);
                             setLoadUuid(newUuid);
                         } else if (downloadRecord.format === 'pkSerialized') {
-                            console.log('Downloaded pkSerialized');
                             const succinctJson = JSON.parse(new TextDecoder().decode(data));
                             newToImport.push({
                                 selectors: downloadRecord.selectors,

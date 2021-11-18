@@ -1,0 +1,8 @@
+.treeBranchNode > circle {
+    fill-opacity: 0;
+    stroke-opacity: 0;
+}
+
+.treeBranchNode text {
+    text-anchor: middle
+}

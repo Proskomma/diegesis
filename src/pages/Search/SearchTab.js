@@ -163,11 +163,13 @@ const SearchTab = ({currentDocSet}) => {
                                 value={searchString}
                                 placeholder="Search Items"
                                 debounce={500}
+                                onKeyPress={e => e.key === 'Enter' && setSearchWaiting(true)}
                                 onIonChange={e => setSearchString(e.detail.value)}
                             />
                         </IonCol>
                         <IonCol size={1}>
                             <IonButton
+                                className="ion-float-end"
                                 color="primary"
                                 fill="clear"
                                 onClick={() => setSearchWaiting(true)}

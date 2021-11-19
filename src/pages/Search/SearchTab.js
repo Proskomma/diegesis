@@ -16,7 +16,12 @@ import './SearchTab.css';
 
 import PkContext from '../../contexts/PkContext';
 import PageToolBar from "../../components/PageToolBar";
-import {options, search, arrowForward, arrowBack} from "ionicons/icons";
+import {arrowBack, arrowForward, options, search} from "ionicons/icons";
+
+const makeVerseRecords = paraRecords => {
+    const ret = [];
+    return ret;
+};
 
 const SearchTab = ({currentDocSet}) => {
     const pk = useContext(PkContext);
@@ -135,7 +140,9 @@ const SearchTab = ({currentDocSet}) => {
                                 items: b.items,
                             })
                         );
-                        setResultParaRecords([...resultParaRecords, ...records]);
+                        const allParaRecords = [...resultParaRecords, ...records];
+                        setResultParaRecords(allParaRecords);
+                        setResultVerseRecords(makeVerseRecords(allParaRecords));
                     }
                     setBooksToSearch(booksToSearch.slice(1));
                     return records;
@@ -162,7 +169,6 @@ const SearchTab = ({currentDocSet}) => {
                             <IonInput
                                 value={searchString}
                                 placeholder="Search Items"
-                                debounce={500}
                                 onKeyPress={e => e.key === 'Enter' && setSearchWaiting(true)}
                                 onIonChange={e => setSearchString(e.detail.value)}
                             />
@@ -183,28 +189,28 @@ const SearchTab = ({currentDocSet}) => {
                         <IonRow>
                             <IonCol style={{textAlign: "center"}}>
                                 <IonTitle>
-                                <IonButton
-                                    fill="clear"
-                                    color="secondary"
-                                    disabled={resultsPage === 0}
-                                    onClick={() => setResultsPage(resultsPage - 1)}
-                                >{
-                                    <IonIcon icon={arrowBack}/>
-                                }</IonButton>
-                                {
-                                    `${(resultsPage * nResultsPerPage) + 1}-${Math.min((resultsPage * nResultsPerPage) + nResultsPerPage, resultParaRecords.length)}
+                                    <IonButton
+                                        fill="clear"
+                                        color="secondary"
+                                        disabled={resultsPage === 0}
+                                        onClick={() => setResultsPage(resultsPage - 1)}
+                                    >{
+                                        <IonIcon icon={arrowBack}/>
+                                    }</IonButton>
+                                    {
+                                        `${(resultsPage * nResultsPerPage) + 1}-${Math.min((resultsPage * nResultsPerPage) + nResultsPerPage, resultParaRecords.length)}
                                     of
-                                    ${(resultsPage * nResultsPerPage) + nResultsPerPage < resultParaRecords.length ? 'at least' : ""}
+                                    ${(resultsPage * nResultsPerPage) + nResultsPerPage < resultParaRecords.length || booksToSearch.length > 0 ? 'at least' : ""}
                                     ${resultParaRecords.length} result${resultParaRecords.length !== 1 && 's'}`}
-                                <IonButton
-                                    fill="clear"
-                                    color="secondary"
-                                    disabled={(resultsPage * nResultsPerPage) + nResultsPerPage > resultParaRecords.length}
-                                    onClick={() => setResultsPage(resultsPage + 1)}
-                                >{
-                                    <IonIcon icon={arrowForward}/>
-                                }</IonButton>
-                                    </IonTitle>
+                                    <IonButton
+                                        fill="clear"
+                                        color="secondary"
+                                        disabled={(resultsPage * nResultsPerPage) + nResultsPerPage > resultParaRecords.length}
+                                        onClick={() => setResultsPage(resultsPage + 1)}
+                                    >{
+                                        <IonIcon icon={arrowForward}/>
+                                    }</IonButton>
+                                </IonTitle>
                             </IonCol>
                         </IonRow>
                     }

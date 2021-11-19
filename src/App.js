@@ -148,7 +148,9 @@ const App = () => {
                                         />
                                     </Route>
                                     <Route exact path="/search">
-                                        <SearchTab/>
+                                        <SearchTab
+                                            currentDocSet={currentDocSet}
+                                        />
                                     </Route>
                                     <Route exact path="/edit">
                                         <EditTab/>

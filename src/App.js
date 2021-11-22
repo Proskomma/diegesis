@@ -40,7 +40,8 @@ const App = () => {
     const [docSets, setDocSets] = React.useState({});
     const [currentDocSet, setCurrentDocSet] = React.useState("");
     const [currentBookCode, setCurrentBookCode] = React.useState("");
-    const [peripheralResources, setPeripheralResources] = React.useState({});
+    const [selectedChapter, setSelectedChapter] = useState(null);
+    const [selectedVerses, setSelectedVerses] = useState(null);
     const pk = useContext(PkContext);
     const settings = {
         enableNetworkAccess: useState(false)
@@ -143,13 +144,20 @@ const App = () => {
                                             currentDocSet={currentDocSet}
                                             setCurrentDocSet={setCurrentDocSet}
                                             currentBookCode={currentBookCode}
+                                            selectedChapter={selectedChapter}
+                                            selectedVerses={selectedVerses}
                                             currentDocId={docSets[currentDocSet] && docSets[currentDocSet].documents[currentBookCode] ? docSets[currentDocSet].documents[currentBookCode].id : ""}
                                             setCurrentBookCode={setCurrentBookCode}
+                                            setSelectedChapter={setSelectedChapter}
+                                            setSelectedVerses={setSelectedVerses}
                                         />
                                     </Route>
                                     <Route exact path="/search">
                                         <SearchTab
                                             currentDocSet={currentDocSet}
+                                            setCurrentBookCode={setCurrentBookCode}
+                                            setSelectedChapter={setSelectedChapter}
+                                            setSelectedVerses={setSelectedVerses}
                                         />
                                     </Route>
                                     <Route exact path="/edit">

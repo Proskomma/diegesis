@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState, useRef} from 'react';
+import React, {useContext, useEffect, useRef, useState} from 'react';
 import {
     IonCol,
     IonContent,
@@ -21,12 +21,22 @@ import PkContext from '../../contexts/PkContext';
 import DocSetsContext from '../../contexts/DocSetsContext';
 
 
-const BrowseTab = ({currentDocSet, setCurrentDocSet, currentBookCode, setCurrentBookCode, currentDocId}) => {
+const BrowseTab = (
+    {
+        currentDocSet,
+        setCurrentDocSet,
+        currentBookCode,
+        setCurrentBookCode,
+        selectedChapter,
+        selectedVerses,
+        setSelectedChapter,
+        setSelectedVerses,
+        currentDocId
+    }
+) => {
     const pk = useContext(PkContext);
     const docSets = useContext(DocSetsContext);
     const [renderedSequence, setRenderedSequence] = useState([]);
-    const [selectedChapter, setSelectedChapter] = useState(null);
-    const [selectedVerses, setSelectedVerses] = useState(null);
     const [showDetails, setShowDetails] = useState(false);
     const selectedVerseRef = useRef(null);
     const topDocRef = useRef(null);
@@ -77,8 +87,8 @@ const BrowseTab = ({currentDocSet, setCurrentDocSet, currentBookCode, setCurrent
         } else if (topDocRef) {
             scrollToTopDoc();
         }
-    }, [selectedVerses, selectedVerseRef, topDocRef, showDetails]);
-        return (
+    }, [selectedVerses, selectedVerseRef, topDocRef, showDetails, renderedSequence]);
+    return (
         <IonPage>
             <IonHeader>
                 <PageToolBar pageTitle="Browse"/>
@@ -149,7 +159,7 @@ const BrowseTab = ({currentDocSet, setCurrentDocSet, currentBookCode, setCurrent
                             currentBookCode={currentBookCode}
                             selectedChapter={selectedChapter}
                             selectedVerses={selectedVerses}
-                            setShowDetails = {setShowDetails}
+                            setShowDetails={setShowDetails}
                         />
                     }
                 </IonGrid>}

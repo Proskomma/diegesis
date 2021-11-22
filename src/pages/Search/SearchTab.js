@@ -1,4 +1,5 @@
 import React, {useContext, useEffect} from 'react';
+import {Link} from 'react-router-dom';
 import {
     IonButton,
     IonCol,
@@ -18,21 +19,20 @@ import PkContext from '../../contexts/PkContext';
 import PageToolBar from "../../components/PageToolBar";
 import {arrowBack, arrowForward, options, search} from "ionicons/icons";
 
-const makeVerseRecords = paraRecords => {
-    const ret = [];
-    return ret;
-};
-
-const SearchTab = ({currentDocSet}) => {
+const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSelectedVerses}) => {
     const pk = useContext(PkContext);
     const [searchString, setSearchString] = React.useState("");
     const [searchWaiting, setSearchWaiting] = React.useState(false);
     const [searchTerms, setSearchTerms] = React.useState([]);
     const [booksToSearch, setBooksToSearch] = React.useState([]);
     const [resultParaRecords, setResultParaRecords] = React.useState([]);
-    const [resultVerseRecords, setResultVerseRecords] = React.useState([]);
     const [nResultsPerPage, setNResultsPerPage] = React.useState(10);
     const [resultsPage, setResultsPage] = React.useState(0);
+    const jumpToVerse = (book, chapter, verses) => {
+        setCurrentBookCode(book);
+        setSelectedChapter(chapter);
+        setSelectedVerses(verses);
+    }
     useEffect(
         // When searchWaiting is set, refresh searchTerms and set booksToSearch
         () => {
@@ -66,7 +66,6 @@ const SearchTab = ({currentDocSet}) => {
                         setSearchWaiting(false);
                         setBooksToSearch([]);
                         setResultParaRecords([]);
-                        setResultVerseRecords([]);
                         setResultsPage(0);
                         if (result.data && result.data.docSet) {
                             setBooksToSearch(
@@ -104,6 +103,7 @@ const SearchTab = ({currentDocSet}) => {
                     "         ) {\n" +
                     "           scopeLabels(startsWith:[\"chapter/\", \"verse/\"])\n" +
                     "           items { type subType payload }\n" +
+                    "           itemGroups(byScopes:[\"chapter/\", \"verses/\"]) { scopeLabels(startsWith:[\"verses/\"]) text }\n" +
                     "         }\n" +
                     "       }\n" +
                     "    }\n" +
@@ -138,11 +138,11 @@ const SearchTab = ({currentDocSet}) => {
                                     .map(sl => sl.split('/')[1])
                                     .map(vns => parseInt(vns)),
                                 items: b.items,
+                                itemGroups: b.itemGroups,
                             })
                         );
                         const allParaRecords = [...resultParaRecords, ...records];
                         setResultParaRecords(allParaRecords);
-                        setResultVerseRecords(makeVerseRecords(allParaRecords));
                     }
                     setBooksToSearch(booksToSearch.slice(1));
                     return records;
@@ -232,10 +232,17 @@ const SearchTab = ({currentDocSet}) => {
                                                     </IonCol>
                                                     <IonCol size={11}>
                                                         {
-                                                            rr.items
-                                                                .filter(i => i.type === 'token')
-                                                                .map((t, n) => rr.matches.includes(t.payload) ?
-                                                                    <b key={n}>{t.payload}</b> : t.payload)
+                                                            rr.itemGroups
+                                                                .map(
+                                                                    (ig, n) =>
+                                                                        <span key={n}>
+                                                                            <Link
+                                                                                to="/browse"
+                                                                                onClick={() => jumpToVerse(rr.book, rr.chapter, ig.scopeLabels[0].split('/')[1])}
+                                                                                className="verseNumber">{ig.scopeLabels[0].split('/')[1]}</Link>
+                                                                            {ig.text}
+                                                                        </span>
+                                                                )
                                                         }
                                                     </IonCol>
                                                 </IonRow>;

@@ -1,3 +1,5 @@
+import {Link} from 'react-router-dom';
+
 const {ScriptureParaDocument} = require('proskomma-render');
 
 class BrowseDocumentModel extends ScriptureParaDocument {
@@ -31,7 +33,20 @@ const addActions = (dInstance) => {
         'token',
         () => true,
         (renderer, context, data) => {
-            renderer.config.blockStack.push(data.payload);
+            renderer.config.blockStack.push(
+                data.subType === 'wordLike' ?
+                    <Link
+                        to={{
+                            pathname: "/search",
+                            state: {newSearchString: data.payload}
+                        }}
+                        key={renderer.config.nextKey++}
+                        className="browserWord"
+                    >
+                        {data.payload}
+                    </Link> :
+                    data.payload
+            );
         }
     );
     dInstance.addAction(

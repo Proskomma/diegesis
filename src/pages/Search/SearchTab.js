@@ -1,5 +1,5 @@
 import React, {useContext, useEffect} from 'react';
-import {Link} from 'react-router-dom';
+import {Link, useLocation} from 'react-router-dom';
 import {
     IonButton,
     IonCol,
@@ -17,10 +17,11 @@ import './SearchTab.css';
 
 import PkContext from '../../contexts/PkContext';
 import PageToolBar from "../../components/PageToolBar";
-import {arrowBack, arrowForward, options, search} from "ionicons/icons";
+import {arrowBack, arrowForward, options, search, trash} from "ionicons/icons";
 
 const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSelectedVerses}) => {
     const pk = useContext(PkContext);
+    const [linkSearchString, setLinkSearchString] = React.useState("");
     const [searchString, setSearchString] = React.useState("");
     const [searchWaiting, setSearchWaiting] = React.useState(false);
     const [searchTerms, setSearchTerms] = React.useState([]);
@@ -33,6 +34,17 @@ const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSe
         setSelectedChapter(chapter);
         setSelectedVerses(verses);
     }
+    const location = useLocation();
+    if (location && location.state && location.state.newSearchString && location.state.newSearchString !== linkSearchString) {
+        setLinkSearchString(location.state.newSearchString);
+    }
+    useEffect(
+        // When linkSearchString changes, refresh searchString and launch new search
+        () => {
+            setSearchString(linkSearchString);
+            setSearchWaiting(true);
+        }, [linkSearchString]);
+
     useEffect(
         // When searchWaiting is set, refresh searchTerms and set booksToSearch
         () => {
@@ -102,8 +114,7 @@ const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSe
                     "           withMatchingChars: [%searchTerms%]\n" +
                     "         ) {\n" +
                     "           scopeLabels(startsWith:[\"chapter/\", \"verse/\"])\n" +
-                    "           items { type subType payload }\n" +
-                    "           itemGroups(byScopes:[\"chapter/\", \"verses/\"]) { scopeLabels(startsWith:[\"verses/\"]) text }\n" +
+                    "           itemGroups(byScopes:[\"chapter/\", \"verses/\"]) { scopeLabels(startsWith:[\"verses/\"]) text tokens { subType payload }}\n" +
                     "         }\n" +
                     "       }\n" +
                     "    }\n" +
@@ -165,7 +176,7 @@ const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSe
                                 <IonIcon float-right icon={options}/>
                             </IonButton>
                         </IonCol>
-                        <IonCol size={10}>
+                        <IonCol size={9}>
                             <IonInput
                                 value={searchString}
                                 placeholder="Search Items"
@@ -175,12 +186,21 @@ const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSe
                         </IonCol>
                         <IonCol size={1}>
                             <IonButton
-                                className="ion-float-end"
                                 color="primary"
                                 fill="clear"
                                 onClick={() => setSearchWaiting(true)}
                             >
                                 <IonIcon float-right icon={search}/>
+                            </IonButton>
+                        </IonCol>
+                        <IonCol size={1}>
+                            <IonButton
+                                className="ion-float-end"
+                                color="secondary"
+                                fill="clear"
+                                onClick={() => setSearchString('')}
+                            >
+                                <IonIcon float-right icon={trash}/>
                             </IonButton>
                         </IonCol>
                     </IonRow>
@@ -201,7 +221,7 @@ const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSe
                                         `${(resultsPage * nResultsPerPage) + 1}-${Math.min((resultsPage * nResultsPerPage) + nResultsPerPage, resultParaRecords.length)}
                                     of
                                     ${(resultsPage * nResultsPerPage) + nResultsPerPage < resultParaRecords.length || booksToSearch.length > 0 ? 'at least' : ""}
-                                    ${resultParaRecords.length} result${resultParaRecords.length !== 1 && 's'}`}
+                                    ${resultParaRecords.length} result${resultParaRecords.length !== 1 ? 's' : ''}`}
                                     <IonButton
                                         fill="clear"
                                         color="secondary"
@@ -240,7 +260,36 @@ const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSe
                                                                                 to="/browse"
                                                                                 onClick={() => jumpToVerse(rr.book, rr.chapter, ig.scopeLabels[0].split('/')[1])}
                                                                                 className="verseNumber">{ig.scopeLabels[0].split('/')[1]}</Link>
-                                                                            {ig.text}
+                                                                            {
+                                                                                ig.tokens.map(
+                                                                                    (t, n) =>
+                                                                                        t.subType === 'wordLike' ?
+                                                                                            <span
+                                                                                                key={n}
+                                                                                                onClick={
+                                                                                                    () => {
+                                                                                                        setSearchString(searchString + " " + t.payload);
+                                                                                                        setSearchWaiting(true);
+                                                                                                    }
+                                                                                                }
+                                                                                            >
+                                                                                                {
+                                                                                                    t.subType === 'wordLike' ?
+                                                                                                        rr.matches.includes(t.payload) ?
+                                                                                                            <IonText
+                                                                                                                color="primary"
+                                                                                                                key={n}>
+                                                                                                                {t.payload}
+                                                                                                            </IonText> :
+                                                                                                            t.payload
+                                                                                                        :
+                                                                                                        t.payload
+                                                                                                }
+                                                                                            </span>
+                                                                                            :
+                                                                                            t.payload
+                                                                                )
+                                                                            }
                                                                         </span>
                                                                 )
                                                         }

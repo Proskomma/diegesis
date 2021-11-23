@@ -10,7 +10,8 @@ import {
     IonInput,
     IonPage,
     IonRow,
-    IonText
+    IonText,
+    IonTitle,
 } from '@ionic/react';
 import './SearchTab.css';
 
@@ -20,18 +21,21 @@ import SearchResultsTools from './SearchResultsTools';
 import {options, search, trash} from "ionicons/icons";
 import WordDetails from "./WordDetails";
 
-const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSelectedVerses}) => {
+const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelectedChapter, setSelectedVerses}) => {
     const pk = useContext(PkContext);
     const [linkSearchString, setLinkSearchString] = React.useState("");
     const [searchString, setSearchString] = React.useState("");
     const [searchWaiting, setSearchWaiting] = React.useState(false);
-    const [searchTerms, setSearchTerms] = React.useState([]);
+    const [payloadSearchTerms, setPayloadSearchTerms] = React.useState([]);
+    const [attSearchTerms, setAttSearchTerms] = React.useState([]);
     const [booksToSearch, setBooksToSearch] = React.useState([]);
     const [searchAllBooks, setSearchAllBooks] = React.useState(false);
     const [resultParaRecords, setResultParaRecords] = React.useState([]);
     const [nResultsPerPage, setNResultsPerPage] = React.useState(5);
     const [resultsPage, setResultsPage] = React.useState(0);
     const [wordDetails, setWordDetails] = React.useState(null);
+    const [showOptions, setShowOptions] = React.useState(false);
+    const [searchTarget, setSearchTarget] = React.useState('docSet');
     const jumpToVerse = (book, chapter, verses) => {
         setCurrentBookCode(book);
         setSelectedChapter(chapter);
@@ -57,20 +61,35 @@ const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSe
         }, [linkSearchString]);
 
     useEffect(
-        // When searchWaiting is set, refresh searchTerms and set booksToSearch
+        // When searchWaiting is set, refresh payloadSearchTerms and set booksToSearch
         () => {
             if (searchWaiting) {
-                const terms = searchString.split(/ +/)
+                const payloadTerms = searchString.split(/ +/)
                     .map((st) => st.trim())
-                    .filter((st) => st.length > 0);
-                if (terms.length > 0) {
+                    .filter((st) => st.length > 0)
+                    .filter(st => !st.includes(':'));
+                const attTerms =
+                    searchString.split(/ +/)
+                        .map((st) => st.trim())
+                        .filter((st) => st.length > 0)
+                        .filter(st => st.includes(':'))
+                        .map(st => st.split(':').slice(0, 2));
+                if (payloadTerms.length > 0 || attTerms.length > 0) {
+                    const payloadTermsClause = payloadTerms.length > 0 ?
+                        "         withMatchingChars: [%payloadSearchTerms%]\n" :
+                        "";
+                    const attTermsClause = attTerms.length > 0 ?
+                        "         withScopes: [%attSearchTerms%]\n" :
+                        "";
                     const searchDocumentMatchQuery = (
                         "{" +
                         '  docSet(id:"%docSetId%") {\n' +
                         "    documents(" +
                         "         sortedBy:\"paratext\"" +
                         "         allChars: true " +
-                        "         withMatchingChars: [%searchTerms%]\n" +
+                        payloadTermsClause +
+                        "         allScopes: true " +
+                        attTermsClause +
                         "         ) {\n" +
                         '           bookCode: header(id:"bookCode") ' +
                         "         }\n" +
@@ -78,26 +97,35 @@ const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSe
                         "}"
                     ).replace('%docSetId%', currentDocSet)
                         .replace(
-                            '%searchTerms%',
-                            terms
+                            '%payloadSearchTerms%',
+                            payloadTerms
                                 .map(st => `"""${st}"""`)
+                                .join(", ")
+                        )
+                        .replace(
+                            '%attSearchTerms%',
+                            attTerms
+                                .map(st => `"""attribute/spanWithAtts/w/${st[0]}/0/${st[1]}"""`)
                                 .join(", ")
                         )
                     const doQuery = async () => {
                         const result = await pk.gqlQuery(searchDocumentMatchQuery);
                         if (result.data && result.data.docSet) {
                             return result.data.docSet.documents.map((book) => book.bookCode);
+                        } else {
+                            return [];
                         }
                     };
                     doQuery().then(res => {
                         setSearchWaiting(false);
-                        setBooksToSearch(res);
-                        setSearchTerms(terms);
+                        setBooksToSearch(searchTarget === 'docSet' ? res : [currentBookCode]);
+                        setPayloadSearchTerms(payloadTerms);
+                        setAttSearchTerms(attTerms);
                     });
                 }
             }
         },
-        [searchWaiting]
+        [searchWaiting, searchTarget]
     );
     useEffect(
         // When booksToSearch is set and is not empty,
@@ -110,6 +138,12 @@ const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSe
                 while (b2s && b2s.length > 0 && (searchAllBooks || rpr.length < ((resultsPage + 1) * nResultsPerPage))) {
                     const bookToSearch = b2s[0];
                     console.log(bookToSearch)
+                    const payloadTermsClause = payloadSearchTerms.length > 0 ?
+                        "         withMatchingChars: [%payloadSearchTerms%]\n" :
+                        "";
+                    const attTermsClause = attSearchTerms.length > 0 ?
+                        "         withScopes: [%attSearchTerms%]\n" :
+                        "";
                     const searchBlockMatchQuery = (
                         "{\n" +
                         '  docSet(id:"%docSetId%") {\n' +
@@ -121,8 +155,9 @@ const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSe
                         '       title: header(id: "toc2")\n' +
                         "       mainSequence {\n" +
                         "         blocks(\n" +
-                        "            allChars : true \n" +
-                        "           withMatchingChars: [%searchTerms%]\n" +
+                        "           allChars : true\n" +
+                                    payloadTermsClause +
+                                    attTermsClause +
                         "         ) {\n" +
                         "           scopeLabels(startsWith:[\"chapter/\", \"verse/\"])\n" +
                         "           itemGroups(byScopes:[\"chapter/\", \"verses/\"], includeContext:true) {\n" +
@@ -147,16 +182,24 @@ const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSe
                     ).replace('%docSetId%', currentDocSet)
                         .replace('%bookCode%', bookToSearch)
                         .replace(
-                            '%searchTerms%',
-                            searchTerms
+                            '%payloadSearchTerms%',
+                            payloadSearchTerms
                                 .map(st => `"""${st.toLowerCase()}"""`)
                                 .join(", ")
                         )
                         .replace(
+                            '%attSearchTerms%',
+                            attSearchTerms
+                                .map(st => `"""attribute/spanWithAtts/w/${st[0]}/0/${st[1]}"""`)
+                                .join(", ")
+                        )
+                        .replace(
                             '%searchTermsRegex%',
-                            searchTerms
+                            payloadSearchTerms.length > 0 ?
+                            payloadSearchTerms
                                 .map(st => `(${st})`)
-                                .join('|')
+                                .join('|') :
+                                "xxxxx"
                         );
                     const result = await pk.gqlQuery(searchBlockMatchQuery);
                     let records = [];
@@ -184,7 +227,7 @@ const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSe
                 setResultParaRecords(res[1]);
             });
         },
-        [resultsPage, currentDocSet, nResultsPerPage, searchTerms, searchAllBooks]
+        [resultsPage, currentDocSet, nResultsPerPage, payloadSearchTerms, attSearchTerms, searchAllBooks]
     );
     return (
         <IonPage>
@@ -207,7 +250,11 @@ const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSe
                     <IonGrid>
                         <IonRow>
                             <IonCol size={1}>
-                                <IonButton color="secondary" fill="clear">
+                                <IonButton
+                                    color="secondary"
+                                    fill="clear"
+                                    onClick={() => setShowOptions(!showOptions)}
+                                >
                                     <IonIcon float-right icon={options}/>
                                 </IonButton>
                             </IonCol>
@@ -243,6 +290,62 @@ const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSe
                                 </IonButton>
                             </IonCol>
                         </IonRow>
+                        {
+                            showOptions &&
+                                <IonRow>
+                                    <IonCol>
+                                        <IonGrid style={{backgroundColor: "#EEF"}}>
+                                            <IonRow>
+                                                <IonCol>
+                                                    <IonTitle>Search Options</IonTitle>
+                                                </IonCol>
+                                            </IonRow>
+                                            <IonRow>
+                                                <IonCol size={2}>
+                                                    Results per page
+                                                </IonCol>
+                                                <IonCol size={10}>
+                                                    <IonInput
+                                                        value={nResultsPerPage}
+                                                        onIonChange={e => parseInt(e.detail.value) > 4 && setNResultsPerPage(parseInt(e.detail.value))}
+                                                    />
+                                                </IonCol>
+                                            </IonRow>
+                                            <IonRow>
+                                                <IonCol size={2}>
+                                                    Search target
+                                                </IonCol>
+                                                <IonCol size={5}>
+                                                    <span
+                                                        onClick={() => {
+                                                            setSearchTarget('docSet');
+                                                            resetSearch();
+                                                        }
+                                                        }
+                                                    >
+                                                        <IonText color={searchTarget === 'docSet' ? 'primary' : 'secondary'}>
+                                                        Current DocSet
+                                                        </IonText>
+                                                    </span>
+                                                </IonCol>
+                                                <IonCol size={5}>
+                                                    <span
+                                                        onClick={() => {
+                                                            setSearchTarget('document');
+                                                            resetSearch();
+                                                        }
+                                                        }
+                                                    >
+                                                        <IonText color={searchTarget === 'document' ? 'primary' : 'secondary'}>
+                                                        Current Book
+                                                        </IonText>
+                                                    </span>
+                                                </IonCol>
+                                            </IonRow>
+                                        </IonGrid>
+                                    </IonCol>
+                                </IonRow>
+                        }
                         {
                             resultParaRecords.length > 0 &&
                             <IonRow>
@@ -310,8 +413,13 @@ const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSe
                                                                                                                 key={n}>
                                                                                                                 {t.payload}
                                                                                                             </IonText> :
-                                                                                                            t.payload
-                                                                                                        :
+                                                                                                        t.scopes.filter(s => attSearchTerms.map(st => st[1]).includes(s.split('/')[5])).length > 0 ?
+                                                                                                            <IonText
+                                                                                                                color="secondary"
+                                                                                                                key={n}>
+                                                                                                                {t.payload}
+                                                                                                            </IonText> :
+                                                                                                            t.payload :
                                                                                                         t.payload
                                                                                                 }
                                                                                             </span>

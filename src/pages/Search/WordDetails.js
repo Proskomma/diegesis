@@ -56,7 +56,16 @@ const WordDetails = ({wordDetails, setWordDetails, searchString, setSearchString
                     (s, n) =>
                         <IonRow key={n}>
                             <IonCol>
-                                <span>Search for Strongs '{s.split('/')[5]}'</span>
+                                <IonButton
+                                    color="secondary"
+                                    style={{textTransform: "none"}}
+                                    onClick={() => {
+                                        setWordDetails(null);
+                                        setSearchString(`strong:${s.split('/')[5]}`);
+                                        resetSearch();
+                                    }}>
+                                    {`Search for Strongs '${s.split('/')[5]}'`}
+                                </IonButton>
                             </IonCol>
                         </IonRow>
                 )

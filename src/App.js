@@ -155,6 +155,7 @@ const App = () => {
                                     <Route exact path="/search">
                                         <SearchTab
                                             currentDocSet={currentDocSet}
+                                            currentBookCode={currentBookCode}
                                             setCurrentBookCode={setCurrentBookCode}
                                             setSelectedChapter={setSelectedChapter}
                                             setSelectedVerses={setSelectedVerses}

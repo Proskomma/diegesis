@@ -18,6 +18,7 @@ import PkContext from '../../contexts/PkContext';
 import PageToolBar from "../../components/PageToolBar";
 import SearchResultsTools from './SearchResultsTools';
 import {options, search, trash} from "ionicons/icons";
+import WordDetails from "./WordDetails";
 
 const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSelectedVerses}) => {
     const pk = useContext(PkContext);
@@ -26,9 +27,11 @@ const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSe
     const [searchWaiting, setSearchWaiting] = React.useState(false);
     const [searchTerms, setSearchTerms] = React.useState([]);
     const [booksToSearch, setBooksToSearch] = React.useState([]);
+    const [searchAllBooks, setSearchAllBooks] = React.useState(false);
     const [resultParaRecords, setResultParaRecords] = React.useState([]);
     const [nResultsPerPage, setNResultsPerPage] = React.useState(5);
     const [resultsPage, setResultsPage] = React.useState(0);
+    const [wordDetails, setWordDetails] = React.useState(null);
     const jumpToVerse = (book, chapter, verses) => {
         setCurrentBookCode(book);
         setSelectedChapter(chapter);
@@ -37,11 +40,13 @@ const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSe
     const location = useLocation();
     if (location && location.state && location.state.newSearchString && location.state.newSearchString !== linkSearchString) {
         setLinkSearchString(location.state.newSearchString);
+        setWordDetails(null);
     }
     const resetSearch = () => {
         setResultsPage(0);
         setBooksToSearch([]);
         setResultParaRecords([]);
+        setSearchAllBooks(false);
         setSearchWaiting(true);
     }
     useEffect(
@@ -53,7 +58,7 @@ const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSe
 
     useEffect(
         // When searchWaiting is set, refresh searchTerms and set booksToSearch
-         () => {
+        () => {
             if (searchWaiting) {
                 const terms = searchString.split(/ +/)
                     .map((st) => st.trim())
@@ -102,7 +107,7 @@ const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSe
             const doQuery = async () => {
                 let b2s = booksToSearch;
                 let rpr = resultParaRecords;
-                while (b2s.length > 0 && rpr.length < ((resultsPage + 1) * nResultsPerPage)) {
+                while (b2s && b2s.length > 0 && (searchAllBooks || rpr.length < ((resultsPage + 1) * nResultsPerPage))) {
                     const bookToSearch = b2s[0];
                     console.log(bookToSearch)
                     const searchBlockMatchQuery = (
@@ -120,7 +125,19 @@ const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSe
                         "           withMatchingChars: [%searchTerms%]\n" +
                         "         ) {\n" +
                         "           scopeLabels(startsWith:[\"chapter/\", \"verse/\"])\n" +
-                        "           itemGroups(byScopes:[\"chapter/\", \"verses/\"]) { scopeLabels(startsWith:[\"verses/\"]) text tokens { subType payload }}\n" +
+                        "           itemGroups(byScopes:[\"chapter/\", \"verses/\"], includeContext:true) {\n" +
+                        "             scopeLabels(startsWith:[\"verses/\"])\n" +
+                        "             text\n" +
+                        "             tokens {\n" +
+                        "               subType\n" +
+                        "               payload\n" +
+                        "               scopes(\n" +
+                        "                 startsWith:[\n" +
+                        "                   \"attribute/spanWithAtts/w/strong\"\n" +
+                        "                 ]\n" +
+                        "               )\n" +
+                        "             }\n" +
+                        "           }\n" +
                         "         }\n" +
                         "       }\n" +
                         "    }\n" +
@@ -167,106 +184,124 @@ const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSe
                 setResultParaRecords(res[1]);
             });
         },
-        [resultsPage, currentDocSet, nResultsPerPage, searchTerms]
+        [resultsPage, currentDocSet, nResultsPerPage, searchTerms, searchAllBooks]
     );
     return (
         <IonPage>
             <IonHeader>
                 <PageToolBar pageTitle="Search"/>
             </IonHeader>
-            <IonContent>
-                <IonGrid>
-                    <IonRow>
-                        <IonCol size={1}>
-                            <IonButton color="secondary" fill="clear">
-                                <IonIcon float-right icon={options}/>
-                            </IonButton>
-                        </IonCol>
-                        <IonCol size={9}>
-                            <IonInput
-                                value={searchString}
-                                placeholder="Search Items"
-                                onKeyPress={e => e.key === 'Enter' && resetSearch()}
-                                onIonChange={e => setSearchString(e.detail.value)}
-                            />
-                        </IonCol>
-                        <IonCol size={1}>
-                            <IonButton
-                                color="primary"
-                                fill="clear"
-                                onClick={
-                                    () => {
-                                        resetSearch();
-                                    }
-                                }
-                            >
-                                <IonIcon float-right icon={search}/>
-                            </IonButton>
-                        </IonCol>
-                        <IonCol size={1}>
-                            <IonButton
-                                className="ion-float-end"
-                                color="secondary"
-                                fill="clear"
-                                onClick={() => setSearchString('')}
-                            >
-                                <IonIcon float-right icon={trash}/>
-                            </IonButton>
-                        </IonCol>
-                    </IonRow>
-                    {
-                        resultParaRecords.length > 0 &&
+            {
+                wordDetails &&
+                <WordDetails
+                    wordDetails={wordDetails}
+                    setWordDetails={setWordDetails}
+                    searchString={searchString}
+                    setSearchString={setSearchString}
+                    resetSearch={resetSearch}
+                />
+            }
+            {
+                !wordDetails &&
+                <IonContent>
+                    <IonGrid>
                         <IonRow>
-                            <IonCol style={{textAlign: "center"}}>
-                                <SearchResultsTools
-                                    resultsPage={resultsPage}
-                                    setResultsPage={setResultsPage}
-                                    nResultsPerPage={nResultsPerPage}
-                                    resultParaRecords={resultParaRecords}
-                                    booksToSearch={booksToSearch}
+                            <IonCol size={1}>
+                                <IonButton color="secondary" fill="clear">
+                                    <IonIcon float-right icon={options}/>
+                                </IonButton>
+                            </IonCol>
+                            <IonCol size={9}>
+                                <IonInput
+                                    value={searchString}
+                                    placeholder="Search Items"
+                                    onKeyPress={e => e.key === 'Enter' && resetSearch()}
+                                    onIonChange={e => setSearchString(e.detail.value)}
                                 />
                             </IonCol>
+                            <IonCol size={1}>
+                                <IonButton
+                                    color="primary"
+                                    fill="clear"
+                                    onClick={
+                                        () => {
+                                            resetSearch();
+                                        }
+                                    }
+                                >
+                                    <IonIcon float-right icon={search}/>
+                                </IonButton>
+                            </IonCol>
+                            <IonCol size={1}>
+                                <IonButton
+                                    className="ion-float-end"
+                                    color="secondary"
+                                    fill="clear"
+                                    onClick={() => setSearchString('')}
+                                >
+                                    <IonIcon float-right icon={trash}/>
+                                </IonButton>
+                            </IonCol>
                         </IonRow>
-                    }
-                    <IonRow>
-                        <IonCol>
-                            {
-                                resultParaRecords.length === 0 ?
-                                    <IonText>No results</IonText> :
-                                    resultParaRecords
-                                        .slice(resultsPage * nResultsPerPage, (resultsPage * nResultsPerPage) + nResultsPerPage)
-                                        .map(
-                                            (rr, n) => {
-                                                const fromVerse = Math.min(...rr.verses);
-                                                const toVerse = Math.max(...rr.verses);
-                                                return <IonRow key={n}>
-                                                    <IonCol size={1} style={{fontSize: "smaller", fontWeight: "bold"}}>
-                                                        {`${rr.book} ${rr.chapter}:${fromVerse}`}
-                                                        {toVerse > fromVerse && `-${toVerse}`}
-                                                    </IonCol>
-                                                    <IonCol size={11}>
-                                                        {
-                                                            rr.itemGroups
-                                                                .map(
-                                                                    (ig, n) =>
-                                                                        <span key={n}>
+                        {
+                            resultParaRecords.length > 0 &&
+                            <IonRow>
+                                <IonCol style={{textAlign: "center"}}>
+                                    <SearchResultsTools
+                                        resultsPage={resultsPage}
+                                        setResultsPage={setResultsPage}
+                                        nResultsPerPage={nResultsPerPage}
+                                        resultParaRecords={resultParaRecords}
+                                        booksToSearch={booksToSearch}
+                                        setSearchAllBooks={setSearchAllBooks}
+                                    />
+                                </IonCol>
+                            </IonRow>
+                        }
+                        <IonRow>
+                            <IonCol>
+                                {
+                                    resultParaRecords.length === 0 ?
+                                        <IonText>No results</IonText> :
+                                        resultParaRecords
+                                            .slice(resultsPage * nResultsPerPage, (resultsPage * nResultsPerPage) + nResultsPerPage)
+                                            .map(
+                                                (rr, n) => {
+                                                    const fromVerse = Math.min(...rr.verses);
+                                                    const toVerse = Math.max(...rr.verses);
+                                                    return <IonRow key={n}>
+                                                        <IonCol size={1}
+                                                                style={{fontSize: "smaller", fontWeight: "bold"}}>
+                                                            {`${rr.book} ${rr.chapter}:${fromVerse}`}
+                                                            {toVerse > fromVerse && `-${toVerse}`}
+                                                        </IonCol>
+                                                        <IonCol size={11}>
+                                                            {
+                                                                rr.itemGroups
+                                                                    .map(
+                                                                        (ig, n) =>
+                                                                            <span key={n}>
                                                                             <Link
                                                                                 to="/browse"
                                                                                 onClick={() => jumpToVerse(rr.book, rr.chapter, ig.scopeLabels[0].split('/')[1])}
                                                                                 className="verseNumber">{ig.scopeLabels[0].split('/')[1]}</Link>
-                                                                            {
-                                                                                ig.tokens.map(
-                                                                                    (t, n) =>
-                                                                                        t.subType === 'wordLike' ?
-                                                                                            <span
-                                                                                                key={n}
-                                                                                                onClick={
-                                                                                                    () => {
-                                                                                                        setSearchString(searchString + " " + t.payload);
-                                                                                                        resetSearch();
+                                                                                {
+                                                                                    ig.tokens.map(
+                                                                                        (t, n) =>
+                                                                                            t.subType === 'wordLike' ?
+                                                                                                <span
+                                                                                                    key={n}
+                                                                                                    onClick={
+                                                                                                        () => {
+                                                                                                            setWordDetails({
+                                                                                                                ...t,
+                                                                                                                book: rr.book,
+                                                                                                                chapter: rr.chapter,
+                                                                                                                verse: ig.scopeLabels[0].split('/')[1]
+                                                                                                            });
+                                                                                                        }
                                                                                                     }
-                                                                                                }
-                                                                                            >
+                                                                                                >
                                                                                                 {
                                                                                                     t.subType === 'wordLike' ?
                                                                                                         rr.matches.includes(t.payload) ?
@@ -280,36 +315,37 @@ const SearchTab = ({currentDocSet, setCurrentBookCode, setSelectedChapter, setSe
                                                                                                         t.payload
                                                                                                 }
                                                                                             </span>
-                                                                                            :
-                                                                                            t.payload
-                                                                                )
-                                                                            }
+                                                                                                :
+                                                                                                t.payload
+                                                                                    )
+                                                                                }
                                                                         </span>
-                                                                )
-                                                        }
-                                                    </IonCol>
-                                                </IonRow>;
-                                            }
-                                        )
-                            }
-                        </IonCol>
-                    </IonRow>
-                    {
-                        resultParaRecords.length > 0 &&
-                        <IonRow>
-                            <IonCol style={{textAlign: "center"}}>
-                                <SearchResultsTools
-                                    resultsPage={resultsPage}
-                                    setResultsPage={setResultsPage}
-                                    nResultsPerPage={nResultsPerPage}
-                                    resultParaRecords={resultParaRecords}
-                                    booksToSearch={booksToSearch}
-                                />
+                                                                    )
+                                                            }
+                                                        </IonCol>
+                                                    </IonRow>;
+                                                }
+                                            )
+                                }
                             </IonCol>
                         </IonRow>
-                    }
-                </IonGrid>
-            </IonContent>
+                        {
+                            resultParaRecords.length > 0 &&
+                            <IonRow>
+                                <IonCol style={{textAlign: "center"}}>
+                                    <SearchResultsTools
+                                        resultsPage={resultsPage}
+                                        setResultsPage={setResultsPage}
+                                        nResultsPerPage={nResultsPerPage}
+                                        resultParaRecords={resultParaRecords}
+                                        booksToSearch={booksToSearch}
+                                    />
+                                </IonCol>
+                            </IonRow>
+                        }
+                    </IonGrid>
+                </IonContent>
+            }
         </IonPage>
     );
 };

@@ -8,7 +8,8 @@ const SearchResultTools = (
         setResultsPage,
         nResultsPerPage,
         resultParaRecords,
-        booksToSearch
+        booksToSearch,
+        setSearchAllBooks
     }
 ) => <IonTitle>
     <IonButton
@@ -24,8 +25,13 @@ const SearchResultTools = (
                                     of
                                     ${booksToSearch.length > 0 ? 'at least' : ""}
                                     ${resultParaRecords.length} result${resultParaRecords.length !== 1 ? 's' : ''}
-                                    ${booksToSearch.length > 0 ? ` (${booksToSearch.length} unsearched book${booksToSearch.length === 1 ? '': 's'})` : ''}
                                     `}
+                                    {
+        booksToSearch.length > 0 ?
+            <span
+                onClick={() => setSearchAllBooks(true)}>{` (${booksToSearch.length} unsearched book${booksToSearch.length === 1 ? '' : 's'})`}</span> :
+            ''
+    }
     <IonButton
         fill="clear"
         color="secondary"

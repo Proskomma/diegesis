@@ -51,7 +51,7 @@ const WordDetails = ({wordDetails, setWordDetails, searchString, setSearchString
                 </IonCol>
             </IonRow>}
             {wordDetails.scopes
-                .filter(s => s.startsWith("attribute/spanWithAtts/w/strong"))
+                .filter(s => s.startsWith("attribute/spanWithAtts/w/strong") || s.startsWith("attribute/milestone/zaln/x-strong"))
                 .map(
                     (s, n) =>
                         <IonRow key={n}>
@@ -61,7 +61,7 @@ const WordDetails = ({wordDetails, setWordDetails, searchString, setSearchString
                                     style={{textTransform: "none"}}
                                     onClick={() => {
                                         setWordDetails(null);
-                                        setSearchString(`strong:${s.split('/')[5]}`);
+                                        setSearchString(`${s.split('/')[3]}:${s.split('/')[5]}`);
                                         resetSearch();
                                     }}>
                                     {`Search for Strongs '${s.split('/')[5]}'`}
@@ -71,7 +71,7 @@ const WordDetails = ({wordDetails, setWordDetails, searchString, setSearchString
                 )
             }
             {wordDetails.scopes
-                .filter(s => s.startsWith("attribute/spanWithAtts/w/lemma"))
+                .filter(s => s.startsWith("attribute/spanWithAtts/w/lemma") || s.startsWith("attribute/milestone/zaln/x-lemma"))
                 .map(
                     (s, n) =>
                         <IonRow key={n}>
@@ -81,7 +81,7 @@ const WordDetails = ({wordDetails, setWordDetails, searchString, setSearchString
                                     style={{textTransform: "none"}}
                                     onClick={() => {
                                         setWordDetails(null);
-                                        setSearchString(`lemma:${s.split('/')[5]}`);
+                                        setSearchString(`${s.split('/')[3]}:${s.split('/')[5]}`);
                                         resetSearch();
                                     }}>
                                     {`Search for lemma '${s.split('/')[5]}'`}

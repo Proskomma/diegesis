@@ -53,7 +53,8 @@ export const AddRemote = ({toImport, setToImport, loadUuid, setLoadUuid, loadedD
                                     return;
                                 }
                                 if (matchingFiles.length === 1) {
-                                    const response = await zip.file(matchingFiles[0]).async('string');
+                                    let response = await zip.file(matchingFiles[0]).async('string');
+                                    response = response.replace(/\\s5/g, '\\ts\\*');
                                     newToImport.push({
                                         selectors: downloadRecord.selectors,
                                         bookCode: bc,

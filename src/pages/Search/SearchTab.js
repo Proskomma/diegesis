@@ -105,9 +105,10 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
                         .replace(
                             '%attSearchTerms%',
                             attTerms
-                                .map(st => `"""attribute/spanWithAtts/w/${st[0]}/0/${st[1]}"""`)
+                                .map(st => `"""attribute/${st[0].startsWith('x-') ? 'milestone' : 'spanWithAtts'}/${st[0].startsWith('x-') ? 'zaln' : 'w'}/${st[0]}/0/${st[1]}"""`)
                                 .join(", ")
                         )
+                    console.log(searchDocumentMatchQuery);
                     const doQuery = async () => {
                         const result = await pk.gqlQuery(searchDocumentMatchQuery);
                         if (result.data && result.data.docSet) {
@@ -169,6 +170,7 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
                         "               scopes(\n" +
                         "                 startsWith:[\n" +
                         "                   \"attribute/spanWithAtts/w/\"\n" +
+                        "                   \"attribute/milestone/zaln/\"\n" +
                         "                 ]\n" +
                         "               )\n" +
                         "             }\n" +
@@ -190,7 +192,7 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
                         .replace(
                             '%attSearchTerms%',
                             attSearchTerms
-                                .map(st => `"""attribute/spanWithAtts/w/${st[0]}/0/${st[1]}"""`)
+                                .map(st => st[0].startsWith('x-') ? `"""attribute/milestone/zaln/${st[0]}/0/${st[1]}"""` : `"""attribute/spanWithAtts/w/${st[0]}/0/${st[1]}"""`)
                                 .join(", ")
                         )
                         .replace(

@@ -70,6 +70,26 @@ const WordDetails = ({wordDetails, setWordDetails, searchString, setSearchString
                         </IonRow>
                 )
             }
+            {wordDetails.scopes
+                .filter(s => s.startsWith("attribute/spanWithAtts/w/lemma"))
+                .map(
+                    (s, n) =>
+                        <IonRow key={n}>
+                            <IonCol>
+                                <IonButton
+                                    color="secondary"
+                                    style={{textTransform: "none"}}
+                                    onClick={() => {
+                                        setWordDetails(null);
+                                        setSearchString(`lemma:${s.split('/')[5]}`);
+                                        resetSearch();
+                                    }}>
+                                    {`Search for lemma '${s.split('/')[5]}'`}
+                                </IonButton>
+                            </IonCol>
+                        </IonRow>
+                )
+            }
         </IonGrid>
     </IonContent>
 }

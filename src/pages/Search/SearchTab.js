@@ -168,7 +168,7 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
                         "               payload\n" +
                         "               scopes(\n" +
                         "                 startsWith:[\n" +
-                        "                   \"attribute/spanWithAtts/w/strong\"\n" +
+                        "                   \"attribute/spanWithAtts/w/\"\n" +
                         "                 ]\n" +
                         "               )\n" +
                         "             }\n" +

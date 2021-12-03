@@ -23,7 +23,7 @@
     "btoa": "^1.2.1",
     "ionicons": "^5.4.0",
     "jszip": "^3.7.1",
-    "proskomma": "^0.4.92",
+    "proskomma": "^0.4.95",
     "proskomma-render": "^0.5.7",
     "react": "^17.0.1",
     "react-d3-tree": "^3.1.1",

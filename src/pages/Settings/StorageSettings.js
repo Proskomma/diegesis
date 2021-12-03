@@ -1,16 +1,58 @@
-import React, {useContext, useEffect} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {IonButton, IonCol, IonGrid, IonIcon, IonLabel, IonRow} from '@ionic/react';
 import {download, trash} from "ionicons/icons";
 
 import AddRemote from "./AddRemote";
 import RemoveLocal from "./RemoveLocal";
 import PkContext from "../../contexts/PkContext";
+import Axios from "axios";
 
-const StorageSettings = ({loadUuid, setLoadUuid, toImport, setToImport, currentDocSet, setCurrentDocSet, currentBookCode, setCurrentBookCode}) => {
+const StorageSettings = ({
+                             loadUuid,
+                             setLoadUuid,
+                             toImport,
+                             setToImport,
+                             currentDocSet,
+                             setCurrentDocSet,
+                             currentBookCode,
+                             setCurrentBookCode
+                         }) => {
     const [selectedSection, setSelectedSection] = React.useState('remote');
     const [loadedDocSets, setLoadedDocSets] = React.useState([]);
+    const [onlineCatalog, setOnlineCatalog] = useState([]);
 
     const pk = useContext(PkContext);
+
+    useEffect(() => {
+        const doDownload = async () => {
+            const axiosInstance = Axios.create({});
+            axiosInstance.defaults.headers = {
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache',
+                'Expires': '0',
+            };
+            await axiosInstance.request(
+                {
+                    method: "get",
+                    responseType: 'arraybuffer',
+                    "url": `http://localhost:8099/https://diegesis/online_sources.json`,
+                    "validateStatus": false,
+                }
+            )
+                .then(
+                    async response => {
+                        const data = response.data;
+                        if (response.status !== 200) {
+                            console.log(`Request for online sources returned status code ${response.status}`);
+                            console.log(String.fromCharCode.apply(null, new Uint8Array(data)));
+                            return;
+                        }
+                        setOnlineCatalog(JSON.parse(String.fromCharCode.apply(null, new Uint8Array(data))));
+                    }
+                );
+        };
+        doDownload().then();
+    }, []);
 
     useEffect(() => {
         const doQuery = async () => {
@@ -55,6 +97,7 @@ const StorageSettings = ({loadUuid, setLoadUuid, toImport, setToImport, currentD
                             toImport={toImport}
                             setToImport={setToImport}
                             loadedDocSets={loadedDocSets}
+                            onlineCatalog={onlineCatalog}
                         />
                     }
                     {
@@ -69,6 +112,7 @@ const StorageSettings = ({loadUuid, setLoadUuid, toImport, setToImport, currentD
                             setCurrentDocSet={setCurrentDocSet}
                             currentBookCode={currentBookCode}
                             setCurrentBookCode={setCurrentBookCode}
+                            onlineCatalog={onlineCatalog}
                         />
                     }
                 </IonCol>

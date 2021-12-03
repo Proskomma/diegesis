@@ -153,6 +153,7 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
                                 attSearchTerms)
                         );
                         if (result.data && result.data.docSet && result.data.docSet.document) {
+                            console.log(JSON.stringify(result.data.docSet.document.mainSequence.blocks.map(cvm => cvm.scopeLabels), null, 2))
                             records = result.data.docSet.document.mainSequence.blocks.map(
                                 b => ({
                                     book: result.data.docSet.document.bookCode,

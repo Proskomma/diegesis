@@ -1,20 +1,16 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {IonButton, IonCol, IonGrid, IonIcon, IonRow, IonSpinner, IonText} from '@ionic/react';
-import onlineSources from '../../resources/sourceIndexes/online_sources';
 import {download} from "ionicons/icons";
 import Axios from 'axios';
 import JSZip from 'jszip';
-import PkContext from "../../contexts/PkContext";
 import SettingsContext from "../../contexts/SettingsContext";
 import "./SettingsTab.css";
 
 const uuid = require('uuid');
 const btoa = require('btoa');
 
-export const AddRemote = ({toImport, setToImport, loadUuid, setLoadUuid, loadedDocSets}) => {
+export const AddRemote = ({toImport, setToImport, loadUuid, setLoadUuid, loadedDocSets, onlineCatalog}) => {
     const [toDownload, setToDownload] = useState([]);
-
-    const pk = useContext(PkContext);
     const settings = useContext(SettingsContext);
 
     useEffect(() => {
@@ -96,7 +92,7 @@ export const AddRemote = ({toImport, setToImport, loadUuid, setLoadUuid, loadedD
             }
         ]));
     }
-    const sourceEntries = [...onlineSources.entries()]
+    const sourceEntries = [...onlineCatalog.entries()]
         .filter(([n, os]) => loadedDocSets.filter(lds => lds[0] === os.selectors.lang && lds[1] === os.selectors.abbr).length === 0);
     if (settings.enableNetworkAccess[0]) {
         return (

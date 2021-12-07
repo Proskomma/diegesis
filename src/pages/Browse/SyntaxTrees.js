@@ -28,7 +28,7 @@ const syntaxTreeToD3 = tribosTree => {
             name:
                     tribosTree.content.text || tribosTree.content.class || JSON.stringify(tribosTree.content),
             attributes:
-                tribosTree.children && tribosTree.children.length === 0 ?
+                tribosTree.children && tribosTree.children.length > 0 ?
                     {} :
                     {
                         gloss: tribosTree.content.gloss,

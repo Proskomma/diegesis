@@ -55,7 +55,8 @@ export const AddRemote = ({toImport, setToImport, loadUuid, setLoadUuid, loadedD
                                         selectors: downloadRecord.selectors,
                                         bookCode: bc,
                                         contentType: downloadRecord.format === 'usfmZip' ? 'usfm' : 'tsv',
-                                        content: response
+                                        content: response,
+                                        docTypes: downloadRecord.docTypes,
                                     });
                                 }
                             }));

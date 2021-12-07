@@ -57,7 +57,11 @@ const App = () => {
                         abbr: importRecord.selectors.abbr
                     },
                     importRecord.contentType,
-                    importRecord.content
+                    importRecord.content,
+                    null,
+                    null,
+                    null,
+                    importRecord.docTypes.map(dt => `doctype:${dt}`)
                 );
             } else if (importRecord.contentType === 'tsv') {
                 const addTsv = async () => {
@@ -68,7 +72,8 @@ const App = () => {
                     let query = `mutation { addDocument(` +
                         `selectors: [{key: "lang", value: "${importRecord.selectors.lang}"}, {key: "abbr", value: "${importRecord.selectors.abbr}"}], ` +
                         `contentType: "usfm", ` +
-                        `content: """${stubUsfm}""") }`;
+                        `content: """${stubUsfm}"""` +
+                        `tags: "${importRecord.docTypes.map(dt => 'doctype:' + dt)}") }`;
                     let result = await pk.gqlQuery(query);
                     if (!result.data || !result.data.addDocument) {
                         console.log(`tsv doc creation for ${importRecord.bookCode} failed: ${JSON.stringify(result)}`);
@@ -105,7 +110,7 @@ const App = () => {
 
     useEffect(() => {
         const doQuery = async () => {
-            const res = await pk.gqlQuery('{ docSets { id selectors { key value } documents(sortedBy:"paratext") { id bookCode: header(id:"bookCode")} } }');
+            const res = await pk.gqlQuery('{ docSets { id selectors { key value } documents(sortedBy:"paratext") { id tags bookCode: header(id:"bookCode")} } }');
             const dss = {}
             for (const ds of res.data.docSets) {
                 const selectors = {};
@@ -116,6 +121,7 @@ const App = () => {
                 for (const document of ds.documents) {
                     documents[document.bookCode] = {
                         id: document.id,
+                        tags: document.tags,
                     }
                 }
                 dss[ds.id] = {

@@ -26,20 +26,17 @@ const syntaxTreeToD3 = tribosTree => {
     } else {
         return {
             name:
-                tribosTree.content.elementType === 'w' ?
-                    tribosTree.content.text :
-                    tribosTree.content.class || JSON.stringify(tribosTree.content),
+                    tribosTree.content.text || tribosTree.content.class || JSON.stringify(tribosTree.content),
             attributes:
-                tribosTree.content.elementType === 'w' ?
+                tribosTree.children && tribosTree.children.length === 0 ?
+                    {} :
                     {
                         gloss: tribosTree.content.gloss,
                         class: tribosTree.content.class
-                    } :
-                    {},
+                    },
             children:
                 tribosTree.children ?
                     tribosTree.children
-                        .filter(n => n.content.elementType !== 'pc')
                         .map(ch => syntaxTreeToD3(ch)) :
                     [],
         }
@@ -71,11 +68,12 @@ const SyntaxTrees = ({currentBookCode, selectedChapter, selectedVerses, isOpen, 
     useEffect(() => {
         if (currentBookCode && selectedChapter && selectedVerses && isOpen) {
             const doQuery = async () => {
+                const cv = `${selectedChapter}:${selectedVerses}`;
                 const res = await pk.gqlQuery(`{docSet(id:"eng_cblft") {
                document(bookCode:"${currentBookCode}") {
                  treeSequences {
                    id
-                   verseTrees: tribos(query:"nodes[or(not(hasContent('chapter')), not(hasContent('verse')), not(==(content('chapter'),'${selectedChapter}')), not(==(content('verse'), '${selectedVerses}')))]/children[and(==(content('chapter'), '${selectedChapter}'), ==(content('verse'), '${selectedVerses}'))]/branch{children, @text, @gloss, @elementType, @role, @class}")
+                   verseTrees: tribos(query:"nodes[==(content('cv'), '${cv}')]/branch{children, @text, @gloss, @class}")
                  }
                }
              }}`);

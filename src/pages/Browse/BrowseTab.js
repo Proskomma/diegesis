@@ -101,9 +101,9 @@ const BrowseTab = (
                                     value={currentDocSet}
                                     disabled={showDetails}
                                     onIonChange={e => {
-                                        setCurrentDocSet(e.detail.value);
                                         const docSet = docSets[e.detail.value];
                                         if (docSet) {
+                                            setCurrentDocSet(e.detail.value);
                                             const firstBookCode = Object.keys(docSet.documents)[0];
                                             setCurrentBookCode(currentBookCode in docSet.documents ? currentBookCode : firstBookCode);
                                             setSelectedChapter(null);
@@ -142,8 +142,9 @@ const BrowseTab = (
             <IonContent>
                 {!currentDocSet &&
                 <IonItem><IonText color="primary">No content - download some in settings</IonText></IonItem>}
-                {currentDocSet &&
-                <IonGrid>
+                {currentDocSet && docSets[currentDocSet].documents[currentBookCode] && docSets[currentDocSet].documents[currentBookCode].tags.includes('doctype:text') &&
+
+                    <IonGrid>
                     {
                         !showDetails &&
                         <IonRow>
@@ -163,6 +164,13 @@ const BrowseTab = (
                         />
                     }
                 </IonGrid>}
+                {currentDocSet && !docSets[currentDocSet].documents[currentBookCode].tags.includes('doctype:text') &&
+                <IonRow>
+                    <IonCol>
+                        <IonText>{docSets[currentDocSet].documents[currentBookCode].tags.join(',')}</IonText>
+                    </IonCol>
+                </IonRow>
+                }
             </IonContent>
         </IonPage>
     );

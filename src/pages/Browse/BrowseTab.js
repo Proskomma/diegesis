@@ -35,7 +35,6 @@ const BrowseTab = (
     }
 ) => {
     const docSets = useContext(DocSetsContext);
-    const [showDetails, setShowDetails] = useState(false);
     return (
         <IonPage>
             <IonHeader>
@@ -47,7 +46,6 @@ const BrowseTab = (
                             <IonCol size={6}>
                                 <IonSelect
                                     value={currentDocSet}
-                                    disabled={showDetails}
                                     onIonChange={e => {
                                         const docSet = docSets[e.detail.value];
                                         if (docSet) {
@@ -71,7 +69,6 @@ const BrowseTab = (
                             <IonCol size={6}>
                                 <IonSelect
                                     value={currentBookCode}
-                                    disabled={showDetails}
                                     onIonChange={e => setCurrentBookCode(e.detail.value)}>
                                     {
                                         [...Object.entries(docSets[currentDocSet].documents)]
@@ -95,7 +92,6 @@ const BrowseTab = (
                     docSets[currentDocSet].documents[currentBookCode] &&
                     docSets[currentDocSet].documents[currentBookCode].tags.includes('doctype:text') &&
                     <TextBookContent
-                        showDetails={showDetails}
                         currentDocSet={currentDocSet}
                         currentDocId={currentDocId}
                         currentBookCode={currentBookCode}
@@ -103,7 +99,6 @@ const BrowseTab = (
                         setSelectedChapter={setSelectedChapter}
                         selectedVerses={selectedVerses}
                         setSelectedVerses={setSelectedVerses}
-                        setShowDetails={setShowDetails}
                     />
                 }
                 {
@@ -111,12 +106,11 @@ const BrowseTab = (
                     docSets[currentDocSet].documents[currentBookCode] &&
                     docSets[currentDocSet].documents[currentBookCode].tags.includes('doctype:tree') &&
                     <TreeChapterContent
-                        showDetails={showDetails}
                         currentDocSet={currentDocSet}
                         currentBookCode={currentBookCode}
                         selectedChapter={selectedChapter}
+                        setSelectedChapter={setSelectedChapter}
                         selectedVerses={selectedVerses}
-                        setShowDetails={setShowDetails}
                     />
                 }
                 {
@@ -124,12 +118,10 @@ const BrowseTab = (
                     docSets[currentDocSet].documents[currentBookCode] &&
                     docSets[currentDocSet].documents[currentBookCode].tags.includes('doctype:table') &&
                     <TableChapterContent
-                        showDetails={showDetails}
                         currentDocSet={currentDocSet}
                         currentBookCode={currentBookCode}
                         selectedChapter={selectedChapter}
                         selectedVerses={selectedVerses}
-                        setShowDetails={setShowDetails}
                     />
                 }
                 {currentDocSet && docSets[currentDocSet].documents[currentBookCode].tags.filter(t => t.startsWith('doctype')).length === 0 &&

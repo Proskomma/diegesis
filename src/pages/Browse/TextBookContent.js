@@ -8,7 +8,6 @@ import DocSetsContext from "../../contexts/DocSetsContext";
 
 const TextBookContent = (
     {
-        showDetails,
         currentDocSet,
         currentDocId,
         currentBookCode,
@@ -16,11 +15,11 @@ const TextBookContent = (
         setSelectedChapter,
         selectedVerses,
         setSelectedVerses,
-        setShowDetails,
     }) => {
     const pk = useContext(PkContext);
     const docSets = useContext(DocSetsContext);
     const [renderedSequence, setRenderedSequence] = useState([]);
+    const [showDetails, setShowDetails] = useState(false);
     const selectedVerseRef = useRef(null);
     const topDocRef = useRef(null);
     const scrollToSelectedVerse = () => {

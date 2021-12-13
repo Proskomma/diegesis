@@ -16,6 +16,9 @@ const leaves = (nodes, cv) => {
     for (const node of nodes) {
         if (node.children && node.children.length > 0) {
             for (const child of leaves(node.children, cv)) {
+                if (!child.cv) {
+                    child.cv = node.cv
+                }
                 ret.push(child);
             }
         } else {
@@ -49,7 +52,7 @@ const TreeChapterContent = (
                document(bookCode:"${currentBookCode}") {
                  treeSequences {
                    id
-                   chapterTrees: tribos(query:"nodes[startsWith(content('cv'), '${selectedChapter || 1}:')]/branch{children, content}")
+                   chapterTrees: tribos(query:"nodes[not(hasContent('cv'))]/children[startsWith(content('cv'), '${selectedChapter || 1}:')]/branch{children, content}")
                  }
                }
              }}`);

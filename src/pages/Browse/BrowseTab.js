@@ -1,22 +1,11 @@
-import React, {useContext, useState} from 'react';
-import {
-    IonCol,
-    IonContent,
-    IonGrid,
-    IonHeader,
-    IonItem,
-    IonPage,
-    IonRow,
-    IonSelect,
-    IonSelectOption,
-    IonText
-} from '@ionic/react';
+import React, {useContext} from 'react';
+import {IonContent, IonHeader, IonItem, IonPage, IonText} from '@ionic/react';
+import './BrowseTab.css';
 import TextBookContent from "./TextBookContent";
 import TreeChapterContent from "./TreeChapterContent";
 import TableChapterContent from "./TableChapterContent";
-
-import './BrowseTab.css';
 import PageToolBar from '../../components/PageToolBar';
+import TranslationNavigation from '../../components/TranslationNavigation';
 
 import DocSetsContext from '../../contexts/DocSetsContext';
 
@@ -35,103 +24,97 @@ const BrowseTab = (
     }
 ) => {
     const docSets = useContext(DocSetsContext);
+    const tagsPresent = () =>
+        currentDocSet &&
+        docSets[currentDocSet].documents[currentBookCode] &&
+        docSets[currentDocSet].documents[currentBookCode].tags;
+    const Navigation = transType => <TranslationNavigation
+        currentDocSet={currentDocSet}
+        setCurrentDocSet={setCurrentDocSet}
+        currentBookCode={currentBookCode}
+        setCurrentBookCode={setCurrentBookCode}
+        selectedChapter={selectedChapter}
+        setSelectedChapter={setSelectedChapter}
+        selectedVerses={selectedVerses}
+        setSelectedVerses={setSelectedVerses}
+    />;
     return (
         <IonPage>
             <IonHeader>
                 <PageToolBar pageTitle="Browse"/>
-                {
-                    currentDocSet !== "" &&
-                    <IonGrid>
-                        <IonRow>
-                            <IonCol size={6}>
-                                <IonSelect
-                                    value={currentDocSet}
-                                    onIonChange={e => {
-                                        const docSet = docSets[e.detail.value];
-                                        if (docSet) {
-                                            setCurrentDocSet(e.detail.value);
-                                            const firstBookCode = Object.keys(docSet.documents)[0];
-                                            setCurrentBookCode(currentBookCode in docSet.documents ? currentBookCode : firstBookCode);
-                                            setSelectedChapter(null);
-                                            setSelectedVerses(null);
-                                        }
-                                    }}>
-                                    {
-                                        [...Object.entries(docSets)]
-                                            .map(dse =>
-                                                <IonSelectOption key={dse[0]} value={dse[0]}>
-                                                    {`${dse[0]}`}
-                                                </IonSelectOption>
-                                            )
-                                    }
-                                </IonSelect>
-                            </IonCol>
-                            <IonCol size={6}>
-                                <IonSelect
-                                    value={currentBookCode}
-                                    onIonChange={e => setCurrentBookCode(e.detail.value)}>
-                                    {
-                                        [...Object.entries(docSets[currentDocSet].documents)]
-                                            .map(de =>
-                                                <IonSelectOption key={de[0]} value={de[0]}>
-                                                    {`${de[0]}`}
-                                                </IonSelectOption>
-                                            )
-                                    }
-                                </IonSelect>
-                            </IonCol>
-                        </IonRow>
-                    </IonGrid>
-                }
             </IonHeader>
-            <IonContent>
-                {!currentDocSet &&
-                <IonItem><IonText color="primary">No content - download some in settings</IonText></IonItem>}
-                {
-                    currentDocSet &&
-                    docSets[currentDocSet].documents[currentBookCode] &&
-                    docSets[currentDocSet].documents[currentBookCode].tags.includes('doctype:text') &&
-                    <TextBookContent
-                        currentDocSet={currentDocSet}
-                        currentDocId={currentDocId}
-                        currentBookCode={currentBookCode}
-                        selectedChapter={selectedChapter}
-                        setSelectedChapter={setSelectedChapter}
-                        selectedVerses={selectedVerses}
-                        setSelectedVerses={setSelectedVerses}
-                    />
-                }
-                {
-                    currentDocSet &&
-                    docSets[currentDocSet].documents[currentBookCode] &&
-                    docSets[currentDocSet].documents[currentBookCode].tags.includes('doctype:tree') &&
-                    <TreeChapterContent
-                        currentDocSet={currentDocSet}
-                        currentBookCode={currentBookCode}
-                        selectedChapter={selectedChapter}
-                        setSelectedChapter={setSelectedChapter}
-                        selectedVerses={selectedVerses}
-                    />
-                }
-                {
-                    currentDocSet &&
-                    docSets[currentDocSet].documents[currentBookCode] &&
-                    docSets[currentDocSet].documents[currentBookCode].tags.includes('doctype:table') &&
-                    <TableChapterContent
-                        currentDocSet={currentDocSet}
-                        currentBookCode={currentBookCode}
-                        selectedChapter={selectedChapter}
-                        selectedVerses={selectedVerses}
-                    />
-                }
-                {currentDocSet && docSets[currentDocSet].documents[currentBookCode].tags.filter(t => t.startsWith('doctype')).length === 0 &&
-                <IonRow>
-                    <IonCol>
+            {
+                !currentDocSet &&
+                <IonContent>
+                    <IonItem>
+                        <IonText color="primary">No content - download some in settings</IonText>
+                    </IonItem>
+                </IonContent>
+            }
+            {
+                tagsPresent() &&
+                docSets[currentDocSet].documents[currentBookCode].tags.includes('doctype:text') &&
+                <>
+                    <IonHeader>
+                        <Navigation transType="text"/>
+                    </IonHeader>
+                    <IonContent>
+                        <TextBookContent
+                            currentDocSet={currentDocSet}
+                            currentDocId={currentDocId}
+                            currentBookCode={currentBookCode}
+                            selectedChapter={selectedChapter}
+                            setSelectedChapter={setSelectedChapter}
+                            selectedVerses={selectedVerses}
+                            setSelectedVerses={setSelectedVerses}
+                        />
+                    </IonContent>
+                </>
+            }
+            {
+                tagsPresent() &&
+                docSets[currentDocSet].documents[currentBookCode].tags.includes('doctype:tree') &&
+                <>
+                    <IonHeader>
+                        <Navigation transType="tree"/>
+                    </IonHeader>
+                    <IonContent>
+                        <TreeChapterContent
+                            currentDocSet={currentDocSet}
+                            currentBookCode={currentBookCode}
+                            selectedChapter={selectedChapter}
+                            setSelectedChapter={setSelectedChapter}
+                            selectedVerses={selectedVerses}
+                        />
+                    </IonContent>
+                </>
+            }
+            {
+                tagsPresent() &&
+                docSets[currentDocSet].documents[currentBookCode].tags.includes('doctype:table') &&
+                <>
+                    <IonHeader>
+                        <Navigation transType="table"/>
+                    </IonHeader>
+                    <IonContent>
+                        <TableChapterContent
+                            currentDocSet={currentDocSet}
+                            currentBookCode={currentBookCode}
+                            selectedChapter={selectedChapter}
+                            selectedVerses={selectedVerses}
+                        />
+                    </IonContent>
+                </>
+            }
+            {
+                tagsPresent() &&
+                docSets[currentDocSet].documents[currentBookCode].tags.filter(t => t.startsWith('doctype')).length === 0 &&
+                <IonContent>
+                    <IonItem>
                         <IonText>{docSets[currentDocSet].documents[currentBookCode].tags.join(', ')}</IonText>
-                    </IonCol>
-                </IonRow>
-                }
-            </IonContent>
+                    </IonItem>
+                </IonContent>
+            }
         </IonPage>
     );
 };

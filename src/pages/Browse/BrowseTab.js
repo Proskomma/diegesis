@@ -28,7 +28,8 @@ const BrowseTab = (
         currentDocSet &&
         docSets[currentDocSet].documents[currentBookCode] &&
         docSets[currentDocSet].documents[currentBookCode].tags;
-    const Navigation = transType => <TranslationNavigation
+    const Navigation = ({transType}) => <TranslationNavigation
+        transType={transType}
         currentDocSet={currentDocSet}
         setCurrentDocSet={setCurrentDocSet}
         currentBookCode={currentBookCode}
@@ -76,7 +77,9 @@ const BrowseTab = (
                 docSets[currentDocSet].documents[currentBookCode].tags.includes('doctype:tree') &&
                 <>
                     <IonHeader>
-                        <Navigation transType="tree"/>
+                        <Navigation
+                            transType="tree"
+                        />
                     </IonHeader>
                     <IonContent>
                         <TreeChapterContent

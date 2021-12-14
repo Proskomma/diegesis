@@ -3,13 +3,11 @@ import React, {useContext, useEffect, useState} from "react";
 import {
     IonCol,
     IonGrid,
-    IonIcon,
-    IonButton,
     IonRow,
 } from '@ionic/react';
 import PkContext from "../../contexts/PkContext";
 import DocSetsContext from "../../contexts/DocSetsContext";
-import {arrowBack, arrowForward} from "ionicons/icons";
+import TreeDisplayLevel from "./TreeDisplayLevel";
 
 const leaves1 = nodes => {
     const ret = [];
@@ -41,7 +39,6 @@ const leaves = (nodes, cv) => {
     return [node].concat(leaves(nodes.slice(1), cv));
 }
 
-const detailLevels = [null, 'text', 'text and gloss', 'text, gloss and lemma', 'all'];
 const TreeChapterContent = (
     {
         currentDocSet,
@@ -79,50 +76,12 @@ const TreeChapterContent = (
     }, [currentBookCode, currentDocSet, selectedChapter, selectedVerses, pk]);
     return <IonGrid>
         <IonRow>
-            <IonCol size={1}>
-                <IonButton
-                    color="secondary"
-                    fill="clear"
-                    onClick={() => setSelectedChapter(selectedChapter - 1)}
-                >
-                    <IonIcon icon={arrowBack}/>
-                </IonButton>
-            </IonCol>
-            <IonCol size={4}>
-                Ch {selectedChapter}
-            </IonCol>
-            <IonCol size={1}>
-                <IonButton
-                    color="secondary"
-                    fill="clear"
-                    onClick={() => setSelectedChapter(selectedChapter + 1)}
-                >
-                    <IonIcon icon={arrowForward}/>
-                </IonButton>
-            </IonCol>
-            <IonCol size={1}>
-                <IonButton
-                    color="secondary"
-                    fill="clear"
-                    disabled={leafDetailLevel <= 1}
-                    onClick={() => setLeafDetailLevel(leafDetailLevel - 1)}
-                >
-                    <IonIcon icon={arrowBack}/>
-                </IonButton>
-            </IonCol>
-            <IonCol size={4}>
-                display {detailLevels[leafDetailLevel]}
-            </IonCol>
-            <IonCol size={1}>
-                <IonButton
-                    color="secondary"
-                    fill="clear"
-                    disabled={leafDetailLevel >= 4}
-                    onClick={() => setLeafDetailLevel(leafDetailLevel + 1)}
-                >
-                    <IonIcon icon={arrowForward}/>
-                </IonButton>
-            </IonCol>
+            <IonCol size={3}></IonCol>
+            <TreeDisplayLevel
+                leafDetailLevel={leafDetailLevel}
+                setLeafDetailLevel={setLeafDetailLevel}
+            />
+            <IonCol size={3}></IonCol>
         </IonRow>
         <IonRow>
             <IonCol>
@@ -135,7 +94,7 @@ const TreeChapterContent = (
                 }
             </IonCol>
         </IonRow>
-    </IonGrid>;
+    </IonGrid>
 };
 
 export default TreeChapterContent;

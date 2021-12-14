@@ -1,9 +1,11 @@
-import {IonCol, IonGrid, IonRow, IonSelect, IonSelectOption} from "@ionic/react";
+import {IonButton, IonCol, IonGrid, IonIcon, IonRow, IonSelect, IonSelectOption} from "@ionic/react";
 import React, {useContext} from "react";
 import DocSetsContext from "../contexts/DocSetsContext";
+import {arrowBack, arrowForward} from "ionicons/icons";
 
 const TranslationNavigation = (
     {
+        transType,
         currentDocSet,
         setCurrentDocSet,
         currentBookCode,
@@ -17,7 +19,7 @@ const TranslationNavigation = (
     const docSets = useContext(DocSetsContext);
     return <IonGrid>
         <IonRow>
-            <IonCol size={3}>
+            <IonCol size={4}>
                 <IonSelect
                     value={currentDocSet}
                     onIonChange={e => {
@@ -40,7 +42,7 @@ const TranslationNavigation = (
                     }
                 </IonSelect>
             </IonCol>
-            <IonCol size={3}>
+            <IonCol size={4}>
                 <IonSelect
                     value={currentBookCode}
                     onIonChange={
@@ -60,6 +62,29 @@ const TranslationNavigation = (
                     }
                 </IonSelect>
             </IonCol>
+            {transType === 'tree' && <>
+            <IonCol size={1} style={{textAlign: "right"}}>
+                <IonButton
+                    color="secondary"
+                    fill="clear"
+                    onClick={() => setSelectedChapter(selectedChapter - 1)}
+                >
+                    <IonIcon icon={arrowBack}/>
+                </IonButton>
+            </IonCol>
+            <IonCol size={2} style={{textAlign: "center"}}>
+                Ch {selectedChapter}
+            </IonCol>
+            <IonCol size={1}>
+                <IonButton
+                    color="secondary"
+                    fill="clear"
+                    onClick={() => setSelectedChapter(selectedChapter + 1)}
+                >
+                    <IonIcon icon={arrowForward}/>
+                </IonButton>
+            </IonCol>
+            </>}
         </IonRow>
     </IonGrid>
 };

@@ -11,11 +11,11 @@ import PkContext from "../../contexts/PkContext";
 import DocSetsContext from "../../contexts/DocSetsContext";
 import {arrowBack, arrowForward} from "ionicons/icons";
 
-const leaves = (nodes, cv) => {
+const leaves1 = nodes => {
     const ret = [];
     for (const node of nodes) {
         if (node.children && node.children.length > 0) {
-            for (const child of leaves(node.children, cv)) {
+            for (const child of leaves1(node.children)) {
                 if (!child.cv) {
                     child.cv = node.cv
                 }
@@ -26,6 +26,19 @@ const leaves = (nodes, cv) => {
         }
     }
     return ret;
+}
+
+const leaves = (nodes, cv) => {
+    if (nodes.length === 0) {
+        return [];
+    }
+    const node = nodes[0];
+    if (node.cv && node.cv !== cv) {
+        cv = node.cv;
+    } else {
+        delete node.cv;
+    }
+    return [node].concat(leaves(nodes.slice(1), cv));
 }
 
 const detailLevels = [null, 'text', 'text and gloss', 'text, gloss and lemma', 'all'];
@@ -114,7 +127,7 @@ const TreeChapterContent = (
         <IonRow>
             <IonCol>
                 {
-                    leaves(chapterNodes, '')
+                    leaves(leaves1(chapterNodes, ''), '')
                         .map(
                             (node, n) =>
                                 <InterlinearNode key={n} content={node} detailLevel={leafDetailLevel}/>

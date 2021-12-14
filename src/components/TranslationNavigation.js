@@ -19,7 +19,7 @@ const TranslationNavigation = (
     const docSets = useContext(DocSetsContext);
     return <IonGrid>
         <IonRow>
-            <IonCol size={4}>
+            <IonCol size={3}>
                 <IonSelect
                     value={currentDocSet}
                     onIonChange={e => {
@@ -42,7 +42,7 @@ const TranslationNavigation = (
                     }
                 </IonSelect>
             </IonCol>
-            <IonCol size={4}>
+            <IonCol size={3}>
                 <IonSelect
                     value={currentBookCode}
                     onIonChange={

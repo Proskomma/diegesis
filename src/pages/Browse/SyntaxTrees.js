@@ -73,7 +73,7 @@ const SyntaxTrees = ({currentBookCode, selectedChapter, selectedVerses, isOpen, 
                document(bookCode:"${currentBookCode}") {
                  treeSequences {
                    id
-                   verseTrees: tribos(query:"nodes[==(content('cv'), '${cv}')]/branch{children, @text, @gloss, @class}")
+                   verseTrees: tribos(query:"nodes[not(hasContent('cv'))]/children[==(content('cv'), '${cv}')]/branch{children, @text, @gloss, @class}")
                  }
                }
              }}`);

@@ -96,6 +96,7 @@ const parsingInfo = content => {
 
 const InterlinearNode = ({content, detailLevel}) => {
     return <>
+        {content.sentence && <><br/><span style={{paddingLeft: "3em"}}> </span></>}
         {content.cv && <div style={cvRcStyle}>{content.cv.split(':')[1]}</div>}
         <div style={wordRcStyle}>
             {content.text && <div style={textStyle}>{content.text}</div>}
@@ -109,7 +110,7 @@ const InterlinearNode = ({content, detailLevel}) => {
                 detailLevel > 3 && parsingInfo(content)
             }
         </div>
-    </>;
+        </>
 }
 
 export default InterlinearNode;

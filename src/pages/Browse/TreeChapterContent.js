@@ -26,7 +26,7 @@ const leaves1 = nodes => {
     return ret;
 }
 
-const leaves = (nodes, cv) => {
+const leaves = (nodes, cv, sentence) => {
     if (nodes.length === 0) {
         return [];
     }
@@ -36,7 +36,12 @@ const leaves = (nodes, cv) => {
     } else {
         delete node.cv;
     }
-    return [node].concat(leaves(nodes.slice(1), cv));
+    if (node.sentence && node.sentence !== sentence) {
+        sentence = node.sentence;
+    } else {
+        delete node.sentence;
+    }
+    return [node].concat(leaves(nodes.slice(1), cv, sentence));
 }
 
 const TreeChapterContent = (
@@ -86,7 +91,7 @@ const TreeChapterContent = (
         <IonRow>
             <IonCol>
                 {
-                    leaves(leaves1(chapterNodes, ''), '')
+                    leaves(leaves1(chapterNodes, ''), '', '')
                         .map(
                             (node, n) =>
                                 <InterlinearNode key={n} content={node} detailLevel={leafDetailLevel}/>

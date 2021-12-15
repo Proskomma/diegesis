@@ -1,13 +1,10 @@
 import InterlinearNode from "./InterlinearNode";
 import React, {useContext, useEffect, useState} from "react";
-import {
-    IonCol,
-    IonGrid,
-    IonRow,
-} from '@ionic/react';
+import {IonCol, IonContent, IonGrid, IonHeader, IonRow,} from '@ionic/react';
 import PkContext from "../../contexts/PkContext";
 import DocSetsContext from "../../contexts/DocSetsContext";
 import TreeDisplayLevel from "./TreeDisplayLevel";
+import TranslationNavigation from "../../components/TranslationNavigation";
 
 const leaves1 = nodes => {
     const ret = [];
@@ -47,10 +44,13 @@ const leaves = (nodes, cv, sentence) => {
 const TreeChapterContent = (
     {
         currentDocSet,
+        setCurrentDocSet,
         currentBookCode,
+        setCurrentBookCode,
         selectedChapter,
         setSelectedChapter,
         selectedVerses,
+        setSelectedVerses,
     }
 ) => {
     const pk = useContext(PkContext);
@@ -72,34 +72,51 @@ const TreeChapterContent = (
                }
              }}`);
                 setChapterNodes(JSON.parse(res.data.docSet.document.treeSequences[0].chapterTrees).data);
-                if (!selectedChapter) {setSelectedChapter(1)}
+                if (!selectedChapter) {
+                    setSelectedChapter(1)
+                }
             }
         };
         if (currentDocSet && currentBookCode) {
             doQuery();
         }
     }, [currentBookCode, currentDocSet, selectedChapter, selectedVerses, pk]);
-    return <IonGrid>
-        <IonRow>
-            <IonCol size={3}></IonCol>
-            <TreeDisplayLevel
-                leafDetailLevel={leafDetailLevel}
-                setLeafDetailLevel={setLeafDetailLevel}
-            />
-            <IonCol size={3}></IonCol>
-        </IonRow>
-        <IonRow>
-            <IonCol>
-                {
-                    leaves(leaves1(chapterNodes, ''), '', '')
-                        .map(
-                            (node, n) =>
-                                <InterlinearNode key={n} content={node} detailLevel={leafDetailLevel}/>
-                        )
-                }
-            </IonCol>
-        </IonRow>
-    </IonGrid>
+    const Navigation = ({transType}) => <TranslationNavigation
+        transType={transType}
+        currentDocSet={currentDocSet}
+        setCurrentDocSet={setCurrentDocSet}
+        currentBookCode={currentBookCode}
+        setCurrentBookCode={setCurrentBookCode}
+        selectedChapter={selectedChapter}
+        setSelectedChapter={setSelectedChapter}
+        selectedVerses={selectedVerses}
+        setSelectedVerses={setSelectedVerses}
+    >
+        <TreeDisplayLevel
+            leafDetailLevel={leafDetailLevel}
+            setLeafDetailLevel={setLeafDetailLevel}
+        />
+    </TranslationNavigation>;
+    return <>
+        <IonHeader>
+            <Navigation transType="tree"/>
+        </IonHeader>
+        <IonContent>
+            <IonGrid>
+                <IonRow>
+                    <IonCol>
+                        {
+                            leaves(leaves1(chapterNodes, ''), '', '')
+                                .map(
+                                    (node, n) =>
+                                        <InterlinearNode key={n} content={node} detailLevel={leafDetailLevel}/>
+                                )
+                        }
+                    </IonCol>
+                </IonRow>
+            </IonGrid>
+        </IonContent>
+    </>
 };
 
 export default TreeChapterContent;

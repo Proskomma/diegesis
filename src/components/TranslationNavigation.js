@@ -14,11 +14,12 @@ const TranslationNavigation = (
         setSelectedChapter,
         selectedVerses,
         setSelectedVerses,
+        children,
     }
 ) => {
     const docSets = useContext(DocSetsContext);
     return <IonGrid>
-        <IonRow>
+        <IonRow style={{alignItems: "center"}}>
             <IonCol size={3}>
                 <IonSelect
                     value={currentDocSet}
@@ -72,7 +73,7 @@ const TranslationNavigation = (
                     <IonIcon icon={arrowBack}/>
                 </IonButton>
             </IonCol>
-            <IonCol size={2} style={{textAlign: "center"}}>
+            <IonCol size={1} style={{textAlign: "center"}}>
                 Ch {selectedChapter}
             </IonCol>
             <IonCol size={1}>
@@ -85,6 +86,7 @@ const TranslationNavigation = (
                 </IonButton>
             </IonCol>
             </>}
+            {children}
         </IonRow>
     </IonGrid>
 };

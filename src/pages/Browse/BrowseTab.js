@@ -75,22 +75,16 @@ const BrowseTab = (
             {
                 tagsPresent() &&
                 docSets[currentDocSet].documents[currentBookCode].tags.includes('doctype:tree') &&
-                <>
-                    <IonHeader>
-                        <Navigation
-                            transType="tree"
-                        />
-                    </IonHeader>
-                    <IonContent>
-                        <TreeChapterContent
-                            currentDocSet={currentDocSet}
-                            currentBookCode={currentBookCode}
-                            selectedChapter={selectedChapter}
-                            setSelectedChapter={setSelectedChapter}
-                            selectedVerses={selectedVerses}
-                        />
-                    </IonContent>
-                </>
+                <TreeChapterContent
+                    currentDocSet={currentDocSet}
+                    setCurrentDocSet={setCurrentDocSet}
+                    currentBookCode={currentBookCode}
+                    setCurrentBookCode={setCurrentBookCode}
+                    selectedChapter={selectedChapter}
+                    setSelectedChapter={setSelectedChapter}
+                    selectedVerses={selectedVerses}
+                    setSelectedVerses={setSelectedVerses}
+                />
             }
             {
                 tagsPresent() &&

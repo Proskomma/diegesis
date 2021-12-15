@@ -2,10 +2,10 @@ import {IonButton, IonCol, IonIcon} from "@ionic/react";
 import {arrowBack, arrowForward} from "ionicons/icons";
 import React from "react";
 
-const detailLevels = [null, 'text', 'text and gloss', 'text, gloss and lemma', 'all'];
+const detailLevels = [null, 'text', 'gloss', 'root', 'all'];
 
 const TreeDisplayLevel = ({leafDetailLevel, setLeafDetailLevel}) => <>
-    <IonCol size={1}>
+    <IonCol size={1} style={{textAlign: "right"}}>
     <IonButton
         color="secondary"
         fill="clear"
@@ -15,8 +15,8 @@ const TreeDisplayLevel = ({leafDetailLevel, setLeafDetailLevel}) => <>
         <IonIcon icon={arrowBack}/>
     </IonButton>
 </IonCol>
-<IonCol size={4} style={{textAlign: "center"}}>
-    display {detailLevels[leafDetailLevel]}
+<IonCol size={1} style={{textAlign: "center"}}>
+    {detailLevels[leafDetailLevel]}
 </IonCol>
 <IonCol size={1}>
     <IonButton

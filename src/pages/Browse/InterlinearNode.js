@@ -63,7 +63,7 @@ const parsingInfo = content => {
             ret.push(e);
         }
     }
-    if (['noun', 'adv', 'det', 'pron', 'adj', 'conj', 'prep', 'ptcl'].includes(content.class)) {
+    if (['noun', 'adv', 'det', 'pron', 'adj', 'conj', 'prep', 'ptcl', 'num'].includes(content.class)) {
         maybePush(content.gender);
         maybePush(content.case);
         maybePush(content.number);

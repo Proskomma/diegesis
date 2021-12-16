@@ -57,6 +57,7 @@ const TreeChapterContent = (
     const docSets = useContext(DocSetsContext);
     const [chapterNodes, setChapterNodes] = useState([]);
     const [leafDetailLevel, setLeafDetailLevel] = useState(1);
+    const [maxC, setMaxC] = useState(0);
     useEffect(() => {
         const doQuery = async () => {
             if (currentDocSet &&
@@ -67,11 +68,24 @@ const TreeChapterContent = (
                document(bookCode:"${currentBookCode}") {
                  treeSequences {
                    id
-                   chapterTrees: tribos(query:"nodes[not(hasContent('cv'))]/children[startsWith(content('cv'), '${selectedChapter || 1}:')]/branch{children, content}")
+                   chapterTrees: tribos(query:
+                     "nodes[not(hasContent('cv'))]/children[startsWith(content('cv'), '${selectedChapter || 1}:')]/branch{children, content}"
+                   )
+                   cvs: tribos(query: "nodes/values{@cv}")
                  }
                }
              }}`);
                 setChapterNodes(JSON.parse(res.data.docSet.document.treeSequences[0].chapterTrees).data);
+                setMaxC(
+                    Math.max(
+                        ...JSON.parse(
+                            res.data.docSet.document.treeSequences[0].cvs
+                        )
+                            .data.cv.map(
+                                cv => cv.split(':').map(cvv => parseInt(cvv))[0]
+                            )
+                    )
+                );
                 if (!selectedChapter) {
                     setSelectedChapter(1)
                 }
@@ -89,6 +103,7 @@ const TreeChapterContent = (
         setCurrentBookCode={setCurrentBookCode}
         selectedChapter={selectedChapter}
         setSelectedChapter={setSelectedChapter}
+        maxChapter={maxC}
         selectedVerses={selectedVerses}
         setSelectedVerses={setSelectedVerses}
     >

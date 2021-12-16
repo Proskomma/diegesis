@@ -12,6 +12,7 @@ const TranslationNavigation = (
         setCurrentBookCode,
         selectedChapter,
         setSelectedChapter,
+        maxChapter,
         selectedVerses,
         setSelectedVerses,
         children,
@@ -69,6 +70,7 @@ const TranslationNavigation = (
                     color="secondary"
                     fill="clear"
                     onClick={() => setSelectedChapter(selectedChapter - 1)}
+                    disabled={selectedChapter <= 1}
                 >
                     <IonIcon icon={arrowBack}/>
                 </IonButton>
@@ -81,6 +83,7 @@ const TranslationNavigation = (
                     color="secondary"
                     fill="clear"
                     onClick={() => setSelectedChapter(selectedChapter + 1)}
+                    disabled={selectedChapter >= maxChapter}
                 >
                     <IonIcon icon={arrowForward}/>
                 </IonButton>

@@ -1,4 +1,4 @@
-import {IonButton, IonCol, IonGrid, IonIcon, IonRow, IonSelect, IonSelectOption} from "@ionic/react";
+import {IonButton, IonCol, IonGrid, IonIcon, IonRow, IonSelect, IonSelectOption, IonInput} from "@ionic/react";
 import React, {useContext} from "react";
 import DocSetsContext from "../contexts/DocSetsContext";
 import {arrowBack, arrowForward} from "ionicons/icons";
@@ -76,7 +76,19 @@ const TranslationNavigation = (
                 </IonButton>
             </IonCol>
             <IonCol size={1} style={{textAlign: "center"}}>
-                Ch {selectedChapter}
+                <IonInput
+                    style={{display: "inline"}}
+                value={selectedChapter}
+                debounce={500}
+                onIonChange={
+                    e => {
+                        const nc = parseInt(e.detail.value);
+                        nc >= 1 &&
+                            nc <= maxChapter &&
+                            setSelectedChapter(nc);
+                    }
+                }
+            />
             </IonCol>
             <IonCol size={1}>
                 <IonButton

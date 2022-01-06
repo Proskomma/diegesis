@@ -38,22 +38,23 @@ const cvRcStyle = {
     fontSize: "smaller",
 };
 
-const formatParsing = (terms, l) => {
+const formatParsing = (terms, l, c) => {
     if (terms.length === 0) {
         return [];
     }
     const ret = [];
     l = l || 0;
+    c = c || 0;
     if (l > 15) {
-        ret.push(<br/>);
-        ret.push(terms[0]);
+        ret.push(<br key={c++}/>);
+        ret.push(<span key={c++}>{terms[0]}</span>);
         l = (terms[0].length + 1);
     } else {
-        ret.push(" ");
-        ret.push(terms[0]);
+        ret.push(<span key={c++}>{" "}</span>);
+        ret.push(<span key={c++}>{terms[0]}</span>);
         l += (terms[0].length + 1);
     }
-    return ret.concat(formatParsing(terms.slice(1), l));
+    return ret.concat(formatParsing(terms.slice(1), l, c));
 }
 
 const parsingInfo = content => {
@@ -83,6 +84,7 @@ const parsingInfo = content => {
             maybePush(content.mood);
         }
     } else {
+        console.log("Unknown content class", content.class);
         Object.entries(content)
             .forEach(
                 kv => {

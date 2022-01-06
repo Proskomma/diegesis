@@ -96,10 +96,28 @@ const parsingInfo = content => {
     return <div style={parsingStyle}>{formatParsing(ret)}</div>;
 }
 
-const InterlinearNode = ({content, detailLevel}) => {
+const InterlinearNode = (
+    {
+        content,
+        detailLevel,
+        setSelectedChapter,
+        setSelectedVerses,
+        setShowDetails
+    }) => {
     return <>
         {content.sentence && <><br/><span style={{paddingLeft: "3em"}}> </span></>}
-        {content.cv && <div style={cvRcStyle}>{content.cv.split(':')[1]}</div>}
+        {content.cv &&
+        <div
+            style={cvRcStyle}
+            onClick={() => {
+                const [c, v] = content.cv.split(':');
+                setSelectedChapter(parseInt(c));
+                setSelectedVerses(parseInt(v));
+                setShowDetails(true);
+            }}
+        >
+            {content.cv.split(':')[1]}
+        </div>}
         <div style={wordRcStyle}>
             {content.text && <div style={textStyle}>{content.text}</div>}
             {detailLevel > 1 && content.gloss &&

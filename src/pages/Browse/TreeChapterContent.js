@@ -5,6 +5,7 @@ import PkContext from "../../contexts/PkContext";
 import DocSetsContext from "../../contexts/DocSetsContext";
 import TreeDisplayLevel from "./TreeDisplayLevel";
 import TranslationNavigation from "../../components/TranslationNavigation";
+import VerseDetails from "./VerseDetails";
 
 const leaves1 = nodes => {
     const ret = [];
@@ -57,6 +58,7 @@ const TreeChapterContent = (
     const docSets = useContext(DocSetsContext);
     const [chapterNodes, setChapterNodes] = useState([]);
     const [leafDetailLevel, setLeafDetailLevel] = useState(1);
+    const [showDetails, setShowDetails] = useState(false);
     const [maxC, setMaxC] = useState(0);
     useEffect(() => {
         const doQuery = async () => {
@@ -118,17 +120,37 @@ const TreeChapterContent = (
         </IonHeader>
         <IonContent>
             <IonGrid>
-                <IonRow>
-                    <IonCol>
-                        {
-                            leaves(leaves1(chapterNodes, ''), '', '')
-                                .map(
-                                    (node, n) =>
-                                        <InterlinearNode key={n} content={node} detailLevel={leafDetailLevel}/>
-                                )
-                        }
-                    </IonCol>
-                </IonRow>
+                {
+                    showDetails &&
+                    <VerseDetails
+                        currentDocSet={currentDocSet}
+                        currentBookCode={currentBookCode}
+                        selectedChapter={selectedChapter}
+                        selectedVerses={selectedVerses}
+                        setShowDetails={setShowDetails}
+                    />
+                }
+                {
+                    !showDetails &&
+                    <IonRow>
+                        <IonCol>
+                            {
+                                leaves(leaves1(chapterNodes, ''), '', '')
+                                    .map(
+                                        (node, n) =>
+                                            <InterlinearNode
+                                                key={n}
+                                                content={node}
+                                                detailLevel={leafDetailLevel}
+                                                setSelectedChapter={setSelectedChapter}
+                                                setSelectedVerses={setSelectedVerses}
+                                                setShowDetails={setShowDetails}
+                                            />
+                                    )
+                            }
+                        </IonCol>
+                    </IonRow>
+                }
             </IonGrid>
         </IonContent>
     </>

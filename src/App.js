@@ -66,6 +66,7 @@ const App = () => {
             } else if (importRecord.contentType === 'tsv') {
                 const addTsv = async () => {
                     const tsvJson = blocksSpecUtils.tsvToInputBlock(importRecord.content, true);
+                    const tsvHeadings = blocksSpecUtils.tsvHeadingTags(importRecord.content);
                     const tsvQueryContent = blocksSpecUtils.blocksSpec2Query(tsvJson);
                     const stubUsfm =
                         `\\id ${importRecord.bookCode} TSV document\n\\toc1 ${importRecord.bookCode}\n\\mt TSV Document for ${importRecord.bookCode}`;
@@ -95,6 +96,18 @@ const App = () => {
                     result = await pk.gqlQuery(query);
                     if (result.errors) {
                         console.log(`tsv mutation for ${importRecord.bookCode} failed: ${JSON.stringify(result)}`);
+                    }
+                    const seqId = result.data.newSequence;
+                    query = `mutation { addSequenceTags(
+                      docSetId: "${docSetId}",
+                      documentId: "${docId}",
+                      sequenceId: "${seqId}",
+                      tags: ${JSON.stringify(tsvHeadings)}
+                    )
+                  }`;
+                    result = await pk.gqlQuery(query);
+                    if (result.errors) {
+                        console.log(`adding tags to tableSequence for ${importRecord.bookCode} failed: ${JSON.stringify(result)}`);
                     }
                 }
                 addTsv().then();

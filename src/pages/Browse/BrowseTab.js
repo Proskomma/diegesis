@@ -90,15 +90,16 @@ const BrowseTab = (
                 tagsPresent() &&
                 docSets[currentDocSet].documents[currentBookCode].tags.includes('doctype:table') &&
                 <>
-                    <IonHeader>
-                        <Navigation transType="table"/>
-                    </IonHeader>
                     <IonContent>
                         <TableChapterContent
                             currentDocSet={currentDocSet}
+                            setCurrentDocSet={setCurrentDocSet}
                             currentBookCode={currentBookCode}
+                            setCurrentBookCode={setCurrentBookCode}
                             selectedChapter={selectedChapter}
+                            setSelectedChapter={setSelectedChapter}
                             selectedVerses={selectedVerses}
+                            setSelectedVerses={setSelectedVerses}
                         />
                     </IonContent>
                 </>

@@ -47,13 +47,14 @@ const TableChapterContent = (
                     setHeadings(res.data.docSet.document.tableSequences[0].headings)
                     setDisplayedCols(res.data.docSet.document.tableSequences[0].headings)
                     setRows(res.data.docSet.document.tableSequences[0].rows.map(r => r.map(c => c.text)));
+                    setSelectedRow(0);
                 }
             }
         };
         if (currentDocSet && currentBookCode) {
             doQuery();
         }
-    }, [currentBookCode, currentDocSet, selectedChapter, selectedVerses, pk]);
+    }, [currentBookCode, currentDocSet, pk]);
     const Navigation = ({transType}) => <TranslationNavigation
         transType={transType}
         currentDocSet={currentDocSet}
@@ -83,7 +84,7 @@ const TableChapterContent = (
             <IonButton
                 color="secondary"
                 fill="clear"
-                disabled={selectedRow >= rows.length}
+                disabled={selectedRow + nDisplayedRows >= rows.length - 1}
                 onClick={() => setSelectedRow(selectedRow + nDisplayedRows)}
             >
                 <IonIcon icon={arrowForward}/>
@@ -146,9 +147,10 @@ const TableChapterContent = (
                                         }}
                                     >
                                         {
-                                            <ReactMarkdown>{
+                                            r[headings.indexOf(dc)] && <ReactMarkdown>{
                                                 r[headings.indexOf(dc)]
                                                     .replace(/<br>/g, '\n')
+                                                    .replace(/\\n/g, '\n')
                                                     .replace(/\(See: .+\)/g, "")
                                             }</ReactMarkdown>
                                         }

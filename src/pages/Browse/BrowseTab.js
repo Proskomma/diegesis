@@ -20,7 +20,8 @@ const BrowseTab = (
         selectedVerses,
         setSelectedChapter,
         setSelectedVerses,
-        currentDocId
+        currentDocId,
+        mutationId,
     }
 ) => {
     const docSets = useContext(DocSetsContext);
@@ -98,6 +99,7 @@ const BrowseTab = (
                     setSelectedChapter={setSelectedChapter}
                     selectedVerses={selectedVerses}
                     setSelectedVerses={setSelectedVerses}
+                    mutationId={mutationId}
                 />
             }
             {

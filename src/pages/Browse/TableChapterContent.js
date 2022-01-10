@@ -16,6 +16,7 @@ const TableChapterContent = (
         setSelectedChapter,
         selectedVerses,
         setSelectedVerses,
+        mutationId,
 
     }
 ) => {
@@ -54,7 +55,7 @@ const TableChapterContent = (
         if (currentDocSet && currentBookCode) {
             doQuery();
         }
-    }, [currentBookCode, currentDocSet, pk]);
+    }, [currentBookCode, currentDocSet, mutationId, pk]);
     const Navigation = ({transType}) => <TranslationNavigation
         transType={transType}
         currentDocSet={currentDocSet}
@@ -78,7 +79,7 @@ const TableChapterContent = (
             </IonButton>
         </IonCol>
         <IonCol size={1} style={{textAlign: "center"}}>
-            Rows {selectedRow} - {selectedRow + (nDisplayedRows - 1)}
+            Rows {selectedRow} - {Math.min(selectedRow + (nDisplayedRows - 1), rows.length)}
         </IonCol>
         <IonCol size={1}>
             <IonButton

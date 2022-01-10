@@ -33,6 +33,7 @@ import PkContext, {PkProvider} from './contexts/PkContext';
 import {blocksSpecUtils} from 'proskomma';
 import {SettingsProvider} from './contexts/SettingsContext';
 import {DocSetsProvider} from './contexts/DocSetsContext';
+const { generateId } = require('proskomma-utils');
 
 const App = () => {
     const [loadUuid, setLoadUuid] = React.useState("");
@@ -42,7 +43,9 @@ const App = () => {
     const [currentBookCode, setCurrentBookCode] = React.useState("");
     const [selectedChapter, setSelectedChapter] = useState(null);
     const [selectedVerses, setSelectedVerses] = useState(null);
+    const [mutationId, setMutationId] = useState(null);
     const pk = useContext(PkContext);
+    const updateMutationId = () => setMutationId(generateId());
     const settings = {
         enableNetworkAccess: useState(false)
     };
@@ -92,22 +95,11 @@ const App = () => {
                         ` documentId: "${docId}"` +
                         ` type: "table"` +
                         ` blocksSpec: ${tsvQueryContent}` +
+                        ` tags: ${JSON.stringify(tsvHeadings)}` +
                         ` graftToMain: true) }`;
-                    result = await pk.gqlQuery(query);
+                    result = await pk.gqlQuery(query, updateMutationId);
                     if (result.errors) {
                         console.log(`tsv mutation for ${importRecord.bookCode} failed: ${JSON.stringify(result)}`);
-                    }
-                    const seqId = result.data.newSequence;
-                    query = `mutation { addSequenceTags(
-                      docSetId: "${docSetId}",
-                      documentId: "${docId}",
-                      sequenceId: "${seqId}",
-                      tags: ${JSON.stringify(tsvHeadings)}
-                    )
-                  }`;
-                    result = await pk.gqlQuery(query);
-                    if (result.errors) {
-                        console.log(`adding tags to tableSequence for ${importRecord.bookCode} failed: ${JSON.stringify(result)}`);
                     }
                 }
                 addTsv().then();
@@ -149,7 +141,7 @@ const App = () => {
             }
         };
         doQuery();
-    }, [loadUuid, toImport]);
+    }, [loadUuid, mutationId, toImport]);
     return <IonApp>
         <PkProvider value={pk}>
             <SettingsProvider value={settings}>
@@ -169,6 +161,7 @@ const App = () => {
                                             setCurrentBookCode={setCurrentBookCode}
                                             setSelectedChapter={setSelectedChapter}
                                             setSelectedVerses={setSelectedVerses}
+                                            mutationId={mutationId}
                                         />
                                     </Route>
                                     <Route exact path="/search">

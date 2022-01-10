@@ -79,7 +79,7 @@ const TableChapterContent = (
             </IonButton>
         </IonCol>
         <IonCol size={1} style={{textAlign: "center"}}>
-            Rows {selectedRow} - {Math.min(selectedRow + (nDisplayedRows - 1), rows.length)}
+            #{selectedRow} - {Math.min(selectedRow + (nDisplayedRows - 1), rows.length)} / {rows.length - 1}
         </IonCol>
         <IonCol size={1}>
             <IonButton

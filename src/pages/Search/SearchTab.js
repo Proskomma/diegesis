@@ -22,9 +22,11 @@ import WordDetails from "./WordDetails";
 import SearchOptions from "./SearchOptions";
 import searchBlockMatchQuery from "./searchBlockMatchQuery";
 import searchVerseMatchQuery from "./searchVerseMatchQuery";
+import DocSetsContext from "../../contexts/DocSetsContext";
 
 const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelectedChapter, setSelectedVerses}) => {
     const pk = useContext(PkContext);
+    const docSets = useContext(DocSetsContext);
     const [linkSearchString, setLinkSearchString] = React.useState("");
     const [searchString, setSearchString] = React.useState("");
     const [searchWaiting, setSearchWaiting] = React.useState(false);
@@ -39,6 +41,7 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
     const [showOptions, setShowOptions] = React.useState(false);
     const [searchTarget, setSearchTarget] = React.useState('docSet');
     const [searchResultUnit, setSearchResultUnit] = React.useState('block');
+    const [docType, setDocType] = React.useState('');
     const jumpToVerse = (book, chapter, verses) => {
         setCurrentBookCode(book);
         setSelectedChapter(chapter);
@@ -57,16 +60,40 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
         setSearchWaiting(true);
     }
     useEffect(
+        () => {
+            resetSearch();
+        },
+        [currentDocSet]
+        )
+    useEffect(
         // When linkSearchString changes, refresh searchString and launch new search
         () => {
             setSearchString(linkSearchString);
             resetSearch();
         }, [linkSearchString]);
-
+    useEffect(
+        // Get docType
+        () => {
+            const docSetRecord = docSets[currentDocSet];
+            if (docSetRecord) {
+                const documentRecord = docSetRecord.documents[currentBookCode];
+                if (documentRecord) {
+                    const docTypeTag = documentRecord.tags.filter(t => t.startsWith('doctype'))[0];
+                    if (docTypeTag) {
+                        const dt = docTypeTag.split(':')[1];
+                        setDocType(dt);
+                    }
+                }
+            }
+        },
+        [currentDocSet, currentBookCode]
+    );
     useEffect(
         // When searchWaiting is set, refresh payloadSearchTerms and set booksToSearch
         () => {
-            if (searchWaiting) {
+            if (docType === 'text' && searchWaiting) {
+                // TEXT:
+                console.log("text search")
                 const payloadTerms = searchString.split(/ +/)
                     .map((st) => st.trim())
                     .filter((st) => st.length > 0)
@@ -128,9 +155,12 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
                 } else {
                     setSearchWaiting(false);
                 }
+            } else if (docType === 'table' && searchWaiting) {
+                console.log('searching', docType);
+                setSearchWaiting(false);
             }
         },
-        [searchWaiting, searchTarget]
+        [searchWaiting, searchTarget, docType]
     );
     useEffect(
         // When booksToSearch is set and is not empty,

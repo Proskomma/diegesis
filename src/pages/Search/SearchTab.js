@@ -156,9 +156,31 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
                     setSearchWaiting(false);
                 }
             } else if (docType === 'table' && searchWaiting) {
-                console.log('searching', docType);
-                setSearchWaiting(false);
-            }
+                console.log('searching table');
+                const matches = `[{colN:1 matching:"^3$"}, {colN:2 matching:"^2$"}]`;
+                const searchTableMatchQuery = `{
+                  docSet(id:"%docSetId%") {
+                    document(bookCode:"%bookCode%") {
+                      tableSequences {
+                        rows(matches:%matches%) {
+                          text
+                        }
+                      }
+                    }
+                  }
+                }`
+                    .replace(/%docSetId%/g, currentDocSet)
+                    .replace(/%bookCode%/g, currentBookCode)
+                    .replace(/%matches%/g, matches);
+                const doQuery = async () => {
+                    const result = await pk.gqlQuery(searchTableMatchQuery);
+                    return result;
+                };
+                doQuery().then(res => {console.log(res)});
+                } else if (searchWaiting) {
+            console.log(`searching ${docType} (not implemented)`);
+            setSearchWaiting(false);
+        }
         },
         [searchWaiting, searchTarget, docType]
     );

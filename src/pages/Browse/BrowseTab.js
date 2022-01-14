@@ -3,7 +3,7 @@ import {IonContent, IonHeader, IonItem, IonPage, IonText} from '@ionic/react';
 import './BrowseTab.css';
 import TextBookContent from "./TextBookContent";
 import TreeChapterContent from "./TreeChapterContent";
-import TableChapterContent from "./TableChapterContent";
+import TableContent from "./TableContent";
 import PageToolBar from '../../components/PageToolBar';
 import TranslationNavigation from '../../components/TranslationNavigation';
 
@@ -90,7 +90,7 @@ const BrowseTab = (
             {
                 tagsPresent() &&
                 docSets[currentDocSet].documents[currentBookCode].tags.includes('doctype:table') &&
-                <TableChapterContent
+                <TableContent
                     currentDocSet={currentDocSet}
                     setCurrentDocSet={setCurrentDocSet}
                     currentBookCode={currentBookCode}

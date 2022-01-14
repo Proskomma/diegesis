@@ -6,7 +6,7 @@ import DocSetsContext from "../../contexts/DocSetsContext";
 import TranslationNavigation from "../../components/TranslationNavigation";
 import {arrowBack, arrowForward} from "ionicons/icons";
 
-const TableChapterContent = (
+const TableContent = (
     {
         currentDocSet,
         setCurrentDocSet,
@@ -170,4 +170,4 @@ const TableChapterContent = (
     </>
 };
 
-export default TableChapterContent;
+export default TableContent;

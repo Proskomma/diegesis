@@ -12,6 +12,7 @@ import {
     IonRow,
     IonText,
 } from '@ionic/react';
+import ReactMarkdown from "react-markdown";
 import './SearchTab.css';
 
 import PkContext from '../../contexts/PkContext';
@@ -23,7 +24,8 @@ import SearchOptions from "./SearchOptions";
 import searchBlockMatchQuery from "./searchBlockMatchQuery";
 import searchVerseMatchQuery from "./searchVerseMatchQuery";
 import DocSetsContext from "../../contexts/DocSetsContext";
-import ReactMarkdown from "react-markdown";
+import textResultCellContent from "./textResultCellContent";
+import tableResultCellContent from "./tableResultCellContent";
 
 const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelectedChapter, setSelectedVerses}) => {
     const pk = useContext(PkContext);
@@ -44,11 +46,7 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
     const [searchTarget, setSearchTarget] = React.useState('docSet');
     const [searchResultUnit, setSearchResultUnit] = React.useState('block');
     const [docType, setDocType] = React.useState('');
-    const jumpToVerse = (book, chapter, verses) => {
-        setCurrentBookCode(book);
-        setSelectedChapter(chapter);
-        setSelectedVerses(verses);
-    }
+
     const location = useLocation();
     if (location && location.state && location.state.newSearchString && location.state.newSearchString !== linkSearchString) {
         setLinkSearchString(location.state.newSearchString);
@@ -279,124 +277,6 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
         },
         [resultsPage, currentDocSet, nResultsPerPage, payloadSearchTerms, attSearchTerms, tableSearchTerms, searchAllBooks]
     );
-    const textResultCellContent = () =>
-        resultParaRecords
-            .slice(resultsPage * nResultsPerPage, (resultsPage * nResultsPerPage) + nResultsPerPage)
-            .map(
-                (rr, n) => {
-                    if (!rr || !rr.verses) {
-                        return '';
-                    }
-                    const fromVerse = Math.min(...rr.verses);
-                    const toVerse = Math.max(...rr.verses);
-                    return <IonRow key={n}>
-                        <IonCol size={1}
-                                style={{fontSize: "smaller", fontWeight: "bold"}}>
-                            {`${rr.book} ${rr.chapter}:${fromVerse}`}
-                            {toVerse > fromVerse && `-${toVerse}`}
-                        </IonCol>
-                        <IonCol size={11}>
-                            {
-                                rr.itemGroups
-                                    .map(
-                                        (ig, n) =>
-                                            <span key={n}>
-                                                                            <Link
-                                                                                to="/browse"
-                                                                                onClick={
-                                                                                    () => jumpToVerse(
-                                                                                        rr.book,
-                                                                                        rr.chapter,
-                                                                                        ig.scopeLabels.filter(s => s.startsWith('verses/'))[0].split('/')[1]
-                                                                                    )
-                                                                                }
-                                                                                className="verseNumber">{
-                                                                                ig.scopeLabels.filter(s => s.startsWith('verses/'))[0].split('/')[1]
-                                                                            }</Link>
-                                                {
-                                                    ig.tokens.map(
-                                                        (t, n) =>
-                                                            t.subType === 'wordLike' ?
-                                                                <span
-                                                                    key={n}
-                                                                    onClick={
-                                                                        () => {
-                                                                            setWordDetails({
-                                                                                ...t,
-                                                                                book: rr.book,
-                                                                                chapter: rr.chapter,
-                                                                                verse: ig.scopeLabels[0].split('/')[1]
-                                                                            });
-                                                                        }
-                                                                    }
-                                                                >
-                                                                                                {
-                                                                                                    t.subType === 'wordLike' ?
-                                                                                                        rr.matches.includes(t.payload) ?
-                                                                                                            <IonText
-                                                                                                                color="primary"
-                                                                                                                key={n}>
-                                                                                                                {t.payload}
-                                                                                                            </IonText> :
-                                                                                                            t.scopes.filter(s => attSearchTerms.map(st => st[1]).includes(s.split('/')[5])).length > 0 ?
-                                                                                                                <IonText
-                                                                                                                    color="secondary"
-                                                                                                                    key={n}>
-                                                                                                                    {t.payload}
-                                                                                                                </IonText> :
-                                                                                                                t.payload :
-                                                                                                        t.payload
-                                                                                                }
-                                                                                            </span>
-                                                                :
-                                                                t.payload
-                                                    )
-                                                }
-                                                                        </span>
-                                    )
-                            }
-                        </IonCol>
-                    </IonRow>;
-                }
-            );
-
-    const tableResultCellContent = () => {
-        const resultsToShow = resultParaRecords
-            .slice(resultsPage * nResultsPerPage, (resultsPage * nResultsPerPage) + nResultsPerPage);
-        return !resultsToShow ?
-            [] :
-            resultsToShow.map(
-                r => <IonRow>
-                    <IonCol
-                        style={{
-                            backgroundColor: '#F7F7F7',
-                            borderBottom: "solid 1px #CCC",
-                        }}
-                    >
-                        <ReactMarkdown>{
-                            `${r.book}/${r.row}`
-                        }</ReactMarkdown>
-                    </IonCol>
-                    {
-                        r.fields && r.fields
-                            .map((f, n) => <IonCol
-                                size={n === (resultParaRecords[0].headings.length - 1) ? 11 - (resultParaRecords[0].headings.length - 1) : 1}
-                                style={{
-                                    backgroundColor: (n % 2 === 0) ? "#FFF" : '#F7F7F7',
-                                    borderBottom: "solid 1px #CCC",
-                                }}
-                            >
-                                {<ReactMarkdown>{
-                                    f
-                                        .replace(/<br>/g, '\n')
-                                        .replace(/\\n/g, '\n')
-                                        .replace(/\(See: .+\)/g, "")
-                                }</ReactMarkdown>}
-                            </IonCol>)
-                    }
-                </IonRow>
-            );
-    }
 
     return (
         <IonPage>
@@ -496,7 +376,16 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
                                     resultParaRecords.length === 0 ?
                                         <IonText>No results</IonText> :
                                         docType === 'text' ?
-                                            textResultCellContent() :
+                                            textResultCellContent(
+                                                resultParaRecords,
+                                                resultsPage,
+                                                nResultsPerPage,
+                                                setWordDetails,
+                                                attSearchTerms,
+                                                setCurrentBookCode,
+                                                setSelectedChapter,
+                                                setSelectedVerses,
+                                            ) :
                                             <>
                                                 <IonRow>
                                                     <IonCol
@@ -520,7 +409,11 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
                                                         )
                                                     }
                                                 </IonRow>
-                                                {tableResultCellContent()}
+                                                {tableResultCellContent(
+                                                    resultParaRecords,
+                                                    resultsPage,
+                                                    nResultsPerPage,
+                                                )}
                                             </>
                                 }
                             </IonCol>

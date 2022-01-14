@@ -120,7 +120,9 @@ const TableChapterContent = (
             <IonGrid>
                 <IonRow>
                     {
-                        displayedCols.map(
+                        headings
+                            .filter(h => displayedCols.includes(h))
+                                .map(
                             (h, hn) => <IonCol
                                 key={hn}
                                 size={hn === (displayedCols.length - 1) ? 12 - (displayedCols.length - 1) : 1}
@@ -138,7 +140,9 @@ const TableChapterContent = (
                     rows.slice(selectedRow, selectedRow + nDisplayedRows).map(
                         (r, rn) => <IonRow key={rn}>
                             {
-                                displayedCols.map(
+                                headings
+                                    .filter(h => displayedCols.includes(h))
+                                    .map(
                                     (dc, dcn) => <IonCol
                                         key={dcn}
                                         size={dcn === (displayedCols.length - 1) ? 12 - (displayedCols.length - 1) : 1}

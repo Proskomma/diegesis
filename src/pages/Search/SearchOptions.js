@@ -11,28 +11,30 @@ const SearchOptions = (
         setSearchResultUnit,
         resetSearch,
     }) =>
-    <IonGrid style={{backgroundColor: "#EEF"}}>
-        <IonRow>
-            <IonCol>
-                <IonTitle>Search Options</IonTitle>
-            </IonCol>
-        </IonRow>
-        <IonRow>
-            <IonCol size={2}>
-                Results per page
-            </IonCol>
-            <IonCol size={10}>
-                <IonInput
-                    value={nResultsPerPage}
-                    onIonChange={e => parseInt(e.detail.value) > 4 && setNResultsPerPage(parseInt(e.detail.value))}
-                />
-            </IonCol>
-        </IonRow>
-        <IonRow>
-            <IonCol size={2}>
-                Search target
-            </IonCol>
-            <IonCol size={5}>
+    <IonRow>
+        <IonCol>
+            <IonGrid style={{backgroundColor: "#EEF"}}>
+                <IonRow>
+                    <IonCol>
+                        <IonTitle>Search Options</IonTitle>
+                    </IonCol>
+                </IonRow>
+                <IonRow>
+                    <IonCol size={2}>
+                        Results per page
+                    </IonCol>
+                    <IonCol size={10}>
+                        <IonInput
+                            value={nResultsPerPage}
+                            onIonChange={e => parseInt(e.detail.value) > 4 && setNResultsPerPage(parseInt(e.detail.value))}
+                        />
+                    </IonCol>
+                </IonRow>
+                <IonRow>
+                    <IonCol size={2}>
+                        Search target
+                    </IonCol>
+                    <IonCol size={5}>
                 <span
                     onClick={() => {
                         setSearchTarget('docSet');
@@ -45,8 +47,8 @@ const SearchOptions = (
                         Current DocSet
                     </IonText>
                 </span>
-            </IonCol>
-            <IonCol size={5}>
+                    </IonCol>
+                    <IonCol size={5}>
                 <span
                     onClick={() => {
                         setSearchTarget('document');
@@ -59,13 +61,13 @@ const SearchOptions = (
                         Current Book
                     </IonText>
                 </span>
-            </IonCol>
-        </IonRow>
-        <IonRow>
-            <IonCol size={2}>
-                Results by
-            </IonCol>
-            <IonCol size={5}>
+                    </IonCol>
+                </IonRow>
+                <IonRow>
+                    <IonCol size={2}>
+                        Results by
+                    </IonCol>
+                    <IonCol size={5}>
                 <span
                     onClick={() => {
                         setSearchResultUnit('block');
@@ -78,8 +80,8 @@ const SearchOptions = (
                         Paragraph
                     </IonText>
                 </span>
-            </IonCol>
-            <IonCol size={5}>
+                    </IonCol>
+                    <IonCol size={5}>
                 <span
                     onClick={() => {
                         setSearchResultUnit('verse');
@@ -92,8 +94,10 @@ const SearchOptions = (
                         Verse
                     </IonText>
                 </span>
-            </IonCol>
-        </IonRow>
-    </IonGrid>;
+                    </IonCol>
+                </IonRow>
+            </IonGrid>
+        </IonCol>
+    </IonRow>;
 
 export default SearchOptions;

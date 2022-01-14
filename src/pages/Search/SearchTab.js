@@ -284,6 +284,9 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
             .slice(resultsPage * nResultsPerPage, (resultsPage * nResultsPerPage) + nResultsPerPage)
             .map(
                 (rr, n) => {
+                    if (!rr || !rr.verses) {
+                        return '';
+                    }
                     const fromVerse = Math.min(...rr.verses);
                     const toVerse = Math.max(...rr.verses);
                     return <IonRow key={n}>
@@ -357,10 +360,12 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
                 }
             );
 
-    const tableResultCellContent = () =>
-        resultParaRecords
-            .slice(resultsPage * nResultsPerPage, (resultsPage * nResultsPerPage) + nResultsPerPage)
-            .map(
+    const tableResultCellContent = () => {
+        const resultsToShow = resultParaRecords
+            .slice(resultsPage * nResultsPerPage, (resultsPage * nResultsPerPage) + nResultsPerPage);
+        return !resultsToShow ?
+            [] :
+            resultsToShow.map(
                 r => <IonRow>
                     <IonCol
                         style={{
@@ -373,7 +378,7 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
                         }</ReactMarkdown>
                     </IonCol>
                     {
-                        r.fields
+                        r.fields && r.fields
                             .map((f, n) => <IonCol
                                 size={n === (resultParaRecords[0].headings.length - 1) ? 11 - (resultParaRecords[0].headings.length - 1) : 1}
                                 style={{
@@ -391,6 +396,7 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
                     }
                 </IonRow>
             );
+    }
 
     return (
         <IonPage>
@@ -500,7 +506,7 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
                                                         }}
                                                     >Book/Row</IonCol>
                                                     {
-                                                        resultParaRecords[0].headings.map(
+                                                        resultParaRecords[0].headings && resultParaRecords[0].headings.map(
                                                             (h, hn) => <IonCol
                                                                 key={hn}
                                                                 size={hn === (resultParaRecords[0].headings.length - 1) ? 11 - (resultParaRecords[0].headings.length - 1) : 1}

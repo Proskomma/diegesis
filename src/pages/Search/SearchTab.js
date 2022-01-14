@@ -17,6 +17,7 @@ import searchTableMatchQuery from "./searchTableMatchQuery";
 import textResultCellContent from "./textResultCellContent";
 import tableResultCellContent from "./tableResultCellContent";
 import tableResultHeaderRow from "./tableResultHeaderRow";
+import TreeSearchForm from "./TreeSearchForm";
 
 const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelectedChapter, setSelectedVerses}) => {
     const pk = useContext(PkContext);
@@ -241,7 +242,8 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
                 !wordDetails &&
                 <IonContent>
                     <IonGrid>
-                        {<>
+                        {docType !== 'tree' &&
+                        <>
                             <SearchBar
                                 searchString={searchString}
                                 setSearchString={setSearchString}
@@ -250,16 +252,20 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
                                 resetSearch={resetSearch}
                             />
                             {showOptions &&
-                                    <SearchOptions
-                                        nResultsPerPage={nResultsPerPage}
-                                        setNResultsPerPage={setNResultsPerPage}
-                                        searchTarget={searchTarget}
-                                        setSearchTarget={setSearchTarget}
-                                        resetSearch={resetSearch}
-                                        searchResultUnit={searchResultUnit}
-                                        setSearchResultUnit={setSearchResultUnit}
-                                    />}
+                            <SearchOptions
+                                nResultsPerPage={nResultsPerPage}
+                                setNResultsPerPage={setNResultsPerPage}
+                                searchTarget={searchTarget}
+                                setSearchTarget={setSearchTarget}
+                                resetSearch={resetSearch}
+                                searchResultUnit={searchResultUnit}
+                                setSearchResultUnit={setSearchResultUnit}
+                            />}
                         </>
+                        }
+                        {
+                            docType === 'tree' &&
+                                <TreeSearchForm/>
                         }
                         {
                             resultParaRecords.length > 0 &&

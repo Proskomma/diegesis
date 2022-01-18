@@ -1,8 +1,8 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {Redirect, Route} from 'react-router-dom';
-import {IonApp, IonIcon, IonLabel, IonPage, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs} from '@ionic/react';
+import {IonApp, IonIcon, IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs} from '@ionic/react';
 import {IonReactRouter} from '@ionic/react-router';
-import {book, search, create, print} from 'ionicons/icons';
+import {book, create, print, search} from 'ionicons/icons';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -26,6 +26,7 @@ import './theme/variables.css';
 /* Non-ionic imports */
 import BrowseTab from './pages/Browse/BrowseTab';
 import SearchTab from './pages/Search/SearchTab';
+import SearchTreeTab from './pages/Search/tree/SearchTreeTab';
 import EditTab from './pages/Edit/EditTab';
 import PublishTab from './pages/Publish/PublishTab';
 import SettingsTab from './pages/Settings/SettingsTab';
@@ -33,7 +34,8 @@ import PkContext, {PkProvider} from './contexts/PkContext';
 import {blocksSpecUtils} from 'proskomma';
 import {SettingsProvider} from './contexts/SettingsContext';
 import {DocSetsProvider} from './contexts/DocSetsContext';
-const { generateId } = require('proskomma-utils');
+
+const {generateId} = require('proskomma-utils');
 
 const App = () => {
     const [loadUuid, setLoadUuid] = React.useState("");
@@ -146,74 +148,78 @@ const App = () => {
         <PkProvider value={pk}>
             <SettingsProvider value={settings}>
                 <DocSetsProvider value={docSets}>
-                    <IonPage>
-                        <IonReactRouter>
-                            <IonTabs>
-                                <IonRouterOutlet>
-                                    <Route exact path="/browse">
-                                        <BrowseTab
-                                            currentDocSet={currentDocSet}
-                                            setCurrentDocSet={setCurrentDocSet}
-                                            currentBookCode={currentBookCode}
-                                            selectedChapter={selectedChapter}
-                                            selectedVerses={selectedVerses}
-                                            currentDocId={docSets[currentDocSet] && docSets[currentDocSet].documents[currentBookCode] ? docSets[currentDocSet].documents[currentBookCode].id : ""}
-                                            setCurrentBookCode={setCurrentBookCode}
-                                            setSelectedChapter={setSelectedChapter}
-                                            setSelectedVerses={setSelectedVerses}
-                                            mutationId={mutationId}
-                                        />
-                                    </Route>
-                                    <Route exact path="/search">
-                                        <SearchTab
-                                            currentDocSet={currentDocSet}
-                                            currentBookCode={currentBookCode}
-                                            setCurrentBookCode={setCurrentBookCode}
-                                            setSelectedChapter={setSelectedChapter}
-                                            setSelectedVerses={setSelectedVerses}
-                                        />
-                                    </Route>
-                                    <Route exact path="/edit">
-                                        <EditTab/>
-                                    </Route>
-                                    <Route exact path="/publish">
-                                        <PublishTab/>
-                                    </Route>
-                                    <Route exact path="/settings">
-                                        <SettingsTab
-                                            loadUuid={loadUuid}
-                                            setLoadUuid={setLoadUuid}
-                                            toImport={toImport}
-                                            setToImport={setToImport}
-                                            currentDocSet={currentDocSet}
-                                            setCurrentDocSet={setCurrentDocSet}
-                                            currentBookCode={currentBookCode}
-                                            setCurrentBookCode={setCurrentBookCode}
-                                        />
-                                    </Route>
-                                    <Route render={() => <Redirect to="/browse"/>}/>
-                                </IonRouterOutlet>
-                                <IonTabBar slot="bottom">
-                                    <IonTabButton tab="browse" href="/browse">
-                                        <IonIcon icon={book}/>
-                                        <IonLabel>Browse</IonLabel>
-                                    </IonTabButton>
-                                    <IonTabButton tab="search" href="/search">
-                                        <IonIcon icon={search}/>
-                                        <IonLabel>Search</IonLabel>
-                                    </IonTabButton>
-                                    <IonTabButton tab="edit" href="/edit">
-                                        <IonIcon icon={create}/>
-                                        <IonLabel>Edit</IonLabel>
-                                    </IonTabButton>
-                                    <IonTabButton tab="publish" href="/publish">
-                                        <IonIcon icon={print}/>
-                                        <IonLabel>Publish</IonLabel>
-                                    </IonTabButton>
-                                </IonTabBar>
-                            </IonTabs>
-                        </IonReactRouter>
-                    </IonPage>
+                    <IonReactRouter>
+                        <IonTabs>
+                            <IonRouterOutlet>
+                                <Route exact path="/browse">
+                                    <BrowseTab
+                                        currentDocSet={currentDocSet}
+                                        setCurrentDocSet={setCurrentDocSet}
+                                        currentBookCode={currentBookCode}
+                                        selectedChapter={selectedChapter}
+                                        selectedVerses={selectedVerses}
+                                        currentDocId={docSets[currentDocSet] && docSets[currentDocSet].documents[currentBookCode] ? docSets[currentDocSet].documents[currentBookCode].id : ""}
+                                        setCurrentBookCode={setCurrentBookCode}
+                                        setSelectedChapter={setSelectedChapter}
+                                        setSelectedVerses={setSelectedVerses}
+                                        mutationId={mutationId}
+                                    />
+                                </Route>
+                                <Route exact path="/search">
+                                    <SearchTab
+                                        currentDocSet={currentDocSet}
+                                        currentBookCode={currentBookCode}
+                                        setCurrentBookCode={setCurrentBookCode}
+                                        setSelectedChapter={setSelectedChapter}
+                                        setSelectedVerses={setSelectedVerses}
+                                    />
+                                </Route>
+                                <Route exact path="/search/tree">
+                                    <SearchTreeTab
+                                        currentDocSet={currentDocSet}
+                                        currentBookCode={currentBookCode}
+                                    />
+                                </Route>
+                                <Route exact path="/edit">
+                                    <EditTab/>
+                                </Route>
+                                <Route exact path="/publish">
+                                    <PublishTab/>
+                                </Route>
+                                <Route exact path="/settings">
+                                    <SettingsTab
+                                        loadUuid={loadUuid}
+                                        setLoadUuid={setLoadUuid}
+                                        toImport={toImport}
+                                        setToImport={setToImport}
+                                        currentDocSet={currentDocSet}
+                                        setCurrentDocSet={setCurrentDocSet}
+                                        currentBookCode={currentBookCode}
+                                        setCurrentBookCode={setCurrentBookCode}
+                                    />
+                                </Route>
+                                <Route render={() => <Redirect to="/browse"/>}/>
+                            </IonRouterOutlet>
+                            <IonTabBar slot="bottom">
+                                <IonTabButton tab="browse" href="/browse">
+                                    <IonIcon icon={book}/>
+                                    <IonLabel>Browse</IonLabel>
+                                </IonTabButton>
+                                <IonTabButton tab="search" href="/search">
+                                    <IonIcon icon={search}/>
+                                    <IonLabel>Search</IonLabel>
+                                </IonTabButton>
+                                <IonTabButton tab="edit" href="/edit">
+                                    <IonIcon icon={create}/>
+                                    <IonLabel>Edit</IonLabel>
+                                </IonTabButton>
+                                <IonTabButton tab="publish" href="/publish">
+                                    <IonIcon icon={print}/>
+                                    <IonLabel>Publish</IonLabel>
+                                </IonTabButton>
+                            </IonTabBar>
+                        </IonTabs>
+                    </IonReactRouter>
                 </DocSetsProvider>
             </SettingsProvider>
         </PkProvider>

@@ -21,6 +21,7 @@
     "@types/react-router-dom": "^5.1.7",
     "axios": "^0.24.0",
     "btoa": "^1.2.1",
+    "deep-equal": "^2.0.5",
     "ionicons": "^5.4.0",
     "jszip": "^3.7.1",
     "proskomma": "^0.4.102",

@@ -1,79 +1,71 @@
-import React, { useState } from 'react';
-import {IonGrid, IonRow, IonCol, IonInput, IonCheckbox, IonButton, IonIcon} from '@ionic/react'
-import {search, refresh} from "ionicons/icons";
+import React, {useEffect, useState} from 'react';
+import {IonButton, IonCheckbox, IonCol, IonGrid, IonIcon, IonInput, IonRow} from '@ionic/react'
+import {refresh, search} from "ionicons/icons";
+import deepEqual from 'deep-equal';
 
-const TreeSearchForm = () => {
+const TreeSearchForm = (props) => {
+    const [content, setContent] = useState({});
     const [checkedFields, setCheckedFields] = useState([]);
-    const [word, setWord] = useState('');
-    const [lemma, setLemma] = useState('');
-    const [gloss, setGloss] = useState('');
-    const [type, setType] = useState('');
-    const [strongs, setStrongs] = useState('');
-    const [parsing, setParsing] = useState('');
-    const TreeSearchField = ({fieldString, fieldAccessor, fieldModifier}) => {
+    useEffect(
+        () => {
+            if (props.content && !deepEqual(props.content, content)) {
+                if (props.content.text) {
+                    props.setWord(props.content.text)
+                }
+                if (props.content.lemma) {
+                    props.setLemma(props.content.lemma)
+                }
+                if (props.content.gloss) {
+                    props.setGloss(props.content.gloss)
+                }
+                if (props.content.strong) {
+                    props.setStrongs(props.content.strong)
+                }
+                const parsingContent = Object.keys(props.content).filter(c => !['text', 'lemma', 'gloss', 'strong', 'class', 'type'].includes(c));
+                if (parsingContent.length > 0) {
+                    props.setParsing(parsingContent.map(k => `${k}:${props.content[k]}`).join(' '))
+                }
+                setContent(content);
+            }
+        },
+        [props.content]
+    )
+    const TreeSearchField = ({fieldString, fieldAccessor, fieldModifier, fieldWidth}) => {
         return <>
-                <IonCol size={1}>
-                    <IonCheckbox
-                        checked={checkedFields.includes(fieldString)}
-                        onIonChange={
-                            () =>
-                                checkedFields.includes(fieldString) ?
-                                    setCheckedFields(checkedFields.filter(f => f !== fieldString)) :
-                                    setCheckedFields([...checkedFields, fieldString])
-                        }
-                    />
-                </IonCol>
-                <IonCol size={3}>
-                    <IonInput
-                        placeholder={fieldString[0].toUpperCase() + fieldString.substring(1)}
-                        value={fieldAccessor}
-                        disabled={!checkedFields.includes(fieldString)}
-                        onIonChange={e => fieldModifier(e.detail.value)}
-                        debounce={1000}
-                    />
-                </IonCol>
-            </>
-    }
-    return <IonGrid>
-        <IonRow>
-            <TreeSearchField fieldString="word" fieldAccessor={word} fieldModifier={setWord}/>
-            <TreeSearchField fieldString="lemma" fieldAccessor={lemma} fieldModifier={setLemma}/>
-            <TreeSearchField fieldString="gloss" fieldAccessor={gloss} fieldModifier={setGloss}/>
-        </IonRow>
-        <IonRow>
-            <TreeSearchField fieldString="type" fieldAccessor={type} fieldModifier={setType}/>
-            <TreeSearchField fieldString="strongs" fieldAccessor={strongs} fieldModifier={setStrongs}/>
-            <TreeSearchField fieldString="parsing" fieldAccessor={parsing} fieldModifier={setParsing}/>
-        </IonRow>
-        <IonRow>
             <IonCol size={1}>
-                <IonButton
-                    className="ion-float-end"
-                    color="secondary"
-                    fill="clear"
-                    onClick={() => console.log('reset')}
-                >
-                    <IonIcon float-right icon={refresh}/>
-                </IonButton>
-            </IonCol>
-            <IonCol size={10}> </IonCol>
-            <IonCol size={1}>
-                <IonButton
-                    color="primary"
-                    fill="clear"
-                    className="ion-float-start"
-                    onClick={
-                        () => {
-                            console.log('search');
-                        }
+                <IonCheckbox
+                    checked={checkedFields.includes(fieldString)}
+                    onIonChange={
+                        () =>
+                            checkedFields.includes(fieldString) ?
+                                setCheckedFields(checkedFields.filter(f => f !== fieldString)) :
+                                setCheckedFields([...checkedFields, fieldString])
                     }
-                >
-                    <IonIcon icon={search}/>
-                </IonButton>
+                />
             </IonCol>
-
-        </IonRow>
-    </IonGrid>
+            <IonCol size={fieldWidth || 2}>
+                <IonInput
+                    placeholder={fieldString[0].toUpperCase() + fieldString.substring(1)}
+                    value={fieldAccessor}
+                    disabled={!checkedFields.includes(fieldString)}
+                    onIonChange={e => fieldModifier(e.detail.value)}
+                    debounce={1000}
+                />
+            </IonCol>
+        </>
+    }
+    return <>
+            <IonRow>
+                <TreeSearchField fieldString="word" fieldAccessor={props.word} fieldModifier={props.setWord}/>
+                <TreeSearchField fieldString="lemma" fieldAccessor={props.lemma} fieldModifier={props.setLemma}/>
+                <TreeSearchField fieldString="gloss" fieldAccessor={props.gloss} fieldModifier={props.setGloss}/>
+                <TreeSearchField fieldString="strongs" fieldAccessor={props.strongs} fieldModifier={props.setStrongs}/>
+            </IonRow>
+            <IonRow>
+                <TreeSearchField fieldString="parsing" fieldAccessor={props.parsing} fieldModifier={props.setParsing}
+                                 fieldWidth={11}/>
+            </IonRow>
+        </>
 }
 
 export default TreeSearchForm;

@@ -102,7 +102,7 @@ const SyntaxTrees = ({currentBookCode, selectedChapter, selectedVerses, isOpen, 
                 (tr, n) =>
                     <IonRow
                         key={n}
-                        style={{height: `${d3TreeDepth(syntaxTreeToD3(tr)) * (90 * (Math.min(1, 12.0 / d3TreeLeaves(syntaxTreeToD3(tr)))))}px`}}>
+                        style={{height: `${d3TreeDepth(syntaxTreeToD3(tr)) * (90 * (Math.min(1, 24.0 / d3TreeLeaves(syntaxTreeToD3(tr)))))}px`}}>
                         <IonCol>
                             <Tree
                                 data={syntaxTreeToD3(tr)}

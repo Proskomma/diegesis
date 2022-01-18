@@ -1,3 +1,5 @@
+import {Link} from "react-router-dom";
+
 const textStyle = {
     display: "block",
     textAlign: "center",
@@ -119,7 +121,19 @@ const InterlinearNode = (
             {content.cv.split(':')[1]}
         </div>}
         <div style={wordRcStyle}>
-            {content.text && <div style={textStyle}>{content.text}</div>}
+            {
+                content.text &&
+                <div style={textStyle}>
+                    <Link
+                        to={{
+                            pathname: "/search/tree",
+                            state: {content}
+                        }}
+                    >
+                        {content.text}
+                    </Link>
+                </div>
+            }
             {detailLevel > 1 && content.gloss &&
             <div style={glossStyle}>
                 {content.gloss}{content.class ? ` (${content.type && content.class !== 'verb' ? `${content.type} ` : ''}${content.class})` : ''}

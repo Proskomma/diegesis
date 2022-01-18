@@ -17,7 +17,6 @@ import searchTableMatchQuery from "./searchTableMatchQuery";
 import textResultCellContent from "./textResultCellContent";
 import tableResultCellContent from "./tableResultCellContent";
 import tableResultHeaderRow from "./tableResultHeaderRow";
-import TreeSearchForm from "./TreeSearchForm";
 
 const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelectedChapter, setSelectedVerses}) => {
     const pk = useContext(PkContext);
@@ -262,10 +261,6 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
                                 setSearchResultUnit={setSearchResultUnit}
                             />}
                         </>
-                        }
-                        {
-                            docType === 'tree' &&
-                                <TreeSearchForm/>
                         }
                         {
                             resultParaRecords.length > 0 &&

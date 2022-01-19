@@ -8,6 +8,14 @@ import PageToolBar from "../../../components/PageToolBar";
 import DocSetsContext from "../../../contexts/DocSetsContext";
 import PkContext from "../../../contexts/PkContext";
 
+const syntaxTreeAsList = tr => {
+    let children = [];
+    if (tr.children) {
+        children = tr.children.map(ch => syntaxTreeAsList(ch))
+    }
+    return <li><b>{tr.content.text}</b> <i>{tr.content.gloss}</i>{children.length > 0 ? <ul>{children}</ul>: ''}</li>;
+}
+
 const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
     const [content, setContent] = useState({});
     const [word, setWord] = useState('');
@@ -34,7 +42,6 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
         () => {
             if (searchWaiting) {
                 const treeSearchTerms = ['baa'];
-                console.log(treeSearchTerms);
                 if (treeSearchTerms.length > 0) {
                     setBooksToSearch(searchTarget === 'docSet' ? Object.keys(docSets[currentDocSet].documents) : [currentBookCode]);
                     setSearchTerms(treeSearchTerms);
@@ -63,7 +70,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                           treeSequences {
                             sentenceValues: tribos(
                             query:
-                              "nodes[==(content('text'), 'τὸν')]/values{@sentence}"
+                              "nodes[==(content('text'), '%searchWord%')]/values{@sentence}"
                             )
                             sentenceNodes: tribos(
                             query:
@@ -74,19 +81,48 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                       }
                     }`.replace(/%docSetId%/g, currentDocSet)
                         .replace(/%bookCode%/g, bookToSearch)
-                    ;
-                    const result = await pk.gqlQuery(
+                        .replace(/%searchWord%/g, word);
+                    let result = await pk.gqlQuery(
                         query
                     );
-                    console.log(JSON.stringify(JSON.parse(result.data.docSet.document.treeSequences[0].sentenceValues).data.sentence.map(v => parseInt(v)).sort((a,b) => a - b)));
-                    console.log(JSON.stringify(JSON.parse(result.data.docSet.document.treeSequences[0].sentenceNodes).data));
+                    let sentences = JSON.parse(result.data.docSet.document.treeSequences[0].sentenceValues)
+                        .data.sentence;
+                    if (sentences) {
+                        sentences = sentences.map(v => parseInt(v))
+                            .sort((a, b) => a - b)
+                            .map(v => `${v}`);
+                        const sentence2id = {};
+                        JSON.parse(result.data.docSet.document.treeSequences[0].sentenceNodes)
+                            .data
+                            .forEach(so => sentence2id[so.content.sentence] = so.id);
+                        const sentenceIds = sentences
+                            .map(s => sentence2id[s])
+                            .join(', ');
+                        query = `{
+                      docSet(id:"%docSetId%") {
+                        document(bookCode:"%bookCode%") {
+                          treeSequences {
+                            matches: tribos(
+                            query:
+                              "#{%ids%}/branch{@text, @gloss, @cv, children}"
+                            )
+                          }
+                        }
+                      }
+                    }`.replace(/%docSetId%/g, currentDocSet)
+                            .replace(/%bookCode%/g, bookToSearch)
+                            .replace(/%ids%/g, sentenceIds);
+                        result = await pk.gqlQuery(
+                            query
+                        );
+                        rr = rr.concat(JSON.parse(result.data.docSet.document.treeSequences[0].matches).data.map(m => ({book: bookToSearch, ...m})));
+                    }
                     b2s = b2s.slice(1);
                     rr = [...rr, ...records];
                 }
                 return [b2s, rr];
             }
             if (!searchWaiting) {
-                console.log('here!')
                 doQuery().then((res) => {
                         setBooksToSearch(res[0]);
                         setResults(res[1]);
@@ -146,8 +182,16 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                 </IonRow>
                 {
                     results.length === 0 ?
-                        <IonCol>No Results</IonCol> :
-                        <IonCol>{JSON.stringify(results)}</IonCol>
+                        <IonRow>
+                            <IonCol>No Results</IonCol>
+                        </IonRow> :
+                        results
+                            .map(
+                                r => <IonRow>
+                                    <IonCol size={1}>{`${r.book} ${r.content.cv}`}</IonCol>
+                                    <IonCol size={11}><ul>{r.children.map(rc => syntaxTreeAsList(rc))}</ul></IonCol>
+                                </IonRow>
+                            )
                 }
             </IonGrid>
         </IonContent>

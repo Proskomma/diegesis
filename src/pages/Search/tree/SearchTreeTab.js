@@ -2,7 +2,7 @@ import {IonButton, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonPage, Ion
 import React, {useContext, useEffect, useState} from "react";
 import {useLocation} from "react-router-dom";
 import deepEqual from 'deep-equal';
-import TreeSearchForm from "../TreeSearchForm";
+import TreeSearchForm from "./TreeSearchForm";
 import {refresh, search} from "ionicons/icons";
 import PageToolBar from "../../../components/PageToolBar";
 import DocSetsContext from "../../../contexts/DocSetsContext";

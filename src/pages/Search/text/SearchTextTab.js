@@ -10,10 +10,10 @@ import SearchResultsTools from '../SearchResultsTools';
 import SearchBar from "../SearchBar";
 import WordDetails from "../WordDetails";
 import SearchOptions from "../SearchOptions";
-import textSearchDocumentQuery from "../textSearchDocumentQuery";
-import searchBlockMatchQuery from "../searchBlockMatchQuery";
-import searchVerseMatchQuery from "../searchVerseMatchQuery";
-import textResultCellContent from "../textResultCellContent";
+import textSearchDocumentQuery from "./textSearchDocumentQuery";
+import searchBlockMatchQuery from "./searchBlockMatchQuery";
+import searchVerseMatchQuery from "./searchVerseMatchQuery";
+import textResultCellContent from "./textResultCellContent";
 
 const SearchTextTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelectedChapter, setSelectedVerses}) => {
     const pk = useContext(PkContext);

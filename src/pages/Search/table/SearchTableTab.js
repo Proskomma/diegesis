@@ -10,9 +10,9 @@ import SearchResultsTools from '../SearchResultsTools';
 import SearchBar from "../SearchBar";
 import WordDetails from "../WordDetails";
 import SearchOptions from "../SearchOptions";
-import searchTableMatchQuery from "../searchTableMatchQuery";
-import tableResultCellContent from "../tableResultCellContent";
-import tableResultHeaderRow from "../tableResultHeaderRow";
+import searchTableMatchQuery from "./searchTableMatchQuery";
+import tableResultCellContent from "./tableResultCellContent";
+import tableResultHeaderRow from "./tableResultHeaderRow";
 
 const SearchTableTab = ({
                             currentDocSet,

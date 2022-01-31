@@ -128,8 +128,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                         setResults(res[1]);
                     }
                 )
-            }
-            ;
+            };
         },
         [resultsPage, currentDocSet, nResultsPerPage, searchAllBooks, searchWaiting, searchTerms]
     );

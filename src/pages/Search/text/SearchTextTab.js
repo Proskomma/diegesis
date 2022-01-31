@@ -1,24 +1,21 @@
 import React, {useContext, useEffect} from 'react';
 import {useLocation} from 'react-router-dom';
 import {IonCol, IonContent, IonGrid, IonHeader, IonPage, IonRow, IonText,} from '@ionic/react';
-import './SearchTab.css';
+import '../SearchTab.css';
 
-import PkContext from '../../contexts/PkContext';
-import DocSetsContext from "../../contexts/DocSetsContext";
-import PageToolBar from "../../components/PageToolBar";
-import SearchResultsTools from './SearchResultsTools';
-import SearchBar from "./SearchBar";
-import WordDetails from "./WordDetails";
-import SearchOptions from "./SearchOptions";
-import textSearchDocumentQuery from "./textSearchDocumentQuery";
-import searchBlockMatchQuery from "./searchBlockMatchQuery";
-import searchVerseMatchQuery from "./searchVerseMatchQuery";
-import searchTableMatchQuery from "./searchTableMatchQuery";
-import textResultCellContent from "./textResultCellContent";
-import tableResultCellContent from "./tableResultCellContent";
-import tableResultHeaderRow from "./tableResultHeaderRow";
+import PkContext from '../../../contexts/PkContext';
+import DocSetsContext from "../../../contexts/DocSetsContext";
+import PageToolBar from "../../../components/PageToolBar";
+import SearchResultsTools from '../SearchResultsTools';
+import SearchBar from "../SearchBar";
+import WordDetails from "../WordDetails";
+import SearchOptions from "../SearchOptions";
+import textSearchDocumentQuery from "../textSearchDocumentQuery";
+import searchBlockMatchQuery from "../searchBlockMatchQuery";
+import searchVerseMatchQuery from "../searchVerseMatchQuery";
+import textResultCellContent from "../textResultCellContent";
 
-const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelectedChapter, setSelectedVerses}) => {
+const SearchTextTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelectedChapter, setSelectedVerses}) => {
     const pk = useContext(PkContext);
     const docSets = useContext(DocSetsContext);
     const [linkSearchString, setLinkSearchString] = React.useState("");
@@ -36,7 +33,6 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
     const [showOptions, setShowOptions] = React.useState(false);
     const [searchTarget, setSearchTarget] = React.useState('docSet');
     const [searchResultUnit, setSearchResultUnit] = React.useState('block');
-    const [docType, setDocType] = React.useState('');
 
     const location = useLocation();
     if (location && location.state && location.state.newSearchString && location.state.newSearchString !== linkSearchString) {
@@ -63,75 +59,38 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
             resetSearch();
         }, [linkSearchString]);
     useEffect(
-        // Get docType
-        () => {
-            const docSetRecord = docSets[currentDocSet];
-            if (docSetRecord) {
-                const documentRecord = docSetRecord.documents[currentBookCode];
-                if (documentRecord) {
-                    const docTypeTag = documentRecord.tags.filter(t => t.startsWith('doctype'))[0];
-                    if (docTypeTag) {
-                        const dt = docTypeTag.split(':')[1];
-                        setDocType(dt);
-                    }
-                }
-            }
-        },
-        [currentDocSet, currentBookCode]
-    );
-    useEffect(
         // When searchWaiting is set, refresh payloadSearchTerms and set booksToSearch
         () => {
-            if (docType === 'text' && searchWaiting) {
-                // TEXT:
-                const payloadTerms = searchString.split(/ +/)
+            const payloadTerms = searchString.split(/ +/)
+                .map((st) => st.trim())
+                .filter((st) => st.length > 0)
+                .filter(st => !st.includes(':'));
+            const attTerms =
+                searchString.split(/ +/)
                     .map((st) => st.trim())
                     .filter((st) => st.length > 0)
-                    .filter(st => !st.includes(':'));
-                const attTerms =
-                    searchString.split(/ +/)
-                        .map((st) => st.trim())
-                        .filter((st) => st.length > 0)
-                        .filter(st => st.includes(':'))
-                        .map(st => st.split(':').slice(0, 2));
-                if (payloadTerms.length > 0 || attTerms.length > 0) {
-                    const doQuery = async () => {
-                        const result = await pk.gqlQuery(textSearchDocumentQuery(payloadTerms, attTerms, currentDocSet));
-                        if (result.data && result.data.docSet) {
-                            return result.data.docSet.documents.map((book) => book.bookCode);
-                        } else {
-                            return [];
-                        }
-                    };
-                    doQuery().then(res => {
-                        setSearchWaiting(false);
-                        setBooksToSearch(searchTarget === 'docSet' ? res : [currentBookCode]);
-                        setPayloadSearchTerms(payloadTerms);
-                        setAttSearchTerms(attTerms);
-                    });
-                } else {
+                    .filter(st => st.includes(':'))
+                    .map(st => st.split(':').slice(0, 2));
+            if (payloadTerms.length > 0 || attTerms.length > 0) {
+                const doQuery = async () => {
+                    const result = await pk.gqlQuery(textSearchDocumentQuery(payloadTerms, attTerms, currentDocSet));
+                    if (result.data && result.data.docSet) {
+                        return result.data.docSet.documents.map((book) => book.bookCode);
+                    } else {
+                        return [];
+                    }
+                };
+                doQuery().then(res => {
                     setSearchWaiting(false);
-                }
-            } else if (docType === 'table' && searchWaiting) {
-                setBooksToSearch(searchTarget === 'docSet' ? Object.keys(docSets[currentDocSet].documents) : [currentBookCode]);
-                const tableSearchTerms = searchString.split(/ +/)
-                    .map((st) => st.trim())
-                    .filter((st) => st.length > 0)
-                    .filter(st => st.includes('=') || st.includes('~'))
-                    .map(st => [
-                        st.includes('=') ? '=' : '~',
-                        ...st.split(/[=~]/).slice(0, 2),
-                    ]);
-                setPayloadSearchTerms([]);
-                setAttSearchTerms([]);
-                setTableSearchTerms(tableSearchTerms);
-                setSearchWaiting(false);
-            } else if (searchWaiting) {
-                console.log(`searching ${docType} (not implemented)`);
+                    setBooksToSearch(searchTarget === 'docSet' ? res : [currentBookCode]);
+                    setPayloadSearchTerms(payloadTerms);
+                    setAttSearchTerms(attTerms);
+                });
+            } else {
                 setSearchWaiting(false);
             }
         },
-        [searchWaiting, searchTarget, docType]
+        [searchWaiting, searchTarget]
     );
     useEffect(
         // When booksToSearch is set and is not empty,
@@ -145,7 +104,7 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
                     const bookToSearch = b2s[0];
                     console.log(bookToSearch, searchResultUnit)
                     let records = [];
-                    if (docType === 'text' && searchResultUnit === 'block') {
+                    if (searchResultUnit === 'block') {
                         const result = await pk.gqlQuery(
                             searchBlockMatchQuery(
                                 currentDocSet,
@@ -167,7 +126,7 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
                                 })
                             );
                         }
-                    } else if (docType === 'text') {
+                    } else {
                         const result = await pk.gqlQuery(
                             searchVerseMatchQuery(
                                 currentDocSet,
@@ -190,24 +149,6 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
                             );
                             setResultParaRecords(records);
                         }
-                    } else if (docType === 'table') {
-                        if (tableSearchTerms.length > 0) {
-                            const result = await pk.gqlQuery(searchTableMatchQuery(
-                                tableSearchTerms,
-                                currentDocSet,
-                                bookToSearch
-                            ));
-                            if (result.data && result.data.docSet && result.data.docSet.document) {
-                                records = result.data.docSet.document.tableSequences[0].rows.map(
-                                    r => ({
-                                        book: result.data.docSet.document.bookCode,
-                                        row: r[0].rows[0],
-                                        headings: result.data.docSet.document.tableSequences[0].headings,
-                                        fields: r.map(f => f.text),
-                                    })
-                                );
-                            }
-                        }
                     }
                     b2s = b2s.slice(1);
                     rpr = [...rpr, ...records];
@@ -225,7 +166,7 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
     return (
         <IonPage>
             <IonHeader>
-                <PageToolBar pageTitle="Search"/>
+                <PageToolBar pageTitle="Search Text"/>
             </IonHeader>
             {
                 wordDetails &&
@@ -241,7 +182,6 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
                 !wordDetails &&
                 <IonContent>
                     <IonGrid>
-                        {docType !== 'tree' &&
                         <>
                             <SearchBar
                                 searchString={searchString}
@@ -261,7 +201,6 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
                                 setSearchResultUnit={setSearchResultUnit}
                             />}
                         </>
-                        }
                         {
                             resultParaRecords.length > 0 &&
                             <IonRow>
@@ -282,25 +221,16 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
                                 {
                                     resultParaRecords.length === 0 ?
                                         <IonText>No results</IonText> :
-                                        docType === 'text' ?
-                                            textResultCellContent(
-                                                resultParaRecords,
-                                                resultsPage,
-                                                nResultsPerPage,
-                                                setWordDetails,
-                                                attSearchTerms,
-                                                setCurrentBookCode,
-                                                setSelectedChapter,
-                                                setSelectedVerses,
-                                            ) :
-                                            <>
-                                                {tableResultHeaderRow(resultParaRecords)}
-                                                {tableResultCellContent(
-                                                    resultParaRecords,
-                                                    resultsPage,
-                                                    nResultsPerPage,
-                                                )}
-                                            </>
+                                        textResultCellContent(
+                                            resultParaRecords,
+                                            resultsPage,
+                                            nResultsPerPage,
+                                            setWordDetails,
+                                            attSearchTerms,
+                                            setCurrentBookCode,
+                                            setSelectedChapter,
+                                            setSelectedVerses,
+                                        )
                                 }
                             </IonCol>
                         </IonRow>
@@ -325,4 +255,4 @@ const SearchTab = ({currentDocSet, currentBookCode, setCurrentBookCode, setSelec
     );
 };
 
-export default SearchTab;
+export default SearchTextTab;

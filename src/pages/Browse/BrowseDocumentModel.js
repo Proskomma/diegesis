@@ -37,7 +37,7 @@ const addActions = (dInstance) => {
                 data.subType === 'wordLike' ?
                     <Link
                         to={{
-                            pathname: "/search",
+                            pathname: "/search/text",
                             state: {newSearchString: data.payload}
                         }}
                         key={renderer.config.nextKey++}

@@ -25,7 +25,8 @@ import './theme/variables.css';
 
 /* Non-ionic imports */
 import BrowseTab from './pages/Browse/BrowseTab';
-import SearchTab from './pages/Search/SearchTab';
+import SearchTextTab from './pages/Search/text/SearchTextTab';
+import SearchTableTab from './pages/Search/table/SearchTableTab';
 import SearchTreeTab from './pages/Search/tree/SearchTreeTab';
 import EditTab from './pages/Edit/EditTab';
 import PublishTab from './pages/Publish/PublishTab';
@@ -46,11 +47,29 @@ const App = () => {
     const [selectedChapter, setSelectedChapter] = useState(null);
     const [selectedVerses, setSelectedVerses] = useState(null);
     const [mutationId, setMutationId] = useState(null);
+    const [docType, setDocType] = useState("");
     const pk = useContext(PkContext);
     const updateMutationId = () => setMutationId(generateId());
     const settings = {
         enableNetworkAccess: useState(false)
     };
+    useEffect(
+        // Get docType
+        () => {
+            const docSetRecord = docSets[currentDocSet];
+            if (docSetRecord) {
+                const documentRecord = docSetRecord.documents[currentBookCode];
+                if (documentRecord) {
+                    const docTypeTag = documentRecord.tags.filter(t => t.startsWith('doctype'))[0];
+                    if (docTypeTag) {
+                        const dt = docTypeTag.split(':')[1];
+                        setDocType(dt);
+                    }
+                }
+            }
+        },
+        [currentDocSet, currentBookCode]
+    );
     useEffect(() => {
         if (toImport.length > 0) {
             const importRecord = toImport[0];
@@ -165,8 +184,8 @@ const App = () => {
                                         mutationId={mutationId}
                                     />
                                 </Route>
-                                <Route exact path="/search">
-                                    <SearchTab
+                                <Route exact path="/search/text">
+                                    <SearchTextTab
                                         currentDocSet={currentDocSet}
                                         currentBookCode={currentBookCode}
                                         setCurrentBookCode={setCurrentBookCode}
@@ -176,6 +195,12 @@ const App = () => {
                                 </Route>
                                 <Route exact path="/search/tree">
                                     <SearchTreeTab
+                                        currentDocSet={currentDocSet}
+                                        currentBookCode={currentBookCode}
+                                    />
+                                </Route>
+                                <Route exact path="/search/table">
+                                    <SearchTableTab
                                         currentDocSet={currentDocSet}
                                         currentBookCode={currentBookCode}
                                     />
@@ -205,7 +230,7 @@ const App = () => {
                                     <IonIcon icon={book}/>
                                     <IonLabel>Browse</IonLabel>
                                 </IonTabButton>
-                                <IonTabButton tab="search" href="/search">
+                                <IonTabButton tab="search" href={`/search/${docType}`}>
                                     <IonIcon icon={search}/>
                                     <IonLabel>Search</IonLabel>
                                 </IonTabButton>

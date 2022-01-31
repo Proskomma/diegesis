@@ -9,7 +9,7 @@ import React from "react";
         }}
     >Book/Row</IonCol>
     {
-        resultParaRecords[0].headings && resultParaRecords[0].headings.map(
+        resultParaRecords[0] && resultParaRecords[0].headings && resultParaRecords[0].headings.map(
             (h, hn) => <IonCol
                 key={hn}
                 size={hn === (resultParaRecords[0].headings.length - 1) ? 11 - (resultParaRecords[0].headings.length - 1) : 1}

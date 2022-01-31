@@ -93,7 +93,7 @@ const TextBookContent = (
                 selectedVerses={selectedVerses}
                 setShowDetails={setShowDetails}
             />
-        };
+        }
     </IonGrid>;
 }
 

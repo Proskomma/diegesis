@@ -17,7 +17,7 @@ const CollapsingRows = ({heading, hasData, children, isOpen, setIsOpen}) => {
                     onClick={() => setIsOpen(true)}
                     icon={expand}/>
             </IonCol>
-        </IonRow>;
+        </IonRow>
     } else {
         return <>
             {

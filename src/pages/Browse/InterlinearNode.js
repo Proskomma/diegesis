@@ -4,6 +4,11 @@ const textStyle = {
     display: "block",
     textAlign: "center",
 };
+const linkStyle = {
+    textAlign: "center",
+    color: "#000",
+    textDecoration: "none",
+}
 const glossStyle = {
     display: "block",
     textAlign: "center",
@@ -125,6 +130,7 @@ const InterlinearNode = (
                 content.text &&
                 <div style={textStyle}>
                     <Link
+                        style={linkStyle}
                         to={{
                             pathname: "/search/tree",
                             state: {content}

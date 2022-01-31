@@ -7,6 +7,7 @@ import {refresh, search} from "ionicons/icons";
 import PageToolBar from "../../../components/PageToolBar";
 import DocSetsContext from "../../../contexts/DocSetsContext";
 import PkContext from "../../../contexts/PkContext";
+import SyntaxTreeRow from "../../../components/SyntaxTreeRow";
 
 const syntaxTreeAsList = tr => {
     let children = [];
@@ -37,6 +38,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
     if (location && location.state && location.state.content && !deepEqual(content, location.state.content)) {
         setContent(location.state.content);
     }
+
     useEffect(
         // When searchWaiting is set, refresh payloadSearchTerms and set booksToSearch
         () => {
@@ -104,7 +106,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                           treeSequences {
                             matches: tribos(
                             query:
-                              "#{%ids%}/branch{@text, @gloss, @cv, children}"
+                              "#{%ids%}/branch{@text, @gloss, @cv, children, @class}"
                             )
                           }
                         }
@@ -188,7 +190,9 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                             .map(
                                 r => <IonRow>
                                     <IonCol size={1}>{`${r.book} ${r.content.cv}`}</IonCol>
-                                    <IonCol size={11}><ul>{r.children.map(rc => syntaxTreeAsList(rc))}</ul></IonCol>
+                                    <IonCol size={11}>
+                                        {r.children.map((rc, n) => <SyntaxTreeRow treeData={rc} rowKey={n}/>)}
+                                    </IonCol>
                                 </IonRow>
                             )
                 }

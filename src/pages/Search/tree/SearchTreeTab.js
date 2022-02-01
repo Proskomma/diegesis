@@ -19,6 +19,7 @@ const syntaxTreeAsList = tr => {
 
 const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
     const [content, setContent] = useState({});
+    const [checkedFields, setCheckedFields] = useState([]);
     const [word, setWord] = useState('');
     const [lemma, setLemma] = useState('');
     const [gloss, setGloss] = useState('');
@@ -66,13 +67,29 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                     const bookToSearch = b2s[0];
                     console.log(bookToSearch)
                     let records = [];
+                    let termClause = "";
+                    if (checkedFields.includes('word')) {
+                        termClause = `[==(content('text'), '%searchTerm%')]`
+                            .replace('%searchTerm%', word);
+                    }
+                    if (checkedFields.includes('lemma')) {
+                        termClause = `[==(content('lemma'), '%searchTerm%')]`
+                            .replace('%searchTerm%', lemma);
+                    }
+                    if (checkedFields.includes('gloss')) {
+                        termClause = `[contains(content('gloss'), '%searchTerm%')]`
+                            .replace('%searchTerm%', gloss);
+                    }
+                    if (checkedFields.includes('strongs')) {
+                        termClause = `[==(content('strong'), '%searchTerm%')]`.replace('%searchTerm%', strongs);
+                    }
                     let query = `{
                       docSet(id:"%docSetId%") {
                         document(bookCode:"%bookCode%") {
                           treeSequences {
                             sentenceValues: tribos(
                             query:
-                              "nodes[==(content('text'), '%searchWord%')]/values{@sentence}"
+                              "nodes%termClause%/values{@sentence}"
                             )
                             sentenceNodes: tribos(
                             query:
@@ -83,7 +100,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                       }
                     }`.replace(/%docSetId%/g, currentDocSet)
                         .replace(/%bookCode%/g, bookToSearch)
-                        .replace(/%searchWord%/g, word);
+                        .replace(/%termClause%/g, termClause);
                     let result = await pk.gqlQuery(
                         query
                     );
@@ -152,6 +169,8 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                     setStrongs={setStrongs}
                     parsing={parsing}
                     setParsing={setParsing}
+                    checkedFields={checkedFields}
+                    setCheckedFields={setCheckedFields}
                 />
                 <IonRow>
                     <IonCol size={1}>
@@ -171,6 +190,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                             color="primary"
                             fill="clear"
                             className="ion-float-start"
+                            disabled={checkedFields.length === 0}
                             onClick={
                                 () => {
                                     setSearchWaiting(true);

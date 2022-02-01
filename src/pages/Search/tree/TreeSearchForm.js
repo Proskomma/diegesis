@@ -3,9 +3,8 @@ import {IonButton, IonCheckbox, IonCol, IonGrid, IonIcon, IonInput, IonRow} from
 import {refresh, search} from "ionicons/icons";
 import deepEqual from 'deep-equal';
 
-const TreeSearchForm = (props) => {
+const TreeSearchForm = props => {
     const [content, setContent] = useState({});
-    const [checkedFields, setCheckedFields] = useState([]);
     useEffect(
         () => {
             if (props.content && !deepEqual(props.content, content)) {
@@ -34,12 +33,17 @@ const TreeSearchForm = (props) => {
         return <>
             <IonCol size={1}>
                 <IonCheckbox
-                    checked={checkedFields.includes(fieldString)}
+                    checked={props.checkedFields.includes(fieldString)}
                     onIonChange={
-                        () =>
-                            checkedFields.includes(fieldString) ?
-                                setCheckedFields(checkedFields.filter(f => f !== fieldString)) :
-                                setCheckedFields([...checkedFields, fieldString])
+                        () => {
+                            if (props.checkedFields.includes(fieldString)) {
+                                props.setCheckedFields(props.checkedFields.filter(f => f !== fieldString))
+                            } else if (fieldString === 'parsing') {
+                                props.setCheckedFields([...props.checkedFields, fieldString])
+                            } else {
+                                props.setCheckedFields([...props.checkedFields.filter(f => !['word', 'lemma', 'gloss', 'strongs'].includes(f)), fieldString])
+                            }
+                        }
                     }
                 />
             </IonCol>
@@ -47,7 +51,7 @@ const TreeSearchForm = (props) => {
                 <IonInput
                     placeholder={fieldString[0].toUpperCase() + fieldString.substring(1)}
                     value={fieldAccessor}
-                    disabled={!checkedFields.includes(fieldString)}
+                    disabled={!props.checkedFields.includes(fieldString)}
                     onIonChange={e => fieldModifier(e.detail.value)}
                     debounce={1000}
                 />

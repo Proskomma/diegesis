@@ -67,21 +67,42 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                     const bookToSearch = b2s[0];
                     console.log(bookToSearch)
                     let records = [];
-                    let termClause = "";
+                    let searchClause = "";
                     if (checkedFields.includes('word')) {
-                        termClause = `[==(content('text'), '%searchTerm%')]`
+                        searchClause = `==(content('text'), '%searchTerm%')`
                             .replace('%searchTerm%', word);
                     }
                     if (checkedFields.includes('lemma')) {
-                        termClause = `[==(content('lemma'), '%searchTerm%')]`
+                        searchClause = `==(content('lemma'), '%searchTerm%')`
                             .replace('%searchTerm%', lemma);
                     }
                     if (checkedFields.includes('gloss')) {
-                        termClause = `[contains(content('gloss'), '%searchTerm%')]`
+                        searchClause = `contains(content('gloss'), '%searchTerm%')`
                             .replace('%searchTerm%', gloss);
                     }
                     if (checkedFields.includes('strongs')) {
-                        termClause = `[==(content('strong'), '%searchTerm%')]`.replace('%searchTerm%', strongs);
+                        searchClause = `==(content('strong'), '%searchTerm%')`.replace('%searchTerm%', strongs);
+                    }
+                    let parsingClauses = [];
+                    if (checkedFields.includes('parsing')) {
+                        const kvs = parsing.split(/ +/)
+                            .map(s => s.trim())
+                            .forEach(s => {
+                                const kv = s.split(':');
+                                if (kv.length === 2) {
+                                    parsingClauses.push(
+                                        `==(content('%key%'), '%value%')`
+                                            .replace('%key%', kv[0].trim())
+                                            .replace('%value%', kv[1].trim())
+                                    );
+                                }
+                            })
+                    }
+                    if (parsingClauses.length > 0) {
+                        if (searchClause.length > 0) {
+                            parsingClauses = [searchClause, ...parsingClauses];
+                        }
+                        searchClause = `and(${parsingClauses.join(',')})`
                     }
                     let query = `{
                       docSet(id:"%docSetId%") {
@@ -89,7 +110,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                           treeSequences {
                             sentenceValues: tribos(
                             query:
-                              "nodes%termClause%/values{@sentence}"
+                              "nodes[%searchClause%]/values{@sentence}"
                             )
                             sentenceNodes: tribos(
                             query:
@@ -100,7 +121,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                       }
                     }`.replace(/%docSetId%/g, currentDocSet)
                         .replace(/%bookCode%/g, bookToSearch)
-                        .replace(/%termClause%/g, termClause);
+                        .replace(/%searchClause%/g, searchClause)
                     let result = await pk.gqlQuery(
                         query
                     );
@@ -208,7 +229,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                         </IonRow> :
                         results
                             .map(
-                                r => <IonRow>
+                                (r, pn) => <IonRow key={pn}>
                                     <IonCol size={1}>{`${r.book} ${r.content.cv}`}</IonCol>
                                     <IonCol size={11}>
                                         {r.children.map((rc, n) => <SyntaxTreeRow treeData={rc} rowKey={n}/>)}

@@ -221,7 +221,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                 {
                     results.length === 0 ?
                         <IonRow>
-                            <IonCol>No Results</IonCol>
+                            <IonCol>{booksToSearch && booksToSearch.length > 0 && (searchAllBooks || results.length < ((resultsPage + 1) * nResultsPerPage)) ? 'Searching' : 'No results'}</IonCol>
                         </IonRow> :
                         <>
                             <IonRow>

@@ -8,14 +8,7 @@ import PageToolBar from "../../../components/PageToolBar";
 import DocSetsContext from "../../../contexts/DocSetsContext";
 import PkContext from "../../../contexts/PkContext";
 import SyntaxTreeRow from "../../../components/SyntaxTreeRow";
-
-const syntaxTreeAsList = tr => {
-    let children = [];
-    if (tr.children) {
-        children = tr.children.map(ch => syntaxTreeAsList(ch))
-    }
-    return <li><b>{tr.content.text}</b> <i>{tr.content.gloss}</i>{children.length > 0 ? <ul>{children}</ul> : ''}</li>;
-}
+import SearchResultsTools from "../SearchResultsTools";
 
 const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
     const [content, setContent] = useState({});
@@ -32,7 +25,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
     const [searchAllBooks, setSearchAllBooks] = React.useState(false);
     const [results, setResults] = useState([]);
     const [resultsPage, setResultsPage] = React.useState(0);
-    const [nResultsPerPage, setNResultsPerPage] = React.useState(25);
+    const [nResultsPerPage, setNResultsPerPage] = React.useState(10);
     const [openBcvRef, setOpenBcvRef] = React.useState('MAT 1:18');
     const pk = useContext(PkContext);
     const docSets = useContext(DocSetsContext);
@@ -52,6 +45,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                 }
                 setResults([]);
                 setSearchWaiting(false);
+                setResultsPage(0);
             }
         },
         [searchWaiting, searchTarget]
@@ -231,8 +225,21 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                         </IonRow> :
                         <>
                             <IonRow>
-                                <IonCol>
+                                <IonCol style={{textAlign: "center"}}>
+                                    <SearchResultsTools
+                                        resultsPage={resultsPage}
+                                        setResultsPage={setResultsPage}
+                                        nResultsPerPage={nResultsPerPage}
+                                        resultParaRecords={results}
+                                        booksToSearch={booksToSearch}
+                                        setSearchAllBooks={setSearchAllBooks}
+                                    />
+                                </IonCol>
+                            </IonRow>
+                            <IonRow>
+                                <IonCol style={{textAlign: "center"}}>
                                     {results
+                                        .slice(resultsPage * nResultsPerPage, (resultsPage * nResultsPerPage) + nResultsPerPage)
                                         .map(
                                             (r, pn) => {
                                                 const bcvRef = `${r.book} ${r.content.cv}`;

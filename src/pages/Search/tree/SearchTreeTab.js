@@ -14,7 +14,7 @@ const syntaxTreeAsList = tr => {
     if (tr.children) {
         children = tr.children.map(ch => syntaxTreeAsList(ch))
     }
-    return <li><b>{tr.content.text}</b> <i>{tr.content.gloss}</i>{children.length > 0 ? <ul>{children}</ul>: ''}</li>;
+    return <li><b>{tr.content.text}</b> <i>{tr.content.gloss}</i>{children.length > 0 ? <ul>{children}</ul> : ''}</li>;
 }
 
 const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
@@ -32,7 +32,8 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
     const [searchAllBooks, setSearchAllBooks] = React.useState(false);
     const [results, setResults] = useState([]);
     const [resultsPage, setResultsPage] = React.useState(0);
-    const [nResultsPerPage, setNResultsPerPage] = React.useState(5);
+    const [nResultsPerPage, setNResultsPerPage] = React.useState(25);
+    const [openBcvRef, setOpenBcvRef] = React.useState('MAT 1:18');
     const pk = useContext(PkContext);
     const docSets = useContext(DocSetsContext);
     const location = useLocation();
@@ -168,7 +169,8 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                         setResults(res[1]);
                     }
                 )
-            };
+            }
+            ;
         },
         [resultsPage, currentDocSet, nResultsPerPage, searchAllBooks, searchWaiting, searchTerms]
     );
@@ -227,15 +229,46 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                         <IonRow>
                             <IonCol>No Results</IonCol>
                         </IonRow> :
-                        results
-                            .map(
-                                (r, pn) => <IonRow key={pn}>
-                                    <IonCol size={1}>{`${r.book} ${r.content.cv}`}</IonCol>
-                                    <IonCol size={11}>
-                                        {r.children.map((rc, n) => <SyntaxTreeRow treeData={rc} rowKey={n}/>)}
-                                    </IonCol>
-                                </IonRow>
-                            )
+                        <>
+                            <IonRow>
+                                <IonCol>
+                                    {results
+                                        .map(
+                                            (r, pn) => {
+                                                const bcvRef = `${r.book} ${r.content.cv}`;
+                                                return <IonButton
+                                                    color="secondary"
+                                                    fill={bcvRef === openBcvRef ? 'solid' : 'outline'}
+                                                    onClick={() => setOpenBcvRef(bcvRef === openBcvRef ? '' : bcvRef)}
+                                                >
+                                                    {bcvRef}
+                                                </IonButton>
+                                            }
+                                        )
+                                    }
+                                </IonCol>
+                            </IonRow>
+                            <IonRow>
+                                <IonCol>
+                                    {results.filter(r => {
+                                        const bcvRef = `${r.book} ${r.content.cv}`;
+                                        return bcvRef === openBcvRef;
+                                    })
+                                        .map((r, rn) => {
+                                            const bcvRef = `${r.book} ${r.content.cv}`;
+                                            return r.children.map((rc, n) => <IonGrid key={n}>
+                                                    <SyntaxTreeRow
+                                                        treeData={rc}
+                                                        key={n}
+                                                        rowKey={`${rn}-${n}`}
+                                                        isOpen={bcvRef === openBcvRef}
+                                                    />
+                                                </IonGrid>
+                                            )
+                                        })}
+                                </IonCol>
+                            </IonRow>
+                        </>
                 }
             </IonGrid>
         </IonContent>

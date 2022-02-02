@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import {IonCol, IonRow} from "@ionic/react";
 import Tree from "react-d3-tree";
 import useWindowDimensions from "./useWindowDimensions";
@@ -46,25 +46,29 @@ const d3TreeLeaves = d3Tree => {
     }
 }
 
-const SyntaxTreeRow = ({rowKey, treeData}) => {
+const SyntaxTreeRow = ({rowKey, treeData, isOpen}) => {
     const windowDimensions = useWindowDimensions();
-    return <IonRow
-        key={rowKey}
-        style={{height: `${d3TreeDepth(syntaxTreeToD3(treeData)) * (90 * (Math.min(1, 24.0 / d3TreeLeaves(syntaxTreeToD3(treeData)))))}px`}}>
-        <IonCol>
-            <Tree
-                data={syntaxTreeToD3(treeData)}
-                orientation="vertical"
-                separation={{nonSiblings: 0.5, siblings: 0.5}}
-                nodeSize={{x: 300, y: 60}}
-                translate={{x: windowDimensions.width / 2, y: 100}}
-                zoom={Math.min(1, 12.0 / d3TreeLeaves(syntaxTreeToD3(treeData)))}
-                rootNodeClassName="treeBranchNode"
-                branchNodeClassName="treeBranchNode"
-                leafNodeClassName="treeLeafNode"
-            />
-        </IonCol>
-    </IonRow>
+    if (isOpen) {
+        return <IonRow
+            key={rowKey}
+            style={{height: `${d3TreeDepth(syntaxTreeToD3(treeData)) * (90 * (Math.min(1, 24.0 / d3TreeLeaves(syntaxTreeToD3(treeData)))))}px`}}>
+            <IonCol>
+                <Tree
+                    data={syntaxTreeToD3(treeData)}
+                    orientation="vertical"
+                    separation={{nonSiblings: 0.5, siblings: 0.5}}
+                    nodeSize={{x: 300, y: 60}}
+                    translate={{x: windowDimensions.width / 2, y: 100}}
+                    zoom={Math.min(1, 12.0 / d3TreeLeaves(syntaxTreeToD3(treeData)))}
+                    rootNodeClassName="treeBranchNode"
+                    branchNodeClassName="treeBranchNode"
+                    leafNodeClassName="treeLeafNode"
+                />
+            </IonCol>
+        </IonRow>
+    } else {
+        return <IonRow><IonCol> </IonCol></IonRow>
+    }
 }
 
 export default SyntaxTreeRow;

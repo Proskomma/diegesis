@@ -42,6 +42,7 @@ const SyntaxTrees = ({currentBookCode, selectedChapter, selectedVerses, isOpen, 
                 (tr, n) => <SyntaxTreeRow
                     treeData={tr}
                     rowKey={n}
+                    isOpen={true}
                     />
             )
         }

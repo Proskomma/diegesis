@@ -31,9 +31,15 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
     const pk = useContext(PkContext);
     const docSets = useContext(DocSetsContext);
     const location = useLocation();
-    if (location && location.state && location.state.content && !deepEqual(content, location.state.content)) {
-        setContent(location.state.content);
-    }
+
+    useEffect(() => {
+            if (location && location.state && location.state.content && !deepEqual(content, location.state.content)) {
+                console.log('reset')
+                setContent(location.state.content);
+            }
+        },
+    [location]
+);
 
     useEffect(
         // When searchWaiting is set, refresh payloadSearchTerms and set booksToSearch
@@ -140,7 +146,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                           treeSequences {
                             matches: tribos(
                             query:
-                              "#{%ids%}/branch{@text, @gloss, @cv, children, @class}"
+                              "#{%ids%}/branch{children, content}"
                             )
                           }
                         }
@@ -169,6 +175,43 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
         },
         [resultsPage, currentDocSet, nResultsPerPage, searchAllBooks, searchWaiting, searchTerms]
     );
+    const nodeMatchesSearch = node => {
+        if (checkedFields.includes('word')) {
+            if (word !== node.text) {
+                return false;
+            }
+        }
+        if (checkedFields.includes('lemma')) {
+            if (lemma !== node.lemma) {
+                return false;
+            }
+        }
+        if (checkedFields.includes('gloss')) {
+            if (gloss !== node.gloss) {
+                return false;
+            }
+        }
+        if (checkedFields.includes('strongs')) {
+            if (strongs !== node.strong) {
+                return false;
+            }
+        }
+        if (checkedFields.includes('parsing')) {
+            for (
+                const [k, v] of
+                parsing
+                    .split(/ +/)
+                    .map(s => s.trim())
+                    .filter(s => s.includes(':'))
+                    .map(s => s.split(':'))
+                ) {
+                if (!(k in node) || node[k] !== v) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
     return <IonPage>
         <IonHeader>
             <PageToolBar pageTitle="Search Tree"/>
@@ -269,16 +312,19 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                                                 leaves(leaves1(r.children, ''), '', '')
                                                     .map(
                                                         (l, n) =>
-                                                            <IonButton
+                                                            <span
                                                                 key={`${rn}-${n}`}
                                                                 style={{
-                                                                    textTransform: "none",
+                                                                    display: "inline-block",
+                                                                    backgroundColor: "#DDD",
+                                                                    padding: "5px",
+                                                                    margin: "5px",
+                                                                    fontWeight: nodeMatchesSearch(l) ? "bold" : "normal"
                                                                 }}
-                                                                color="tertiary"
-                                                                fill="outline"
+                                                                onClick={() => setContent({...l})}
                                                             >
-                                                                {l.text}
-                                                            </IonButton>
+                                                                {l.text}<br/><span style={{fontSize: "smaller"}}>{l.gloss}</span>
+                                                            </span>
                                                     )
                                         )
                                     }

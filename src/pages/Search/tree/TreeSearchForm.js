@@ -24,7 +24,7 @@ const TreeSearchForm = props => {
                 if (parsingContent.length > 0) {
                     props.setParsing(parsingContent.map(k => `${k}:${props.content[k]}`).join(' '))
                 }
-                setContent(content);
+                setContent(props.content);
             }
         },
         [props.content]

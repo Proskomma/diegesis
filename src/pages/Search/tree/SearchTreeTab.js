@@ -34,8 +34,8 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
 
     useEffect(() => {
             if (location && location.state && location.state.content && !deepEqual(content, location.state.content)) {
-                console.log('reset')
                 setContent(location.state.content);
+                setResults([]);
             }
         },
     [location]

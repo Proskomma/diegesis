@@ -9,6 +9,7 @@ import DocSetsContext from "../../../contexts/DocSetsContext";
 import PkContext from "../../../contexts/PkContext";
 import SyntaxTreeRow from "../../../components/SyntaxTreeRow";
 import SearchResultsTools from "../SearchResultsTools";
+import {leaves, leaves1} from "../../../components/treeLeaves";
 
 const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
     const [content, setContent] = useState({});
@@ -244,6 +245,8 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                                             (r, pn) => {
                                                 const bcvRef = `${r.book} ${r.content.cv}`;
                                                 return <IonButton
+                                                    key={pn}
+                                                    size="small"
                                                     color="secondary"
                                                     fill={bcvRef === openBcvRef ? 'solid' : 'outline'}
                                                     onClick={() => setOpenBcvRef(bcvRef === openBcvRef ? '' : bcvRef)}
@@ -254,6 +257,32 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                                         )
                                     }
                                 </IonCol>
+                            </IonRow>
+                            <IonRow>
+                                <IonCol style={{textAlign: "center"}}>
+                                    {results.filter(r => {
+                                        const bcvRef = `${r.book} ${r.content.cv}`;
+                                        return bcvRef === openBcvRef;
+                                    })
+                                        .map(
+                                            (r, rn) =>
+                                                leaves(leaves1(r.children, ''), '', '')
+                                                    .map(
+                                                        (l, n) =>
+                                                            <IonButton
+                                                                key={`${rn}-${n}`}
+                                                                style={{
+                                                                    textTransform: "none",
+                                                                }}
+                                                                color="tertiary"
+                                                                fill="outline"
+                                                            >
+                                                                {l.text}
+                                                            </IonButton>
+                                                    )
+                                        )
+                                    }
+                                        </IonCol>
                             </IonRow>
                             <IonRow>
                                 <IonCol>

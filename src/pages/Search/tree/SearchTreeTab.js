@@ -289,14 +289,14 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                                     />
                                 </IonCol>
                             </IonRow>
-                            <IonRow>
-                                <IonCol style={{textAlign: "center"}}>
-                                    {results
-                                        .slice(resultsPage * nResultsPerPage, (resultsPage * nResultsPerPage) + nResultsPerPage)
-                                        .map(
-                                            (r, pn) => {
-                                                const bcvRef = `${r.book} ${r.content.cv}`;
-                                                return <IonButton
+                            {results
+                                .slice(resultsPage * nResultsPerPage, (resultsPage * nResultsPerPage) + nResultsPerPage)
+                                .map(
+                                    (r, pn) => {
+                                        const bcvRef = `${r.book} ${r.content.cv}`;
+                                        return <IonRow>
+                                            <IonCol size={1}>
+                                                <IonButton
                                                     key={pn}
                                                     size="small"
                                                     color="secondary"
@@ -305,33 +305,33 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                                                 >
                                                     {bcvRef}
                                                 </IonButton>
-                                            }
-                                        )
+                                            </IonCol>
+                                            <IonCol size={11}>
+                                                {
+                                                    leaves(leaves1(r.children, ''), '', '')
+                                                                .map(
+                                                                    (l, n) =>
+                                                                        <InterlinearNode
+                                                                            key={`${pn}-${n}`}
+                                                                            content={l}
+                                                                            detailLevel={leafDetailLevel}
+                                                                            isBold={nodeMatchesSearch(l)}
+                                                                            onClickFunction={() => setContent({...l})}
+                                                                        />
+                                                                )
+                                                }
+                                                {(bcvRef === openBcvRef) && <SyntaxTreeRow
+                                                    treeData={r}
+                                                    key={pn}
+                                                    rowKey={pn}
+                                                    isOpen={true}
+                                                />}
+                                            </IonCol>
+                                        </IonRow>
                                     }
-                                </IonCol>
-                            </IonRow>
+                                )
+                            }
                             <IonRow>
-                                <IonCol style={{textAlign: "center"}}>
-                                    {results.filter(r => {
-                                        const bcvRef = `${r.book} ${r.content.cv}`;
-                                        return bcvRef === openBcvRef;
-                                    })
-                                        .map(
-                                            (r, rn) =>
-                                                leaves(leaves1(r.children, ''), '', '')
-                                                    .map(
-                                                        (l, n) =>
-                                                            <InterlinearNode
-                                                                key={`${rn}-${n}`}
-                                                                content={l}
-                                                                detailLevel={leafDetailLevel}
-                                                                isBold={nodeMatchesSearch(l)}
-                                                                onClickFunction={() => setContent({...l})}
-                                                            />
-                                                    )
-                                        )
-                                    }
-                                </IonCol>
                             </IonRow>
                             <IonRow>
                                 <IonCol>

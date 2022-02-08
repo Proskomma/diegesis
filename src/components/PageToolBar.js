@@ -1,5 +1,5 @@
 import {IonButton, IonButtons, IonIcon, IonTitle, IonToolbar} from "@ionic/react";
-import {cog, globe} from "ionicons/icons";
+import {globe} from "ionicons/icons";
 import React, {useContext} from "react";
 import SettingsContext from "../contexts/SettingsContext";
 
@@ -14,9 +14,6 @@ const PageToolBar = ({pageTitle}) => {
                     color={settings.enableNetworkAccess[0] ? "dark" : "medium"}
                     slot="icon-only"
                     icon={globe}/>
-            </IonButton>
-            <IonButton routerLink="/settings">
-                <IonIcon slot="icon-only" icon={cog}/>
             </IonButton>
         </IonButtons>
         <IonTitle>{pageTitle} - Diegesis</IonTitle>

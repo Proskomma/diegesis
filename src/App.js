@@ -1,8 +1,8 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {Redirect, Route} from 'react-router-dom';
-import {IonApp, IonIcon, IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs} from '@ionic/react';
+import {IonApp, IonButton, IonIcon, IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs} from '@ionic/react';
 import {IonReactRouter} from '@ionic/react-router';
-import {book, create, print, search} from 'ionicons/icons';
+import {book, cog, create, print, search} from 'ionicons/icons';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -234,13 +234,17 @@ const App = () => {
                                     <IonIcon icon={search}/>
                                     <IonLabel>Search</IonLabel>
                                 </IonTabButton>
-                                <IonTabButton tab="edit" href="/edit">
+                                <IonTabButton tab="edit" href="/edit" disabled={true}>
                                     <IonIcon icon={create}/>
                                     <IonLabel>Edit</IonLabel>
                                 </IonTabButton>
-                                <IonTabButton tab="publish" href="/publish">
+                                <IonTabButton tab="publish" href="/publish" disabled={true}>
                                     <IonIcon icon={print}/>
                                     <IonLabel>Publish</IonLabel>
+                                </IonTabButton>
+                                <IonTabButton tab="settings" href="/settings">
+                                    <IonIcon icon={cog}/>
+                                    <IonLabel>Settings</IonLabel>
                                 </IonTabButton>
                             </IonTabBar>
                         </IonTabs>

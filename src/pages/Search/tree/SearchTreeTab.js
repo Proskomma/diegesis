@@ -331,28 +331,6 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                                     }
                                 )
                             }
-                            <IonRow>
-                            </IonRow>
-                            <IonRow>
-                                <IonCol>
-                                    {results.filter(r => {
-                                        const bcvRef = `${r.book} ${r.content.cv}`;
-                                        return bcvRef === openBcvRef;
-                                    })
-                                        .map((r, rn) => {
-                                            const bcvRef = `${r.book} ${r.content.cv}`;
-                                            return r.children.map((rc, n) => <IonGrid key={n}>
-                                                    <SyntaxTreeRow
-                                                        treeData={rc}
-                                                        key={n}
-                                                        rowKey={`${rn}-${n}`}
-                                                        isOpen={bcvRef === openBcvRef}
-                                                    />
-                                                </IonGrid>
-                                            )
-                                        })}
-                                </IonCol>
-                            </IonRow>
                         </>
                 }
             </IonGrid>

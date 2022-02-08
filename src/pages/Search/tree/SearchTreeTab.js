@@ -10,6 +10,8 @@ import PkContext from "../../../contexts/PkContext";
 import SyntaxTreeRow from "../../../components/SyntaxTreeRow";
 import SearchResultsTools from "../SearchResultsTools";
 import {leaves, leaves1} from "../../../components/treeLeaves";
+import InterlinearNode from "../../../components/InterlinearNode";
+import TreeDisplayLevel from "../../../components/TreeDisplayLevel";
 
 const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
     const [content, setContent] = useState({});
@@ -28,6 +30,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
     const [resultsPage, setResultsPage] = React.useState(0);
     const [nResultsPerPage, setNResultsPerPage] = React.useState(10);
     const [openBcvRef, setOpenBcvRef] = React.useState('MAT 1:18');
+    const [leafDetailLevel, setLeafDetailLevel] = useState(1);
     const pk = useContext(PkContext);
     const docSets = useContext(DocSetsContext);
     const location = useLocation();
@@ -38,8 +41,8 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                 setResults([]);
             }
         },
-    [location]
-);
+        [location]
+    );
 
     useEffect(
         // When searchWaiting is set, refresh payloadSearchTerms and set booksToSearch
@@ -269,7 +272,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                         </IonRow> :
                         <>
                             <IonRow>
-                                <IonCol style={{textAlign: "center"}}>
+                                <IonCol size={8}>
                                     <SearchResultsTools
                                         resultsPage={resultsPage}
                                         setResultsPage={setResultsPage}
@@ -277,6 +280,12 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                                         resultParaRecords={results}
                                         booksToSearch={booksToSearch}
                                         setSearchAllBooks={setSearchAllBooks}
+                                    />
+                                </IonCol>
+                                <IonCol style={{textAlign: "right"}} size={4}>
+                                    <TreeDisplayLevel
+                                        leafDetailLevel={leafDetailLevel}
+                                        setLeafDetailLevel={setLeafDetailLevel}
                                     />
                                 </IonCol>
                             </IonRow>
@@ -312,23 +321,17 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                                                 leaves(leaves1(r.children, ''), '', '')
                                                     .map(
                                                         (l, n) =>
-                                                            <span
+                                                            <InterlinearNode
                                                                 key={`${rn}-${n}`}
-                                                                style={{
-                                                                    display: "inline-block",
-                                                                    backgroundColor: "#DDD",
-                                                                    padding: "5px",
-                                                                    margin: "5px",
-                                                                    fontWeight: nodeMatchesSearch(l) ? "bold" : "normal"
-                                                                }}
-                                                                onClick={() => setContent({...l})}
-                                                            >
-                                                                {l.text}<br/><span style={{fontSize: "smaller"}}>{l.gloss}</span>
-                                                            </span>
+                                                                content={l}
+                                                                detailLevel={leafDetailLevel}
+                                                                isBold={nodeMatchesSearch(l)}
+                                                                onClickFunction={() => setContent({...l})}
+                                                            />
                                                     )
                                         )
                                     }
-                                        </IonCol>
+                                </IonCol>
                             </IonRow>
                             <IonRow>
                                 <IonCol>

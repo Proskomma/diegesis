@@ -9,6 +9,12 @@ const linkStyle = {
     color: "#000",
     textDecoration: "none",
 }
+const boldLinkStyle = {
+    textAlign: "center",
+    fontWeight: "bold",
+    color: "#000",
+    textDecoration: "none",
+}
 const glossStyle = {
     display: "block",
     textAlign: "center",
@@ -107,21 +113,15 @@ const InterlinearNode = (
     {
         content,
         detailLevel,
-        setSelectedChapter,
-        setSelectedVerses,
-        setShowDetails
+        onClickFunction,
+        isBold,
     }) => {
     return <>
         {content.sentence && <><br/><span style={{paddingLeft: "3em"}}> </span></>}
         {content.cv &&
         <div
             style={cvRcStyle}
-            onClick={() => {
-                const [c, v] = content.cv.split(':');
-                setSelectedChapter(parseInt(c));
-                setSelectedVerses(parseInt(v));
-                setShowDetails(true);
-            }}
+            onClick={onClickFunction}
         >
             {content.cv.split(':')[1]}
         </div>}
@@ -130,7 +130,7 @@ const InterlinearNode = (
                 content.text &&
                 <div style={textStyle}>
                     <Link
-                        style={linkStyle}
+                        style={isBold ? boldLinkStyle : linkStyle}
                         to={{
                             pathname: "/search/tree",
                             state: {content}

@@ -1,9 +1,9 @@
-import InterlinearNode from "./InterlinearNode";
+import InterlinearNode from "../../components/InterlinearNode";
 import React, {useContext, useEffect, useState} from "react";
 import {IonCol, IonContent, IonGrid, IonHeader, IonRow,} from '@ionic/react';
 import PkContext from "../../contexts/PkContext";
 import DocSetsContext from "../../contexts/DocSetsContext";
-import TreeDisplayLevel from "./TreeDisplayLevel";
+import TreeDisplayLevel from "../../components/TreeDisplayLevel";
 import TranslationNavigation from "../../components/TranslationNavigation";
 import {leaves, leaves1} from "../../components/treeLeaves";
 import VerseDetails from "./VerseDetails";
@@ -108,9 +108,14 @@ const TreeChapterContent = (
                                                 key={n}
                                                 content={node}
                                                 detailLevel={leafDetailLevel}
-                                                setSelectedChapter={setSelectedChapter}
-                                                setSelectedVerses={setSelectedVerses}
-                                                setShowDetails={setShowDetails}
+                                                onClickFunction={
+                                                    () => {
+                                                        const [c, v] = node.cv.split(':');
+                                                        setSelectedChapter(parseInt(c));
+                                                        setSelectedVerses(parseInt(v));
+                                                        setShowDetails(true);
+                                                    }
+                                                }
                                             />
                                     )
                             }

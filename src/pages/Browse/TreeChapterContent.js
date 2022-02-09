@@ -7,6 +7,7 @@ import TreeDisplayLevel from "../../components/TreeDisplayLevel";
 import TranslationNavigation from "../../components/TranslationNavigation";
 import {leaves, leaves1} from "../../components/treeLeaves";
 import VerseDetails from "./VerseDetails";
+import {Link} from "react-router-dom";
 
 const TreeChapterContent = (
     {
@@ -108,14 +109,8 @@ const TreeChapterContent = (
                                                 key={n}
                                                 content={node}
                                                 detailLevel={leafDetailLevel}
-                                                onClickFunction={
-                                                    () => {
-                                                        const [c, v] = node.cv.split(':');
-                                                        setSelectedChapter(parseInt(c));
-                                                        setSelectedVerses(parseInt(v));
-                                                        setShowDetails(true);
-                                                    }
-                                                }
+                                                isBold={false}
+                                                referer="browse"
                                             />
                                     )
                             }

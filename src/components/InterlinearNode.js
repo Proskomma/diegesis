@@ -113,15 +113,14 @@ const InterlinearNode = (
     {
         content,
         detailLevel,
-        onClickFunction,
         isBold,
+        referer,
     }) => {
     return <>
         {content.sentence && <><br/><span style={{paddingLeft: "3em"}}> </span></>}
         {content.cv &&
         <div
             style={cvRcStyle}
-            onClick={onClickFunction}
         >
             {content.cv.split(':')[1]}
         </div>}
@@ -133,7 +132,7 @@ const InterlinearNode = (
                         style={isBold ? boldLinkStyle : linkStyle}
                         to={{
                             pathname: "/search/tree",
-                            state: {content}
+                            state: {...{content}, referer},
                         }}
                     >
                         {content.text}

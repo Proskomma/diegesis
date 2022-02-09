@@ -12,6 +12,7 @@ import SearchResultsTools from "../SearchResultsTools";
 import {leaves, leaves1} from "../../../components/treeLeaves";
 import InterlinearNode from "../../../components/InterlinearNode";
 import TreeDisplayLevel from "../../../components/TreeDisplayLevel";
+import TreeDetails from "./TreeDetails";
 
 const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
     const [content, setContent] = useState({});
@@ -31,14 +32,19 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
     const [nResultsPerPage, setNResultsPerPage] = React.useState(10);
     const [openBcvRef, setOpenBcvRef] = React.useState('MAT 1:18');
     const [leafDetailLevel, setLeafDetailLevel] = useState(1);
+    const [selectedNode, setSelectedNode] = useState(null);
     const pk = useContext(PkContext);
     const docSets = useContext(DocSetsContext);
     const location = useLocation();
 
     useEffect(() => {
             if (location && location.state && location.state.content && !deepEqual(content, location.state.content)) {
-                setContent(location.state.content);
-                setResults([]);
+                if (location.state.referer === "browse" || Object.keys(content).length === 0) {
+                    setContent(location.state.content);
+                    setResults([]);
+                } else {
+                    setSelectedNode(location.state.content);
+                }
             }
         },
         [location]
@@ -219,122 +225,131 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
         <IonHeader>
             <PageToolBar pageTitle="Search Tree"/>
         </IonHeader>
-        <IonContent>
-            <IonGrid>
-                <TreeSearchForm
-                    content={content}
-                    word={word}
-                    setWord={setWord}
-                    lemma={lemma}
-                    setLemma={setLemma}
-                    gloss={gloss}
-                    setGloss={setGloss}
-                    strongs={strongs}
-                    setStrongs={setStrongs}
-                    parsing={parsing}
-                    setParsing={setParsing}
-                    checkedFields={checkedFields}
-                    setCheckedFields={setCheckedFields}
-                />
-                <IonRow>
-                    <IonCol size={1}>
-                        <IonButton
-                            className="ion-float-end"
-                            color="secondary"
-                            fill="clear"
-                            disabled={true}
-                            onClick={() => console.log('reset')}
-                        >
-                            <IonIcon float-right icon={refresh}/>
-                        </IonButton>
-                    </IonCol>
-                    <IonCol size={10}> </IonCol>
-                    <IonCol size={1}>
-                        <IonButton
-                            color="primary"
-                            fill="clear"
-                            className="ion-float-start"
-                            disabled={checkedFields.length === 0}
-                            onClick={
-                                () => {
-                                    setSearchWaiting(true);
-                                }
-                            }
-                        >
-                            <IonIcon icon={search}/>
-                        </IonButton>
-                    </IonCol>
-                </IonRow>
-                {
-                    results.length === 0 ?
-                        <IonRow>
-                            <IonCol>{booksToSearch && booksToSearch.length > 0 && (searchAllBooks || results.length < ((resultsPage + 1) * nResultsPerPage)) ? 'Searching' : 'No results'}</IonCol>
-                        </IonRow> :
-                        <>
-                            <IonRow>
-                                <IonCol size={8}>
-                                    <SearchResultsTools
-                                        resultsPage={resultsPage}
-                                        setResultsPage={setResultsPage}
-                                        nResultsPerPage={nResultsPerPage}
-                                        resultParaRecords={results}
-                                        booksToSearch={booksToSearch}
-                                        setSearchAllBooks={setSearchAllBooks}
-                                    />
-                                </IonCol>
-                                <IonCol style={{textAlign: "right"}} size={4}>
-                                    <TreeDisplayLevel
-                                        leafDetailLevel={leafDetailLevel}
-                                        setLeafDetailLevel={setLeafDetailLevel}
-                                    />
-                                </IonCol>
-                            </IonRow>
-                            {results
-                                .slice(resultsPage * nResultsPerPage, (resultsPage * nResultsPerPage) + nResultsPerPage)
-                                .map(
-                                    (r, pn) => {
-                                        const bcvRef = `${r.book} ${r.content.cv}`;
-                                        return <IonRow>
-                                            <IonCol size={1}>
-                                                <IonButton
-                                                    key={pn}
-                                                    size="small"
-                                                    color="secondary"
-                                                    fill={bcvRef === openBcvRef ? 'solid' : 'outline'}
-                                                    onClick={() => setOpenBcvRef(bcvRef === openBcvRef ? '' : bcvRef)}
-                                                >
-                                                    {bcvRef}
-                                                </IonButton>
-                                            </IonCol>
-                                            <IonCol size={11}>
-                                                {
-                                                    leaves(leaves1(r.children, ''), '', '')
-                                                                .map(
-                                                                    (l, n) =>
-                                                                        <InterlinearNode
-                                                                            key={`${pn}-${n}`}
-                                                                            content={l}
-                                                                            detailLevel={leafDetailLevel}
-                                                                            isBold={nodeMatchesSearch(l)}
-                                                                            onClickFunction={() => setContent({...l})}
-                                                                        />
-                                                                )
-                                                }
-                                                {(bcvRef === openBcvRef) && <SyntaxTreeRow
-                                                    treeData={r}
-                                                    key={pn}
-                                                    rowKey={pn}
-                                                    isOpen={true}
-                                                />}
-                                            </IonCol>
-                                        </IonRow>
+        {
+            selectedNode && <TreeDetails
+                currentContent={content}
+                selectedNode={selectedNode}
+                setSelectedNode={setSelectedNode}
+            />
+        }
+        {
+            !selectedNode && <IonContent>
+                <IonGrid>
+                    <TreeSearchForm
+                        content={content}
+                        word={word}
+                        setWord={setWord}
+                        lemma={lemma}
+                        setLemma={setLemma}
+                        gloss={gloss}
+                        setGloss={setGloss}
+                        strongs={strongs}
+                        setStrongs={setStrongs}
+                        parsing={parsing}
+                        setParsing={setParsing}
+                        checkedFields={checkedFields}
+                        setCheckedFields={setCheckedFields}
+                    />
+                    <IonRow>
+                        <IonCol size={1}>
+                            <IonButton
+                                className="ion-float-end"
+                                color="secondary"
+                                fill="clear"
+                                disabled={true}
+                                onClick={() => console.log('reset')}
+                            >
+                                <IonIcon float-right icon={refresh}/>
+                            </IonButton>
+                        </IonCol>
+                        <IonCol size={10}> </IonCol>
+                        <IonCol size={1}>
+                            <IonButton
+                                color="primary"
+                                fill="clear"
+                                className="ion-float-start"
+                                disabled={checkedFields.length === 0}
+                                onClick={
+                                    () => {
+                                        setSearchWaiting(true);
                                     }
-                                )
-                            }
-                        </>
-                }
-            </IonGrid>
-        </IonContent>
+                                }
+                            >
+                                <IonIcon icon={search}/>
+                            </IonButton>
+                        </IonCol>
+                    </IonRow>
+                    {
+                        results.length === 0 ?
+                            <IonRow>
+                                <IonCol>{booksToSearch && booksToSearch.length > 0 && (searchAllBooks || results.length < ((resultsPage + 1) * nResultsPerPage)) ? 'Searching' : 'No results'}</IonCol>
+                            </IonRow> :
+                            <>
+                                <IonRow>
+                                    <IonCol size={8}>
+                                        <SearchResultsTools
+                                            resultsPage={resultsPage}
+                                            setResultsPage={setResultsPage}
+                                            nResultsPerPage={nResultsPerPage}
+                                            resultParaRecords={results}
+                                            booksToSearch={booksToSearch}
+                                            setSearchAllBooks={setSearchAllBooks}
+                                        />
+                                    </IonCol>
+                                    <IonCol style={{textAlign: "right"}} size={4}>
+                                        <TreeDisplayLevel
+                                            leafDetailLevel={leafDetailLevel}
+                                            setLeafDetailLevel={setLeafDetailLevel}
+                                        />
+                                    </IonCol>
+                                </IonRow>
+                                {results
+                                    .slice(resultsPage * nResultsPerPage, (resultsPage * nResultsPerPage) + nResultsPerPage)
+                                    .map(
+                                        (r, pn) => {
+                                            const bcvRef = `${r.book} ${r.content.cv}`;
+                                            return <IonRow>
+                                                <IonCol size={1}>
+                                                    <IonButton
+                                                        key={pn}
+                                                        size="small"
+                                                        color="secondary"
+                                                        fill={bcvRef === openBcvRef ? 'solid' : 'outline'}
+                                                        onClick={() => setOpenBcvRef(bcvRef === openBcvRef ? '' : bcvRef)}
+                                                    >
+                                                        {bcvRef}
+                                                    </IonButton>
+                                                </IonCol>
+                                                <IonCol size={11}>
+                                                    {
+                                                        leaves(leaves1(r.children, ''), '', '')
+                                                            .map(
+                                                                (l, n) =>
+                                                                    <InterlinearNode
+                                                                        key={`${pn}-${n}`}
+                                                                        content={l}
+                                                                        detailLevel={leafDetailLevel}
+                                                                        isBold={nodeMatchesSearch(l)}
+                                                                        referer="search"
+                                                                    />
+                                                            )
+                                                    }
+                                                    {(bcvRef === openBcvRef) && <SyntaxTreeRow
+                                                        treeData={r}
+                                                        key={pn}
+                                                        rowKey={pn}
+                                                        isOpen={true}
+                                                    />}
+                                                </IonCol>
+                                            </IonRow>
+                                        }
+                                    )
+                                }
+                            </>
+                    }
+                </IonGrid>
+            </IonContent>
+        }
     </IonPage>
 }
 

@@ -1,5 +1,6 @@
 import {IonContent, IonGrid, IonRow, IonCol, IonTitle, IonButton} from "@ionic/react";
 import React from "react";
+import {Link} from "react-router-dom";
 
 const TreeDetails = ({selectedNode, setSelectedNode, currentContent}) => {
     return <IonContent>
@@ -19,6 +20,18 @@ const TreeDetails = ({selectedNode, setSelectedNode, currentContent}) => {
                     >
                         Dismiss
                     </IonButton>
+                </IonCol>
+            </IonRow>
+            <IonRow>
+                <IonCol>
+                    <Link
+                        to={{
+                            pathname: "/search/tree",
+                            state: {content: selectedNode, referer: "newSearch"},
+                        }}
+                    >
+                        {`Search for '${selectedNode.text}'`}
+                    </Link>
                 </IonCol>
             </IonRow>
         </IonGrid>

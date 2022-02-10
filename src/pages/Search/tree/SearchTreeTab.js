@@ -39,9 +39,10 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
 
     useEffect(() => {
             if (location && location.state && location.state.content && !deepEqual(content, location.state.content)) {
-                if (location.state.referer === "browse" || Object.keys(content).length === 0) {
+                if (location.state.referer === "browse" || location.state.referer === "newSearch" || Object.keys(content).length === 0) {
                     setContent(location.state.content);
                     setResults([]);
+                    setSelectedNode(null);
                 } else {
                     setSelectedNode(location.state.content);
                 }

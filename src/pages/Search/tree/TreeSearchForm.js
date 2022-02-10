@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {IonButton, IonCheckbox, IonCol, IonGrid, IonIcon, IonInput, IonRow} from '@ionic/react'
-import {refresh, search} from "ionicons/icons";
+import {IonButton, IonCheckbox, IonCol, IonIcon, IonInput, IonRow} from '@ionic/react'
+import {trash} from "ionicons/icons";
 import deepEqual from 'deep-equal';
 
 const TreeSearchForm = props => {
@@ -32,7 +32,7 @@ const TreeSearchForm = props => {
                     .filter(c => !parsingFields.includes(c))
                     .filter(c => props.isSecond ? c.endsWith('_2') : !c.endsWith('_2'));
                 if (parsingContent.length > 0) {
-                    props.setParsing(parsingContent.map(k => `${k}:${props.content[k]}`).join(' '))
+                    props.setParsing(parsingContent.map(k => `${k.replace('_2', '')}:${props.content[k]}`).join(' '))
                 }
                 setContent(props.content);
             }
@@ -40,18 +40,20 @@ const TreeSearchForm = props => {
         [props.content]
     )
     const TreeSearchField = ({fieldString, fieldAccessor, fieldModifier, fieldWidth}) => {
+        const cf = props.checkedFields;
+        const scf = props.setCheckedFields;
         return <>
             <IonCol size={1}>
                 <IonCheckbox
-                    checked={props.checkedFields.includes(fieldString)}
+                    checked={cf.includes(fieldString)}
                     onIonChange={
                         () => {
-                            if (props.checkedFields.includes(fieldString)) {
-                                props.setCheckedFields(props.checkedFields.filter(f => f !== fieldString))
+                            if (cf.includes(fieldString)) {
+                                scf(cf.filter(f => f !== fieldString))
                             } else if (fieldString === 'parsing') {
-                                props.setCheckedFields([...props.checkedFields, fieldString])
+                                scf([...cf, fieldString])
                             } else {
-                                props.setCheckedFields([...props.checkedFields.filter(f => !['word', 'lemma', 'gloss', 'strongs'].includes(f)), fieldString])
+                                scf([...cf.filter(f => !['word', 'lemma', 'gloss', 'strongs'].includes(f)), fieldString])
                             }
                         }
                     }
@@ -61,7 +63,7 @@ const TreeSearchForm = props => {
                 <IonInput
                     placeholder={fieldString[0].toUpperCase() + fieldString.substring(1)}
                     value={fieldAccessor}
-                    disabled={!props.checkedFields.includes(fieldString)}
+                    disabled={!cf.includes(fieldString)}
                     onIonChange={e => fieldModifier(e.detail.value)}
                     debounce={1000}
                 />
@@ -77,7 +79,25 @@ const TreeSearchForm = props => {
             </IonRow>
             <IonRow>
                 <TreeSearchField fieldString="parsing" fieldAccessor={props.parsing} fieldModifier={props.setParsing}
-                                 fieldWidth={11}/>
+                                 fieldWidth={10}/>
+                <IonCol size={1}>
+                    <IonButton
+                        color="secondary"
+                        fill="clear"
+                        disabled={`${props.word}${props.lemma}${props.gloss}${props.strongs}${props.parsing}`.length === 0}
+                        onClick={
+                            () => {
+                                props.setWord('');
+                                props.setLemma('');
+                                props.setGloss('');
+                                props.setStrongs('');
+                                props.setParsing('');
+                            }
+                        }
+                    >
+                        <IonIcon icon={trash}/>
+                    </IonButton>
+                </IonCol>
             </IonRow>
         </>
 }

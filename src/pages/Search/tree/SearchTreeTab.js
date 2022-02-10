@@ -44,12 +44,18 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
     const location = useLocation();
 
     useEffect(() => {
-        console.log(location)
             if (location && location.state && location.state.content && !deepEqual(content, location.state.content)) {
                 if (location.state.referer === "browse" || location.state.referer === "newSearch" || location.state.referer === "addSearch" || Object.keys(content).length === 0) {
                     setContent(location.state.content);
                     setResults([]);
                     setSelectedNode(null);
+                    if (location.state.referer === "browse" || location.state.referer === "newSearch") {
+                        setWord_2('');
+                        setLemma_2('');
+                        setGloss_2('');
+                        setStrongs_2('');
+                        setParsing_2('');
+                    }
                 } else {
                     setSelectedNode(location.state.content);
                 }
@@ -123,14 +129,56 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                         }
                         searchClause = `and(${parsingClauses.join(',')})`
                     }
+                    let searchClause_2 = "";
+                    if (checkedFields_2.includes('word')) {
+                        searchClause_2 = `==(content('text'), '%searchTerm%')`
+                            .replace('%searchTerm%', word_2);
+                    }
+                    if (checkedFields_2.includes('lemma')) {
+                        searchClause_2 = `==(content('lemma'), '%searchTerm%')`
+                            .replace('%searchTerm%', lemma_2);
+                    }
+                    if (checkedFields_2.includes('gloss')) {
+                        searchClause_2 = `contains(content('gloss'), '%searchTerm%')`
+                            .replace('%searchTerm%', gloss_2);
+                    }
+                    if (checkedFields_2.includes('strongs')) {
+                        searchClause_2 = `==(content('strong'), '%searchTerm%')`.replace('%searchTerm%', strongs_2);
+                    }
+                    let parsingClauses_2 = [];
+                    if (checkedFields_2.includes('parsing')) {
+                        const kvs = parsing_2.split(/ +/)
+                            .map(s => s.trim())
+                            .forEach(s => {
+                                const kv = s.split(':');
+                                if (kv.length === 2) {
+                                    parsingClauses_2.push(
+                                        `==(content('%key%'), '%value%')`
+                                            .replace('%key%', kv[0].trim())
+                                            .replace('%value%', kv[1].trim())
+                                    );
+                                }
+                            })
+                    }
+                    if (parsingClauses_2.length > 0) {
+                        if (searchClause_2.length > 0) {
+                            parsingClauses_2 = [searchClause, ...parsingClauses];
+                        }
+                        searchClause_2 = `and(${parsingClauses.join(',')})`
+                    }
+                    let searchClauses = searchClause;
+                    if (searchClause.length > 0 && searchClause_2.length > 0) {
+                        searchClauses = `and(${searchClause},${searchClause_2})`;
+                    } else if (searchClause_2.length > 0) {
+                        searchClauses = searchClause_2;
+                    }
                     let query = `{
                       docSet(id:"%docSetId%") {
                         document(bookCode:"%bookCode%") {
                           treeSequences {
-                            sentenceValues: tribos(
-                            query:
-                              "nodes[%searchClause%]/values{@sentence}"
-                            )
+                            
+                            %sentenceValues%
+                            %sentenceValues2%
                             sentenceNodes: tribos(
                             query:
                               "root/children/node{@sentence, id}"
@@ -140,12 +188,39 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                       }
                     }`.replace(/%docSetId%/g, currentDocSet)
                         .replace(/%bookCode%/g, bookToSearch)
-                        .replace(/%searchClause%/g, searchClause)
+                        .replace(
+                            /%sentenceValues%/g,
+                            searchClause.length > 0 ? `sentenceValues: tribos(query: "nodes[${searchClause}]/values{@sentence}")` : ""
+                        )
+                        .replace(
+                            /%sentenceValues2%/g,
+                            searchClause_2.length > 0 ? `sentenceValues2: tribos(query: "nodes[${searchClause_2}]/values{@sentence}")` : ""
+                        )
                     let result = await pk.gqlQuery(
                         query
                     );
-                    let sentences = JSON.parse(result.data.docSet.document.treeSequences[0].sentenceValues)
-                        .data.sentence;
+                    let sentences1 = [];
+                    let hasS1 = false;
+                    let hasS2 = false;
+                    if (result.data.docSet.document.treeSequences[0].sentenceValues) {
+                        hasS1 = true;
+                        const s1v = JSON.parse(result.data.docSet.document.treeSequences[0].sentenceValues);
+                        sentences1 = s1v.data.sentence || [];
+                    }
+                    let sentences2 = [];
+                    if (result.data.docSet.document.treeSequences[0].sentenceValues2) {
+                        hasS2 = true;
+                        const s2v = JSON.parse(result.data.docSet.document.treeSequences[0].sentenceValues2);
+                        sentences2 = s2v.data.sentence || [];
+                    }
+                    let sentences = [];
+                    if (hasS1 && hasS2) {
+                        sentences = sentences1.filter(s => sentences2.includes(s));
+                    } else if (hasS2) {
+                        sentences = sentences2;
+                    } else {
+                        sentences = sentences1;
+                    }
                     if (sentences) {
                         sentences = sentences.map(v => parseInt(v))
                             .sort((a, b) => a - b)
@@ -157,7 +232,8 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                         const sentenceIds = sentences
                             .map(s => sentence2id[s])
                             .join(', ');
-                        query = `{
+                        if (sentenceIds.length > 0) {
+                            query = `{
                       docSet(id:"%docSetId%") {
                         document(bookCode:"%bookCode%") {
                           treeSequences {
@@ -169,12 +245,13 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                         }
                       }
                     }`.replace(/%docSetId%/g, currentDocSet)
-                            .replace(/%bookCode%/g, bookToSearch)
-                            .replace(/%ids%/g, sentenceIds);
-                        result = await pk.gqlQuery(
-                            query
-                        );
-                        rr = rr.concat(JSON.parse(result.data.docSet.document.treeSequences[0].matches).data.map(m => ({book: bookToSearch, ...m})));
+                                .replace(/%bookCode%/g, bookToSearch)
+                                .replace(/%ids%/g, sentenceIds);
+                            result = await pk.gqlQuery(
+                                query
+                            );
+                            rr = rr.concat(JSON.parse(result.data.docSet.document.treeSequences[0].matches).data.map(m => ({book: bookToSearch, ...m})));
+                        }
                     }
                     b2s = b2s.slice(1);
                     rr = [...rr, ...records];
@@ -192,31 +269,47 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
         },
         [resultsPage, currentDocSet, nResultsPerPage, searchAllBooks, searchWaiting, searchTerms]
     );
-    const nodeMatchesSearch = node => {
-        if (checkedFields.includes('word')) {
-            if (word !== node.text) {
+    const nodeMatchesSearch1 = (node, isSecond) => {
+        const cf = isSecond ? checkedFields_2 : checkedFields;
+        if (cf.length === 0) {
+            return false;
+        }
+        if (cf.includes('word')) {
+            if (!isSecond && word !== node.text) {
+                return false;
+            }
+            if (isSecond && word_2 !== node.text) {
                 return false;
             }
         }
-        if (checkedFields.includes('lemma')) {
-            if (lemma !== node.lemma) {
+        if (cf.includes('lemma')) {
+            if (!isSecond && lemma !== node.lemma) {
+                return false;
+            }
+            if (isSecond && lemma_2 !== node.lemma) {
                 return false;
             }
         }
-        if (checkedFields.includes('gloss')) {
-            if (gloss !== node.gloss) {
+        if (cf.includes('gloss')) {
+            if (!isSecond && gloss !== node.gloss) {
+                return false;
+            }
+            if (isSecond && gloss_2 !== node.gloss) {
                 return false;
             }
         }
-        if (checkedFields.includes('strongs')) {
-            if (strongs !== node.strong) {
+        if (cf.includes('strongs')) {
+            if (!isSecond && strongs !== node.strong) {
+                return false;
+            }
+            if (isSecond && strongs_2 !== node.strong) {
                 return false;
             }
         }
-        if (checkedFields.includes('parsing')) {
+        if (cf.includes('parsing')) {
             for (
                 const [k, v] of
-                parsing
+                (isSecond ? parsing_2 : parsing)
                     .split(/ +/)
                     .map(s => s.trim())
                     .filter(s => s.includes(':'))
@@ -228,6 +321,9 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
             }
         }
         return true;
+    }
+    const nodeMatchesSearch = node => {
+        return nodeMatchesSearch1(node, false) || nodeMatchesSearch1(node, true);
     }
     return <IonPage>
         <IonHeader>
@@ -259,7 +355,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                         checkedFields={checkedFields}
                         setCheckedFields={setCheckedFields}
                     />
-                    {Object.keys(content).filter(k => k.endsWith('_2')).length > 0 && <IonRow>
+                    <IonRow>
                         <IonCol>
                             <TreeSearchForm
                                 isSecond={true}
@@ -279,7 +375,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                             />
 
                         </IonCol>
-                    </IonRow>}
+                    </IonRow>
                     <IonRow>
                         <IonCol size={11}> </IonCol>
                         <IonCol size={1}>
@@ -287,7 +383,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                                 color="primary"
                                 fill="clear"
                                 className="ion-float-start"
-                                disabled={checkedFields.length === 0}
+                                disabled={checkedFields.length === 0 && checkedFields_2.length === 0}
                                 onClick={
                                     () => {
                                         setSearchWaiting(true);

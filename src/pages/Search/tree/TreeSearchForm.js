@@ -8,19 +8,29 @@ const TreeSearchForm = props => {
     useEffect(
         () => {
             if (props.content && !deepEqual(props.content, content)) {
-                if (props.content.text) {
-                    props.setWord(props.content.text)
+                const text = props.isSecond ? props.content.text_2 : props.content.text
+                if (text) {
+                    props.setWord(text)
                 }
-                if (props.content.lemma) {
-                    props.setLemma(props.content.lemma)
+                const lemma = props.isSecond ? props.content.lemma_2 : props.content.lemma
+                if (lemma) {
+                    props.setLemma(lemma)
                 }
-                if (props.content.gloss) {
-                    props.setGloss(props.content.gloss)
+                const gloss = props.isSecond ? props.content.gloss_2 : props.content.gloss
+                if (gloss) {
+                    props.setGloss(gloss)
                 }
-                if (props.content.strong) {
-                    props.setStrongs(props.content.strong)
+                const strong = props.isSecond ? props.content.strong_2 : props.content.strong
+                if (strong) {
+                    props.setStrongs(strong)
                 }
-                const parsingContent = Object.keys(props.content).filter(c => !['text', 'lemma', 'gloss', 'strong', 'class', 'type'].includes(c));
+                let parsingFields = ['text', 'lemma', 'gloss', 'strong', 'class', 'type'];
+                if (props.isSecond) {
+                    parsingFields = parsingFields.map(f => `${f}_2`)
+                }
+                const parsingContent = Object.keys(props.content)
+                    .filter(c => !parsingFields.includes(c))
+                    .filter(c => props.isSecond ? c.endsWith('_2') : !c.endsWith('_2'));
                 if (parsingContent.length > 0) {
                     props.setParsing(parsingContent.map(k => `${k}:${props.content[k]}`).join(' '))
                 }

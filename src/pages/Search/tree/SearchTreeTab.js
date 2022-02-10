@@ -22,6 +22,12 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
     const [gloss, setGloss] = useState('');
     const [strongs, setStrongs] = useState('');
     const [parsing, setParsing] = useState('');
+    const [checkedFields_2, setCheckedFields_2] = useState([]);
+    const [word_2, setWord_2] = useState('');
+    const [lemma_2, setLemma_2] = useState('');
+    const [gloss_2, setGloss_2] = useState('');
+    const [strongs_2, setStrongs_2] = useState('');
+    const [parsing_2, setParsing_2] = useState('');
     const [searchWaiting, setSearchWaiting] = React.useState(false);
     const [booksToSearch, setBooksToSearch] = React.useState([]);
     const [searchTarget, setSearchTarget] = React.useState('docSet');
@@ -38,8 +44,9 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
     const location = useLocation();
 
     useEffect(() => {
+        console.log(location)
             if (location && location.state && location.state.content && !deepEqual(content, location.state.content)) {
-                if (location.state.referer === "browse" || location.state.referer === "newSearch" || Object.keys(content).length === 0) {
+                if (location.state.referer === "browse" || location.state.referer === "newSearch" || location.state.referer === "addSearch" || Object.keys(content).length === 0) {
                     setContent(location.state.content);
                     setResults([]);
                     setSelectedNode(null);
@@ -237,6 +244,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
             !selectedNode && <IonContent>
                 <IonGrid>
                     <TreeSearchForm
+                        isSecond={false}
                         content={content}
                         word={word}
                         setWord={setWord}
@@ -251,19 +259,29 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                         checkedFields={checkedFields}
                         setCheckedFields={setCheckedFields}
                     />
-                    <IonRow>
-                        <IonCol size={1}>
-                            <IonButton
-                                className="ion-float-end"
-                                color="secondary"
-                                fill="clear"
-                                disabled={true}
-                                onClick={() => console.log('reset')}
-                            >
-                                <IonIcon float-right icon={refresh}/>
-                            </IonButton>
+                    {Object.keys(content).filter(k => k.endsWith('_2')).length > 0 && <IonRow>
+                        <IonCol>
+                            <TreeSearchForm
+                                isSecond={true}
+                                content={content}
+                                word={word_2}
+                                setWord={setWord_2}
+                                lemma={lemma_2}
+                                setLemma={setLemma_2}
+                                gloss={gloss_2}
+                                setGloss={setGloss_2}
+                                strongs={strongs_2}
+                                setStrongs={setStrongs_2}
+                                parsing={parsing_2}
+                                setParsing={setParsing_2}
+                                checkedFields={checkedFields_2}
+                                setCheckedFields={setCheckedFields_2}
+                            />
+
                         </IonCol>
-                        <IonCol size={10}> </IonCol>
+                    </IonRow>}
+                    <IonRow>
+                        <IonCol size={11}> </IonCol>
                         <IonCol size={1}>
                             <IonButton
                                 color="primary"
@@ -283,7 +301,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                     {
                         results.length === 0 ?
                             <IonRow>
-                                <IonCol>{booksToSearch && booksToSearch.length > 0 && (searchAllBooks || results.length < ((resultsPage + 1) * nResultsPerPage)) ? 'Searching' : 'No results'}</IonCol>
+                                <IonCol>No results</IonCol>
                             </IonRow> :
                             <>
                                 <IonRow>

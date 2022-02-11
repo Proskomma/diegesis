@@ -85,93 +85,77 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
         // and more results are needed according to paging,
         // search next book
         () => {
+            const searchTermClause = (cf, f) => {
+                let ret = "";
+                if (cf.includes('word')) {
+                    ret = `==(content('text'), '%searchTerm%')`
+                        .replace('%searchTerm%', f.word);
+                }
+                if (cf.includes('lemma')) {
+                    ret = `==(content('lemma'), '%searchTerm%')`
+                        .replace('%searchTerm%', f.lemma);
+                }
+                if (cf.includes('gloss')) {
+                    ret = `contains(content('gloss'), '%searchTerm%')`
+                        .replace('%searchTerm%', f.gloss);
+                }
+                if (cf.includes('strongs')) {
+                    ret = `==(content('strong'), '%searchTerm%')`
+                        .replace('%searchTerm%', f.strongs);
+                }
+                let parsingClauses = [];
+                if (cf.includes('parsing')) {
+                    const kvs = parsing.split(/ +/)
+                        .map(s => s.trim())
+                        .forEach(s => {
+                            const kv = s.split(':');
+                            if (kv.length === 2) {
+                                parsingClauses.push(
+                                    `==(content('%key%'), '%value%')`
+                                        .replace('%key%', kv[0].trim())
+                                        .replace('%value%', kv[1].trim())
+                                );
+                            }
+                        })
+                }
+                if (parsingClauses.length > 0) {
+                    if (ret.length > 0) {
+                        parsingClauses = [ret, ...parsingClauses];
+                    }
+                    ret = `and(${parsingClauses.join(',')})`
+                }
+                return ret;
+            }
             const doQuery = async () => {
                 let b2s = booksToSearch;
                 let rr = results;
+
+                const searchClause = searchTermClause(
+                    checkedFields,
+                    {
+                        word: word,
+                        lemma: lemma,
+                        gloss: gloss,
+                        strongs: strongs,
+                        parsing: parsing,
+                    }
+                );
+                const searchClause_2 = searchTermClause(
+                    checkedFields_2,
+                    {
+                        word: word_2,
+                        lemma: lemma_2,
+                        gloss: gloss_2,
+                        strongs: strongs_2,
+                        parsing: parsing_2,
+                    }
+                );
+
                 while (b2s && b2s.length > 0 && (searchAllBooks || rr.length < ((resultsPage + 1) * nResultsPerPage))) {
                     const bookToSearch = b2s[0];
                     console.log(bookToSearch)
                     let records = [];
-                    let searchClause = "";
-                    if (checkedFields.includes('word')) {
-                        searchClause = `==(content('text'), '%searchTerm%')`
-                            .replace('%searchTerm%', word);
-                    }
-                    if (checkedFields.includes('lemma')) {
-                        searchClause = `==(content('lemma'), '%searchTerm%')`
-                            .replace('%searchTerm%', lemma);
-                    }
-                    if (checkedFields.includes('gloss')) {
-                        searchClause = `contains(content('gloss'), '%searchTerm%')`
-                            .replace('%searchTerm%', gloss);
-                    }
-                    if (checkedFields.includes('strongs')) {
-                        searchClause = `==(content('strong'), '%searchTerm%')`.replace('%searchTerm%', strongs);
-                    }
-                    let parsingClauses = [];
-                    if (checkedFields.includes('parsing')) {
-                        const kvs = parsing.split(/ +/)
-                            .map(s => s.trim())
-                            .forEach(s => {
-                                const kv = s.split(':');
-                                if (kv.length === 2) {
-                                    parsingClauses.push(
-                                        `==(content('%key%'), '%value%')`
-                                            .replace('%key%', kv[0].trim())
-                                            .replace('%value%', kv[1].trim())
-                                    );
-                                }
-                            })
-                    }
-                    if (parsingClauses.length > 0) {
-                        if (searchClause.length > 0) {
-                            parsingClauses = [searchClause, ...parsingClauses];
-                        }
-                        searchClause = `and(${parsingClauses.join(',')})`
-                    }
-                    let searchClause_2 = "";
-                    if (checkedFields_2.includes('word')) {
-                        searchClause_2 = `==(content('text'), '%searchTerm%')`
-                            .replace('%searchTerm%', word_2);
-                    }
-                    if (checkedFields_2.includes('lemma')) {
-                        searchClause_2 = `==(content('lemma'), '%searchTerm%')`
-                            .replace('%searchTerm%', lemma_2);
-                    }
-                    if (checkedFields_2.includes('gloss')) {
-                        searchClause_2 = `contains(content('gloss'), '%searchTerm%')`
-                            .replace('%searchTerm%', gloss_2);
-                    }
-                    if (checkedFields_2.includes('strongs')) {
-                        searchClause_2 = `==(content('strong'), '%searchTerm%')`.replace('%searchTerm%', strongs_2);
-                    }
-                    let parsingClauses_2 = [];
-                    if (checkedFields_2.includes('parsing')) {
-                        const kvs = parsing_2.split(/ +/)
-                            .map(s => s.trim())
-                            .forEach(s => {
-                                const kv = s.split(':');
-                                if (kv.length === 2) {
-                                    parsingClauses_2.push(
-                                        `==(content('%key%'), '%value%')`
-                                            .replace('%key%', kv[0].trim())
-                                            .replace('%value%', kv[1].trim())
-                                    );
-                                }
-                            })
-                    }
-                    if (parsingClauses_2.length > 0) {
-                        if (searchClause_2.length > 0) {
-                            parsingClauses_2 = [searchClause_2, ...parsingClauses_2];
-                        }
-                        searchClause_2 = `and(${parsingClauses_2.join(',')})`
-                    }
-                    let searchClauses = searchClause;
-                    if (searchClause.length > 0 && searchClause_2.length > 0) {
-                        searchClauses = `and(${searchClause},${searchClause_2})`;
-                    } else if (searchClause_2.length > 0) {
-                        searchClauses = searchClause_2;
-                    }
+
                     let query = `{
                       docSet(id:"%docSetId%") {
                         document(bookCode:"%bookCode%") {

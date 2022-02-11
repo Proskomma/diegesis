@@ -150,6 +150,10 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                         parsing: parsing_2,
                     }
                 );
+                const combinedClauses = [searchClause, searchClause_2]
+                    .filter(c => c.length > 0)
+                    .map(c => `"nodes[${c}]/values{@sentence}"`)
+                    .join(",");
 
                 while (b2s && b2s.length > 0 && (searchAllBooks || rr.length < ((resultsPage + 1) * nResultsPerPage))) {
                     const bookToSearch = b2s[0];
@@ -160,9 +164,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                       docSet(id:"%docSetId%") {
                         document(bookCode:"%bookCode%") {
                           treeSequences {
-                            
-                            %sentenceValues%
-                            %sentenceValues2%
+                            sentenceValues: triboi(queries: [%combinedClauses%])
                             sentenceNodes: tribos(
                             query:
                               "root/children/node{@sentence, id}"
@@ -172,38 +174,18 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                       }
                     }`.replace(/%docSetId%/g, currentDocSet)
                         .replace(/%bookCode%/g, bookToSearch)
-                        .replace(
-                            /%sentenceValues%/g,
-                            searchClause.length > 0 ? `sentenceValues: tribos(query: "nodes[${searchClause}]/values{@sentence}")` : ""
-                        )
-                        .replace(
-                            /%sentenceValues2%/g,
-                            searchClause_2.length > 0 ? `sentenceValues2: tribos(query: "nodes[${searchClause_2}]/values{@sentence}")` : ""
-                        )
+                        .replace(/%combinedClauses%/g, combinedClauses);
                     let result = await pk.gqlQuery(
                         query
                     );
-                    let sentences1 = [];
-                    let hasS1 = false;
-                    let hasS2 = false;
-                    if (result.data.docSet.document.treeSequences[0].sentenceValues) {
-                        hasS1 = true;
-                        const s1v = JSON.parse(result.data.docSet.document.treeSequences[0].sentenceValues);
-                        sentences1 = s1v.data.sentence || [];
-                    }
-                    let sentences2 = [];
-                    if (result.data.docSet.document.treeSequences[0].sentenceValues2) {
-                        hasS2 = true;
-                        const s2v = JSON.parse(result.data.docSet.document.treeSequences[0].sentenceValues2);
-                        sentences2 = s2v.data.sentence || [];
-                    }
                     let sentences = [];
-                    if (hasS1 && hasS2) {
-                        sentences = sentences1.filter(s => sentences2.includes(s));
-                    } else if (hasS2) {
-                        sentences = sentences2;
+                    const sv = result.data.docSet.document.treeSequences[0].sentenceValues.map(r => JSON.parse(r));
+                    if (sv.length === 2) {
+                        const svs0 = sv[0].data.sentence || [];
+                        const svs1 = sv[1].data.sentence || [];
+                        sentences = svs0.filter(v => svs1.includes(v));
                     } else {
-                        sentences = sentences1;
+                        sentences = sv[0].data.sentence || [];
                     }
                     if (sentences) {
                         sentences = sentences.map(v => parseInt(v))

@@ -3,7 +3,7 @@ import React, {useContext, useEffect, useState} from "react";
 import {useLocation} from "react-router-dom";
 import deepEqual from 'deep-equal';
 import TreeSearchForm from "./TreeSearchForm";
-import {refresh, search} from "ionicons/icons";
+import {search} from "ionicons/icons";
 import PageToolBar from "../../../components/PageToolBar";
 import DocSetsContext from "../../../contexts/DocSetsContext";
 import PkContext from "../../../contexts/PkContext";
@@ -321,27 +321,22 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                         checkedFields={checkedFields}
                         setCheckedFields={setCheckedFields}
                     />
-                    <IonRow>
-                        <IonCol>
-                            <TreeSearchForm
-                                isSecond={true}
-                                content={content}
-                                word={word_2}
-                                setWord={setWord_2}
-                                lemma={lemma_2}
-                                setLemma={setLemma_2}
-                                gloss={gloss_2}
-                                setGloss={setGloss_2}
-                                strongs={strongs_2}
-                                setStrongs={setStrongs_2}
-                                parsing={parsing_2}
-                                setParsing={setParsing_2}
-                                checkedFields={checkedFields_2}
-                                setCheckedFields={setCheckedFields_2}
-                            />
-
-                        </IonCol>
-                    </IonRow>
+                    <TreeSearchForm
+                        isSecond={true}
+                        content={content}
+                        word={word_2}
+                        setWord={setWord_2}
+                        lemma={lemma_2}
+                        setLemma={setLemma_2}
+                        gloss={gloss_2}
+                        setGloss={setGloss_2}
+                        strongs={strongs_2}
+                        setStrongs={setStrongs_2}
+                        parsing={parsing_2}
+                        setParsing={setParsing_2}
+                        checkedFields={checkedFields_2}
+                        setCheckedFields={setCheckedFields_2}
+                    />
                     <IonRow>
                         <IonCol size={11}> </IonCol>
                         <IonCol size={1}>

@@ -162,9 +162,9 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                     }
                     if (parsingClauses_2.length > 0) {
                         if (searchClause_2.length > 0) {
-                            parsingClauses_2 = [searchClause, ...parsingClauses];
+                            parsingClauses_2 = [searchClause_2, ...parsingClauses_2];
                         }
-                        searchClause_2 = `and(${parsingClauses.join(',')})`
+                        searchClause_2 = `and(${parsingClauses_2.join(',')})`
                     }
                     let searchClauses = searchClause;
                     if (searchClause.length > 0 && searchClause_2.length > 0) {

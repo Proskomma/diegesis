@@ -389,7 +389,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                                     .map(
                                         (r, pn) => {
                                             const bcvRef = `${r.book} ${r.content.cv}`;
-                                            return <IonRow>
+                                            return <IonRow key={pn}>
                                                 <IonCol size={1}>
                                                     <IonButton
                                                         key={pn}

@@ -113,8 +113,7 @@ const InterlinearNode = (
     {
         content,
         detailLevel,
-        isBold,
-        referer,
+        isBold
     }) => {
     return <>
         {content.sentence && <><br/><span style={{paddingLeft: "3em"}}> </span></>}
@@ -132,7 +131,7 @@ const InterlinearNode = (
                         style={isBold ? boldLinkStyle : linkStyle}
                         to={{
                             pathname: "/search/tree",
-                            state: {...{content}, referer},
+                            state: {content},
                         }}
                     >
                         {content.text}

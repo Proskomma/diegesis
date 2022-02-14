@@ -7,7 +7,6 @@ import TreeDisplayLevel from "../../components/TreeDisplayLevel";
 import TranslationNavigation from "../../components/TranslationNavigation";
 import {leaves, leaves1} from "../../components/treeLeaves";
 import VerseDetails from "./VerseDetails";
-import {Link} from "react-router-dom";
 
 const TreeChapterContent = (
     {

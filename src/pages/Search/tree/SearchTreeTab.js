@@ -1,9 +1,8 @@
 import {IonButton, IonCol, IonContent, IonGrid, IonHeader, IonIcon, IonPage, IonRow} from "@ionic/react";
 import React, {useContext, useEffect, useState} from "react";
 import {useLocation} from "react-router-dom";
-import deepEqual from 'deep-equal';
 import TreeSearchForm from "./TreeSearchForm";
-import {search} from "ionicons/icons";
+import {addCircle, search} from "ionicons/icons";
 import PageToolBar from "../../../components/PageToolBar";
 import DocSetsContext from "../../../contexts/DocSetsContext";
 import PkContext from "../../../contexts/PkContext";
@@ -12,67 +11,57 @@ import SearchResultsTools from "../SearchResultsTools";
 import {leaves, leaves1} from "../../../components/treeLeaves";
 import InterlinearNode from "../../../components/InterlinearNode";
 import TreeDisplayLevel from "../../../components/TreeDisplayLevel";
-import TreeDetails from "./TreeDetails";
 
 const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
-    const [content, setContent] = useState({});
-    const [checkedFields, setCheckedFields] = useState([]);
-    const [word, setWord] = useState('');
-    const [lemma, setLemma] = useState('');
-    const [gloss, setGloss] = useState('');
-    const [strongs, setStrongs] = useState('');
-    const [parsing, setParsing] = useState('');
-    const [checkedFields_2, setCheckedFields_2] = useState([]);
-    const [word_2, setWord_2] = useState('');
-    const [lemma_2, setLemma_2] = useState('');
-    const [gloss_2, setGloss_2] = useState('');
-    const [strongs_2, setStrongs_2] = useState('');
-    const [parsing_2, setParsing_2] = useState('');
+    const [searchFields, setSearchFields] = useState([]);
     const [searchWaiting, setSearchWaiting] = React.useState(false);
     const [booksToSearch, setBooksToSearch] = React.useState([]);
     const [searchTarget, setSearchTarget] = React.useState('docSet');
-    const [searchTerms, setSearchTerms] = React.useState([]);
     const [searchAllBooks, setSearchAllBooks] = React.useState(false);
     const [results, setResults] = useState([]);
     const [resultsPage, setResultsPage] = React.useState(0);
     const [nResultsPerPage, setNResultsPerPage] = React.useState(10);
     const [openBcvRef, setOpenBcvRef] = React.useState('MAT 1:18');
     const [leafDetailLevel, setLeafDetailLevel] = useState(1);
-    const [selectedNode, setSelectedNode] = useState(null);
     const pk = useContext(PkContext);
     const docSets = useContext(DocSetsContext);
     const location = useLocation();
+    const updateSearchField = (fieldContent, fieldN) => setSearchFields(searchFields.map((f, n) => n === fieldN ? fieldContent : f));
+    const removeSearchField = (fieldN) => setSearchFields(searchFields.filter((f, n) => n !== fieldN));
+    const addSearchField = nf =>
+        setSearchFields([
+            ...searchFields,
+            (nf || {
+                    word: '',
+                    lemma: '',
+                    gloss: '',
+                    strongs: '',
+                    parsing: '',
+                    checkedFields: [],
+                }
+            ),
+        ])
 
     useEffect(() => {
-            if (location && location.state && location.state.content && !deepEqual(content, location.state.content)) {
-                if (location.state.referer === "browse" || location.state.referer === "newSearch" || location.state.referer === "addSearch" || Object.keys(content).length === 0) {
-                    setContent(location.state.content);
-                    setResults([]);
-                    setSelectedNode(null);
-                    if (location.state.referer === "browse" || location.state.referer === "newSearch") {
-                        setWord_2('');
-                        setLemma_2('');
-                        setGloss_2('');
-                        setStrongs_2('');
-                        setParsing_2('');
-                    }
-                } else {
-                    setSelectedNode(location.state.content);
-                }
+            if (location && location.state && location.state.content) {
+                addSearchField({
+                    ...location.state.content,
+                    checkedFields: ['lemma'],
+                    parsing: Object.keys(location.state.content)
+                        .filter(k => ['person', 'gender', 'case', 'number', 'tense', 'voice', 'mood'].includes(k))
+                        .map(k => `${k}:${location.state.content[k]}`)
+                        .join(' '),
+                });
             }
         },
         [location]
     );
 
     useEffect(
-        // When searchWaiting is set, refresh payloadSearchTerms and set booksToSearch
+        // When searchWaiting is set, set booksToSearch
         () => {
             if (searchWaiting) {
-                const treeSearchTerms = ['baa'];
-                if (treeSearchTerms.length > 0) {
-                    setBooksToSearch(searchTarget === 'docSet' ? Object.keys(docSets[currentDocSet].documents) : [currentBookCode]);
-                    setSearchTerms(treeSearchTerms);
-                }
+                setBooksToSearch(searchTarget === 'docSet' ? Object.keys(docSets[currentDocSet].documents) : [currentBookCode]);
                 setResults([]);
                 setSearchWaiting(false);
                 setResultsPage(0);
@@ -85,27 +74,22 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
         // and more results are needed according to paging,
         // search next book
         () => {
-            const searchTermClause = (cf, f) => {
+            const searchTermClause = f => {
                 let ret = "";
-                if (cf.includes('word')) {
-                    ret = `==(content('text'), '%searchTerm%')`
-                        .replace('%searchTerm%', f.word);
+                for (const ff of ['text', 'lemma', 'gloss', 'strong']) {
+                    if ((f.checkedFields || []).includes(ff) && f[ff].length > 0) {
+                        ret = `==(content('%ff%'), '%searchTerm%')`
+                            .replace('%searchTerm%', f[ff])
+                            .replace('%ff%', ff);
+                        break;
+                    }
                 }
-                if (cf.includes('lemma')) {
-                    ret = `==(content('lemma'), '%searchTerm%')`
-                        .replace('%searchTerm%', f.lemma);
-                }
-                if (cf.includes('gloss')) {
-                    ret = `contains(content('gloss'), '%searchTerm%')`
-                        .replace('%searchTerm%', f.gloss);
-                }
-                if (cf.includes('strongs')) {
-                    ret = `==(content('strong'), '%searchTerm%')`
-                        .replace('%searchTerm%', f.strongs);
+                if (ret.length === 0) {
+                    return ret;
                 }
                 let parsingClauses = [];
-                if (cf.includes('parsing')) {
-                    const kvs = parsing.split(/ +/)
+                if (f.checkedFields.includes('parsing')) {
+                    const kvs = f.parsing.split(/ +/)
                         .map(s => s.trim())
                         .forEach(s => {
                             const kv = s.split(':');
@@ -130,27 +114,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                 let b2s = booksToSearch;
                 let rr = results;
 
-                const searchClause = searchTermClause(
-                    checkedFields,
-                    {
-                        word: word,
-                        lemma: lemma,
-                        gloss: gloss,
-                        strongs: strongs,
-                        parsing: parsing,
-                    }
-                );
-                const searchClause_2 = searchTermClause(
-                    checkedFields_2,
-                    {
-                        word: word_2,
-                        lemma: lemma_2,
-                        gloss: gloss_2,
-                        strongs: strongs_2,
-                        parsing: parsing_2,
-                    }
-                );
-                const combinedClauses = [searchClause, searchClause_2]
+                const combinedClauses = searchFields.map(f => searchTermClause(f))
                     .filter(c => c.length > 0)
                     .map(c => `"nodes[${c}]/values{@sentence}"`)
                     .join(",");
@@ -178,14 +142,12 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                     let result = await pk.gqlQuery(
                         query
                     );
-                    let sentences = [];
-                    const sv = result.data.docSet.document.treeSequences[0].sentenceValues.map(r => JSON.parse(r));
-                    if (sv.length === 2) {
-                        const svs0 = sv[0].data.sentence || [];
-                        const svs1 = sv[1].data.sentence || [];
-                        sentences = svs0.filter(v => svs1.includes(v));
-                    } else {
-                        sentences = sv[0].data.sentence || [];
+                    const sv = result.data.docSet.document.treeSequences[0].sentenceValues
+                        .map(r => JSON.parse(r))
+                        .map(r => (r && r.data && r.data.sentence) ? r : {data: {sentence: []}});
+                    let sentences = sv[0].data.sentence;
+                    for (const svs of (sv.slice(1) || [])) {
+                        sentences = sentences.filter(s => svs.data && svs.data.sentence && svs.data.sentence.includes(s));
                     }
                     if (sentences) {
                         sentences = sentences.map(v => parseInt(v))
@@ -233,55 +195,21 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
             }
             ;
         },
-        [resultsPage, currentDocSet, nResultsPerPage, searchAllBooks, searchWaiting, searchTerms]
+        [resultsPage, currentDocSet, nResultsPerPage, searchAllBooks, searchWaiting]
     );
-    const nodeMatchesSearch1 = (node, isSecond) => {
-        const cf = isSecond ? checkedFields_2 : checkedFields;
-        if (cf.length === 0) {
+    const nodeMatchesSearch1 = (node, sf) => {
+        const mainSearchKey = sf.checkedFields.filter(f => f !== 'parsing')[0];
+        if (!mainSearchKey || (node[mainSearchKey] !== sf[mainSearchKey])) {
             return false;
         }
-        if (cf.includes('word')) {
-            if (!isSecond && word !== node.text) {
-                return false;
-            }
-            if (isSecond && word_2 !== node.text) {
-                return false;
-            }
-        }
-        if (cf.includes('lemma')) {
-            if (!isSecond && lemma !== node.lemma) {
-                return false;
-            }
-            if (isSecond && lemma_2 !== node.lemma) {
-                return false;
-            }
-        }
-        if (cf.includes('gloss')) {
-            if (!isSecond && gloss !== node.gloss) {
-                return false;
-            }
-            if (isSecond && gloss_2 !== node.gloss) {
-                return false;
-            }
-        }
-        if (cf.includes('strongs')) {
-            if (!isSecond && strongs !== node.strong) {
-                return false;
-            }
-            if (isSecond && strongs_2 !== node.strong) {
-                return false;
-            }
-        }
-        if (cf.includes('parsing')) {
-            for (
-                const [k, v] of
-                (isSecond ? parsing_2 : parsing)
-                    .split(/ +/)
-                    .map(s => s.trim())
-                    .filter(s => s.includes(':'))
-                    .map(s => s.split(':'))
-                ) {
-                if (!(k in node) || node[k] !== v) {
+        if (sf.checkedFields.includes('parsing')) {
+            const parsingKV = sf.parsing
+                .split(/ +/)
+                .map(t => t.trim())
+                .map(t => t.split(':'))
+                .filter(kv => kv.length === 2);
+            for (const [k, v] of parsingKV) {
+                if (!node[k] || node[k] !== v) {
                     return false;
                 }
             }
@@ -289,143 +217,144 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
         return true;
     }
     const nodeMatchesSearch = node => {
-        return nodeMatchesSearch1(node, false) || nodeMatchesSearch1(node, true);
+        for (const sf of searchFields) {
+            if (nodeMatchesSearch1(node, sf)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    const somethingSelected = () => {
+        return searchFields
+            .filter(
+                f => {
+                    return ['text', 'lemma', 'gloss', 'strong']
+                        .filter(
+                            ff =>
+                                f.checkedFields.includes(ff) &&
+                                (f[ff] || '')
+                                    .trim()
+                                    .length > 0
+                        )
+                        .length > 0;
+                }
+            )
+            .length;
     }
     return <IonPage>
         <IonHeader>
             <PageToolBar pageTitle="Search Tree"/>
         </IonHeader>
-        {
-            selectedNode && <TreeDetails
-                currentContent={content}
-                selectedNode={selectedNode}
-                setSelectedNode={setSelectedNode}
-            />
-        }
-        {
-            !selectedNode && <IonContent>
-                <IonGrid>
-                    <TreeSearchForm
-                        isSecond={false}
-                        content={content}
-                        word={word}
-                        setWord={setWord}
-                        lemma={lemma}
-                        setLemma={setLemma}
-                        gloss={gloss}
-                        setGloss={setGloss}
-                        strongs={strongs}
-                        setStrongs={setStrongs}
-                        parsing={parsing}
-                        setParsing={setParsing}
-                        checkedFields={checkedFields}
-                        setCheckedFields={setCheckedFields}
+        <IonContent>
+            <IonGrid>
+                {searchFields.map((f, n) => <TreeSearchForm
+                        key={n}
+                        searchField={searchFields[n]}
+                        updateSearchField={updateSearchField}
+                        removeSearchField={removeSearchField}
+                        fieldN={n}
+                        nFields={searchFields.length}
                     />
-                    <TreeSearchForm
-                        isSecond={true}
-                        content={content}
-                        word={word_2}
-                        setWord={setWord_2}
-                        lemma={lemma_2}
-                        setLemma={setLemma_2}
-                        gloss={gloss_2}
-                        setGloss={setGloss_2}
-                        strongs={strongs_2}
-                        setStrongs={setStrongs_2}
-                        parsing={parsing_2}
-                        setParsing={setParsing_2}
-                        checkedFields={checkedFields_2}
-                        setCheckedFields={setCheckedFields_2}
-                    />
-                    <IonRow>
-                        <IonCol size={11}> </IonCol>
-                        <IonCol size={1}>
-                            <IonButton
-                                color="primary"
-                                fill="clear"
-                                className="ion-float-start"
-                                disabled={checkedFields.length === 0 && checkedFields_2.length === 0}
-                                onClick={
-                                    () => {
-                                        setSearchWaiting(true);
-                                    }
+                )
+                }
+                <IonRow>
+                    <IonCol size={1}>
+                        <IonButton
+                            className="ion-float-start"
+                            fill="clear"
+                            color="secondary"
+                            onClick={() => addSearchField(null)}
+                        >
+                            <IonIcon icon={addCircle}/>
+                        </IonButton>
+                    </IonCol>
+                    <IonCol size={10}> </IonCol>
+                    <IonCol size={1}>
+                        <IonButton
+                            color="primary"
+                            fill="clear"
+                            className="ion-float-end"
+                            disabled={searchFields.length === 0 || !somethingSelected()}
+                            onClick={
+                                () => {
+                                    setSearchWaiting(true);
                                 }
-                            >
-                                <IonIcon icon={search}/>
-                            </IonButton>
-                        </IonCol>
-                    </IonRow>
-                    {
-                        results.length === 0 ?
+                            }
+                        >
+                            <IonIcon icon={search}/>
+                        </IonButton>
+                    </IonCol>
+                </IonRow>
+                {
+                    results.length === 0 ?
+                        <IonRow>
+                            <IonCol>No results</IonCol>
+                        </IonRow> :
+                        <>
                             <IonRow>
-                                <IonCol>No results</IonCol>
-                            </IonRow> :
-                            <>
-                                <IonRow>
-                                    <IonCol size={8}>
-                                        <SearchResultsTools
-                                            resultsPage={resultsPage}
-                                            setResultsPage={setResultsPage}
-                                            nResultsPerPage={nResultsPerPage}
-                                            resultParaRecords={results}
-                                            booksToSearch={booksToSearch}
-                                            setSearchAllBooks={setSearchAllBooks}
-                                        />
-                                    </IonCol>
-                                    <IonCol style={{textAlign: "right"}} size={4}>
-                                        <TreeDisplayLevel
-                                            leafDetailLevel={leafDetailLevel}
-                                            setLeafDetailLevel={setLeafDetailLevel}
-                                        />
-                                    </IonCol>
-                                </IonRow>
-                                {results
-                                    .slice(resultsPage * nResultsPerPage, (resultsPage * nResultsPerPage) + nResultsPerPage)
-                                    .map(
-                                        (r, pn) => {
-                                            const bcvRef = `${r.book} ${r.content.cv}`;
-                                            return <IonRow key={pn}>
-                                                <IonCol size={1}>
-                                                    <IonButton
-                                                        key={pn}
-                                                        size="small"
-                                                        color="secondary"
-                                                        fill={bcvRef === openBcvRef ? 'solid' : 'outline'}
-                                                        onClick={() => setOpenBcvRef(bcvRef === openBcvRef ? '' : bcvRef)}
-                                                    >
-                                                        {bcvRef}
-                                                    </IonButton>
-                                                </IonCol>
-                                                <IonCol size={11}>
-                                                    {
-                                                        leaves(leaves1(r.children, ''), '', '')
-                                                            .map(
-                                                                (l, n) =>
-                                                                    <InterlinearNode
-                                                                        key={`${pn}-${n}`}
-                                                                        content={l}
-                                                                        detailLevel={leafDetailLevel}
-                                                                        isBold={nodeMatchesSearch(l)}
-                                                                        referer="search"
-                                                                    />
-                                                            )
-                                                    }
-                                                    {(bcvRef === openBcvRef) && <SyntaxTreeRow
-                                                        treeData={r}
-                                                        key={pn}
-                                                        rowKey={pn}
-                                                        isOpen={true}
-                                                    />}
-                                                </IonCol>
-                                            </IonRow>
-                                        }
-                                    )
-                                }
-                            </>
-                    }
-                </IonGrid>
-            </IonContent>
-        }
+                                <IonCol size={8}>
+                                    <SearchResultsTools
+                                        resultsPage={resultsPage}
+                                        setResultsPage={setResultsPage}
+                                        nResultsPerPage={nResultsPerPage}
+                                        resultParaRecords={results}
+                                        booksToSearch={booksToSearch}
+                                        setSearchAllBooks={setSearchAllBooks}
+                                    />
+                                </IonCol>
+                                <IonCol style={{textAlign: "right"}} size={4}>
+                                    <TreeDisplayLevel
+                                        leafDetailLevel={leafDetailLevel}
+                                        setLeafDetailLevel={setLeafDetailLevel}
+                                    />
+                                </IonCol>
+                            </IonRow>
+                            {results
+                                .slice(resultsPage * nResultsPerPage, (resultsPage * nResultsPerPage) + nResultsPerPage)
+                                .map(
+                                    (r, pn) => {
+                                        const bcvRef = `${r.book} ${r.content.cv}`;
+                                        return <IonRow key={pn}>
+                                            <IonCol size={1}>
+                                                <IonButton
+                                                    key={pn}
+                                                    size="small"
+                                                    color="secondary"
+                                                    fill={bcvRef === openBcvRef ? 'solid' : 'outline'}
+                                                    onClick={() => setOpenBcvRef(bcvRef === openBcvRef ? '' : bcvRef)}
+                                                >
+                                                    {bcvRef}
+                                                </IonButton>
+                                            </IonCol>
+                                            <IonCol size={11}>
+                                                {
+                                                    leaves(leaves1(r.children, ''), '', '')
+                                                        .map(
+                                                            (l, n) =>
+                                                                <InterlinearNode
+                                                                    key={`${pn}-${n}`}
+                                                                    content={l}
+                                                                    detailLevel={leafDetailLevel}
+                                                                    isBold={nodeMatchesSearch(l)}
+                                                                    referer="search"
+                                                                />
+                                                        )
+                                                }
+                                                {(bcvRef === openBcvRef) && <SyntaxTreeRow
+                                                    treeData={r}
+                                                    key={pn}
+                                                    rowKey={pn}
+                                                    isOpen={true}
+                                                />}
+                                            </IonCol>
+                                        </IonRow>
+                                    }
+                                )
+                            }
+                        </>
+                }
+            </IonGrid>
+        </IonContent>
     </IonPage>
 }
 

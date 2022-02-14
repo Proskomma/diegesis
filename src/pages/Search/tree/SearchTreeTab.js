@@ -21,7 +21,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
     const [results, setResults] = useState([]);
     const [resultsPage, setResultsPage] = React.useState(0);
     const [nResultsPerPage, setNResultsPerPage] = React.useState(10);
-    const [openBcvRef, setOpenBcvRef] = React.useState('MAT 1:18');
+    const [openBcvRef, setOpenBcvRef] = React.useState('');
     const [leafDetailLevel, setLeafDetailLevel] = useState(1);
     const pk = useContext(PkContext);
     const docSets = useContext(DocSetsContext);

@@ -23,6 +23,7 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
     const [nResultsPerPage, setNResultsPerPage] = React.useState(10);
     const [openBcvRef, setOpenBcvRef] = React.useState('');
     const [leafDetailLevel, setLeafDetailLevel] = useState(1);
+    const [combineLogic, setCombineLogic] = useState('and');
     const pk = useContext(PkContext);
     const docSets = useContext(DocSetsContext);
     const location = useLocation();
@@ -139,15 +140,24 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                     }`.replace(/%docSetId%/g, currentDocSet)
                         .replace(/%bookCode%/g, bookToSearch)
                         .replace(/%combinedClauses%/g, combinedClauses);
-                    let result = await pk.gqlQuery(
-                        query
-                    );
+                    let result = await pk.gqlQuery(query);
                     const sv = result.data.docSet.document.treeSequences[0].sentenceValues
                         .map(r => JSON.parse(r))
                         .map(r => (r && r.data && r.data.sentence) ? r : {data: {sentence: []}});
-                    let sentences = sv[0].data.sentence;
-                    for (const svs of (sv.slice(1) || [])) {
-                        sentences = sentences.filter(s => svs.data && svs.data.sentence && svs.data.sentence.includes(s));
+                    let sentences;
+                    if (combineLogic === 'and') {
+                        sentences = sv[0].data.sentence;
+                        for (const svs of (sv.slice(1) || [])) {
+                            sentences = sentences.filter(s => svs.data && svs.data.sentence && svs.data.sentence.includes(s));
+                        }
+                    } else {
+                        const sentenceSet = new Set([]);
+                        for (const svs of sv) {
+                            for (const s of (svs.data.sentence || [])) {
+                                sentenceSet.add(s);
+                            }
+                        }
+                        sentences = Array.from(sentenceSet);
                     }
                     if (sentences) {
                         sentences = sentences.map(v => parseInt(v))
@@ -268,7 +278,19 @@ const SearchTreeTab = ({currentDocSet, currentBookCode}) => {
                             <IonIcon icon={addCircle}/>
                         </IonButton>
                     </IonCol>
-                    <IonCol size={10}> </IonCol>
+                    <IonCol size={9}> </IonCol>
+                    <IonCol size={1}>
+                        {searchFields.length > 1 &&
+                        <IonButton
+                            size="small"
+                            color="tertiary"
+                            fill="clear"
+                            onClick={() => setCombineLogic(combineLogic === 'and' ? 'or' : 'and')}
+                        >
+                            {`${combineLogic} logic`}
+                        </IonButton>
+                        }
+                    </IonCol>
                     <IonCol size={1}>
                         <IonButton
                             color="primary"

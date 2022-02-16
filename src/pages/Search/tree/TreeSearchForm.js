@@ -31,7 +31,7 @@ const TreeSearchForm = ({searchField, updateSearchField, removeSearchField, fiel
                                 updateSearchField(
                                     {
                                         ...searchField,
-                                        checkedFields: [...cf.filter(f => !['word', 'lemma', 'gloss', 'strongs'].includes(f)), fieldKey]
+                                        checkedFields: [...cf.filter(f => !['text', 'lemma', 'gloss', 'strong'].includes(f)), fieldKey]
                                     },
                                     fieldN
                                 )

@@ -1,6 +1,7 @@
 import React, {useContext, useEffect, useState} from 'react';
 import {Redirect, Route} from 'react-router-dom';
 import {IonApp, IonButton, IonIcon, IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, IonTabs} from '@ionic/react';
+import { setupIonicReact } from '@ionic/react';
 import {IonReactRouter} from '@ionic/react-router';
 import {book, cog, create, print, search} from 'ionicons/icons';
 
@@ -37,6 +38,8 @@ import {SettingsProvider} from './contexts/SettingsContext';
 import {DocSetsProvider} from './contexts/DocSetsContext';
 
 const {generateId} = require('proskomma-utils');
+
+setupIonicReact({});
 
 const App = () => {
     const [loadUuid, setLoadUuid] = React.useState("");

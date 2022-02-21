@@ -33,20 +33,28 @@ const addActions = (dInstance) => {
         'token',
         () => true,
         (renderer, context, data) => {
+            if (data.subType === 'wordLike') {
+                const attScopes = Array.from(context.sequenceStack[0].openScopes)
+                    .filter(s => s.startsWith('attribute'))
+                    .filter(s => ['strong', 'lemma', 'x-strong', 'x-lemma', 'x-content'].includes(s.split('/')[3]))
+                    .map(s => [s.split('/')[3], s.split('/')[5]]);
+                const state = {newSearchString: data.payload};
+                attScopes.forEach(s => state[s[0] = s[1]])
             renderer.config.blockStack.push(
-                data.subType === 'wordLike' ?
                     <Link
                         to={{
                             pathname: "/search/text",
-                            state: {newSearchString: data.payload}
+                            state
                         }}
                         key={renderer.config.nextKey++}
                         className="browserWord"
                     >
                         {data.payload}
-                    </Link> :
-                    data.payload
+                    </Link>
             );
+            } else {
+                renderer.config.blockStack.push(data.payload);
+            };
         }
     );
     dInstance.addAction(

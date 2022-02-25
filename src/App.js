@@ -224,6 +224,7 @@ const App = () => {
                                         setCurrentDocSet={setCurrentDocSet}
                                         currentBookCode={currentBookCode}
                                         setCurrentBookCode={setCurrentBookCode}
+                                        updateMutationId={updateMutationId}
                                     />
                                 </Route>
                                 <Route render={() => <Redirect to="/browse"/>}/>

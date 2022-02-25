@@ -15,7 +15,8 @@ const SettingsTab = ({
                          currentDocSet,
                          setCurrentDocSet,
                          currentBookCode,
-                         setCurrentBookCode
+                         setCurrentBookCode,
+                         updateMutationId
                      }) => {
     const [selectedSection, setSelectedSection] = React.useState('storage');
     return (
@@ -60,6 +61,7 @@ const SettingsTab = ({
                                     setCurrentDocSet={setCurrentDocSet}
                                     currentBookCode={currentBookCode}
                                     setCurrentBookCode={setCurrentBookCode}
+                                    updateMutationId={updateMutationId}
                                 />
                             }
                             {

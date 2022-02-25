@@ -1,9 +1,10 @@
 import React, {useContext, useEffect, useState} from "react";
 import {IonButton, IonCol, IonGrid, IonIcon, IonLabel, IonRow} from '@ionic/react';
-import {download, trash} from "ionicons/icons";
+import {download, trash, cloudUpload, cloudDownload} from "ionicons/icons";
 
 import AddRemote from "./AddRemote";
 import RemoveLocal from "./RemoveLocal";
+import ArchiveRestore from './ArchiveRestore';
 import PkContext from "../../contexts/PkContext";
 import Axios from "axios";
 
@@ -15,7 +16,8 @@ const StorageSettings = ({
                              currentDocSet,
                              setCurrentDocSet,
                              currentBookCode,
-                             setCurrentBookCode
+                             setCurrentBookCode,
+                             updateMutationId
                          }) => {
     const [selectedSection, setSelectedSection] = React.useState('remote');
     const [loadedDocSets, setLoadedDocSets] = React.useState([]);
@@ -86,6 +88,17 @@ const StorageSettings = ({
                         <IonLabel>Remove from Local</IonLabel>
                     </IonButton>
                 </IonCol>
+                <IonCol className="ion-text-center">
+                    <IonButton
+                        fill={selectedSection === 'archive' ? "solid" : "clear"}
+                        expand="full"
+                        onClick={() => setSelectedSection('archive')}
+                    >
+                        <IonIcon icon={cloudUpload}/>&nbsp;
+                        <IonLabel>Archive/Restore</IonLabel>&nbsp;
+                        <IonIcon icon={cloudDownload}/>
+                    </IonButton>
+                </IonCol>
             </IonRow>
             <IonRow>
                 <IonCol>
@@ -114,6 +127,12 @@ const StorageSettings = ({
                             setCurrentBookCode={setCurrentBookCode}
                             onlineCatalog={onlineCatalog}
                         />
+                    }
+                    {
+                        selectedSection === 'archive' &&
+                            <ArchiveRestore
+                                updateMutationId={updateMutationId}
+                            />
                     }
                 </IonCol>
             </IonRow>
